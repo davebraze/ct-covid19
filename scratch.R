@@ -61,8 +61,10 @@ tmp <- tabulizer::extract_tables(covid.fname,
 covid <- do.call(rbind,tmp)  %>%
     rename(`N Cases` = Cases) %>%
     mutate(`N Cases` = as.numeric(`N Cases`),
-           `Log N Cases` = (log(`N Cases`)))
+           `Log N Cases` = (log(`N Cases`)),
+           Date = date)
 
+## Merge shapes covid data
 ct.covid <-
     left_join(ct.shp, covid, by=c("NAME10" = "Town"))
 
