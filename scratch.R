@@ -1,13 +1,12 @@
 library(httr)
 library(here)
-## library(readxl)
 library(tabulizer)
 library(stringr)
 library(lubridate)
 library(sf)
 library(dplyr)
 library(ggplot2)
-## library(RColorBrewer)
+library(cowplot)
 
 ## example of url for daily COVID-19 update from CT DPH, with breakdown by town.
 ##
@@ -30,52 +29,75 @@ ct.shp <-
 
 ##### extract info from file
 
-## filename for daily covid-19 summary
-covid.fname <- "CTDPHCOVID19summary3302020.pdf"
+## get list of ctdph covid reports at hand
+covid.fnames <- fs::dir_ls(".") %>%
+    str_subset("CTDPHCOVID19summary[0-9]+.pdf")
 
-## extract date from file metadata
-meta <- tabulizer::extract_metadata(covid.fname)
-date <- lubridate::parse_date_time(meta$created, "a b! d! T* Y!")
+## filename for most recent covid-19 report
+## covid.fname <- covid.fnames[length(covid.fnames)]
 
-##### find page with town data
-covid.text <- tabulizer::extract_text(covid.fname,
-                               pages=1:meta$pages)
-## find page for cases-by-town table, assume town names occur only there
-page <- which(str_detect(covid.text, "West Haven"))
+read_covid_data <- function(covid.fname){
+    ## extract date from file metadata
+    meta <- tabulizer::extract_metadata(covid.fname)
+    date <- lubridate::parse_date_time(meta$created, "a b! d! T* Y!")
 
-## find approx Number of lab tests completed
-tests.complete <- str_extract(covid.text, "more than [0-9,]+")
-tests.complete <- as.integer(str_remove_all(tests.complete[!is.na(tests.complete)], "[^0-9]"))
+    ##### find page with town data
+    covid.text <- tabulizer::extract_text(covid.fname,
+                                          pages=1:meta$pages)
+    ## find page for cases-by-town table, assume town names occur only there
+    page <- which(str_detect(covid.text, "West Haven"))
 
-##### get cases-by-town data
-## manually get page areas for town data table
-## tabulizer::locate_areas(covid.fname.pdf, pages=rep(pages, 3))
+    ## find approx Number of lab tests completed
+    tests.complete <- str_extract(covid.text, "more than [0-9,]+")
+    tests.complete <- as.integer(str_remove_all(tests.complete[!is.na(tests.complete)], "[^0-9]"))
 
-tmp <- tabulizer::extract_tables(covid.fname,
-                                 pages=rep(page, 3),
-                                 area=list(c(80,67,740,205), ## data split across 3 "areas" on the page
-                                           c(80,234,740,368),
-                                           c(80,400,740,540)),
-                                 guess=FALSE,
-                                 output="data.frame")
-covid <- do.call(rbind,tmp)  %>%
-    rename(`N Cases` = Cases) %>%
-    mutate(`N Cases` = as.numeric(`N Cases`),
-           `Log N Cases` = (log(`N Cases`)),
-           Date = date)
+    ##### get cases-by-town data
+    ## manually get page areas for town data table
+    ## tabulizer::locate_areas(covid.fname.pdf, pages=rep(pages, 3))
+
+    tmp <- tabulizer::extract_tables(covid.fname,
+                                     pages=rep(page, 3),
+                                     area=list(c(80,67,740,205), ## data split across 3 "areas" on the page
+                                               c(80,234,740,368),
+                                               c(80,400,740,540)),
+                                     guess=FALSE,
+                                     output="data.frame")
+    covid <- do.call(rbind,tmp)  %>%
+        rename(`N Cases` = Cases) %>%
+        mutate(`N Cases` = as.numeric(`N Cases`),
+               `Log N Cases` = (log(`N Cases`)),
+               Date = date,
+               date.string = strftime(Date, "%B %d, %Y"),
+               tests.complete = tests.complete)
+
+    return(covid)
+}
+
+##### read all available covid reports
+covid <- purrr::map_dfr(covid.fnames, read_covid_data)
+covid[779, "Town"] <- "North Stonington" ## repair bad line from one input file
+covid <- covid[-778,]
 
 ## Merge shapes covid data
 ct.covid <-
-    left_join(ct.shp, covid, by=c("NAME10" = "Town"))
+    right_join(ct.shp, covid, by=c("NAME10" = "Town"))
 
 ct.covid %>%
+##    filter(strftime(.$Date, "%B %d, %Y") == "March 21, 2020") %>%
     ggplot() +
     geom_sf(aes(fill=`Log N Cases`), color="lightblue", size=.33) +
     scale_fill_continuous(type="viridis") +
-    geom_sf_text(aes(label=NAME10),
-                 color="white",
-                 size=3) +
+    ## geom_sf_text(aes(label=NAME10),
+    ##              color="white",
+    ##              size=3) +
+    facet_wrap(~date.string, nrow=3) +
     labs(title="Lab Confirmed Covid-19 Cases per Connecticut Town",
-         subtitle=strftime(date, "%B %d, %Y"),
+##         subtitle=strftime(Date, "%B %d, %Y"),
          caption="Data Source: https://portal.ct.gov/Coronavirus") +
-    ylab("latitude") + xlab("longitude")
+    ##    ylab("latitude") + xlab("longitude") +
+    theme_cowplot() +
+    theme(legend.position="top",
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank())
