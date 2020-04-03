@@ -1,13 +1,18 @@
 library(httr)
 library(here)
+library(fs)
 library(tabulizer)
 library(stringr)
 library(lubridate)
+library(wordstonumbers)
 library(sf)
 library(dplyr)
 library(ggplot2)
 library(cowplot)
 
+#######################
+## load up map files ##
+#######################
 
 ##### GIS data for CT is available here:
 ## http://magic.lib.uconn.edu/connecticut_data.html
@@ -20,8 +25,6 @@ ct.shp <-
     filter(NAME10 != "County subdivisions not defined") %>%
     mutate(LAT = as.numeric(INTPTLAT10),
            LON = as.numeric(INTPTLON10))
-
-
 
 #####################################
 ## download CTDPH daily reports    ##
@@ -54,13 +57,26 @@ read_covid_data <- function(covid.fname) {
     ## Using file creation date for this purpose is dodgy. Will fail if there is a delay in building the daily report
     date <- as.Date(lubridate::parse_date_time(meta$created, "a b! d! T* Y!", tz="EST"))
 
-    ##### find page with town data
     covid.text <- tabulizer::extract_text(covid.fname,
                                           pages=1:meta$pages)
-    ## find page for cases-by-town table, assume town names occur only there
-    page <- which(str_detect(covid.text, "West Haven"))
 
-    ## find approx Number of lab tests completed
+    ## several variable values are given in prose on page 1.
+    ## Clean it up before extracting them
+    page1 <- words_to_numbers(str_remove_all(covid.text[[1]], "\r\n"))
+
+    ## get total lab-confirmed cases (cumulative) state wide from first page of report
+    cases.confirmed <- str_extract(page1, "[0-9,]+ laboratory-confirmed cases")
+    cases.confirmed <- as.integer(str_remove_all(cases.confirmed[!is.na(cases.confirmed)], "[^0-9]"))
+
+    ## get total number of fatalities (cumulative) state wide from first page of report
+    fatalities <- str_extract(page1, "[0-9]+[^0-9]*died")
+    fatalities <- as.integer(str_remove_all(fatalities[!is.na(fatalities)], "[^0-9]"))
+
+    ## get current number hospitalized state-wide from first page of report
+    hospitalized <- str_extract(page1, "[0-9]+[^0-9]*hospitalized")
+    hospitalized <- as.integer(str_remove_all(hospitalized[!is.na(hospitalized)], "[^0-9]"))
+
+    ## get approx Number of lab tests completed (cumulative)
     tests.complete <- str_extract(covid.text, "more than [0-9,]+")
     tests.complete <- as.integer(str_remove_all(tests.complete[!is.na(tests.complete)], "[^0-9]"))
 
@@ -68,27 +84,30 @@ read_covid_data <- function(covid.fname) {
     ## manually get page areas for town data table
     ## tabulizer::locate_areas(covid.fnames[12], pages=rep(10, 3))
 
+    ## find page for cases-by-town table, assume town names occur only there
+    page.tab <- which(str_detect(covid.text, "West Haven"))
+
     area <- list(c(80,67,730,205), ## data split across 3 "areas" on the page
                  c(80,234,730,368),
                  c(80,400,720,540))
 
-    tmp <- tabulizer::extract_tables(covid.fname,
-                                     pages=rep(page, 3),
+    tab <- tabulizer::extract_tables(covid.fname,
+                                     pages=rep(page.tab, 3),
                                      area=area,
                                      guess=FALSE,
                                      output="data.frame")
 
-    covid <- do.call(rbind,tmp)  %>%
+    covid <- do.call(rbind,tab)  %>%
         rename(`N Cases` = Cases) %>%
         mutate(`N Cases` = as.numeric(`N Cases`),
-               `Log N Cases` = (log(`N Cases`)),
                Date = date,
-               tests.complete = tests.complete)
+               tests.complete = tests.complete,
+               cases.confirmed = cases.confirmed,
+               fatalities = fatalities,
+               hospitalized = hospitalized)
 
     return(covid)
 }
-
-
 
 ##### read all available covid reports
 
@@ -105,15 +124,28 @@ covid  <-
 ct.covid <-
     right_join(ct.shp, covid, by=c("NAME10" = "Town"))
 
+#########################
+## constants for plots ##
+#########################
+caption <- paste("Data Source: https://portal.ct.gov/Coronavirus.",
+                 "Figure by David Braze (davebraze@gmail.com)",
+                 "using R statistical software.", sep="\n")
+
+today <- strftime(today(), "%Y%m%d-")
+ftype <- "png"
+fig.path <- here::here("figures")
+width <- 14
+height <- 14
+units <- "in"
+dpi <- 96
+
 #########################################################
 ## map cumulative confirmed case count by Town and Day ##
 #########################################################
 
-caption <- paste("Data Source: https://portal.ct.gov/Coronavirus.",
-                 "Figure by David Braze (davebraze@gmail.com)",
-                 "using R statistical software.", sep="\n")
 breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400)
-ct.covid %>%
+map.days <-
+    ct.covid %>%
     ggplot() +
     geom_sf(aes(fill=`N Cases`), color="lightblue", size=.33) +
     scale_fill_continuous(type="viridis",
@@ -133,13 +165,21 @@ ct.covid %>%
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank())
 
+ggsave(filename=fs::path_ext_set(paste0(today, "map-days"), ftype),
+       plot=map.days,
+       path=fig.path,
+       device=ftype,
+       width=width, height=height,
+       units=units,
+       dpi=dpi)
 
 #################################################################
 ## map cumulative confirmed case count by Town most recent day ##
 #################################################################
 
 breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400)
-ct.covid %>%
+map.today <-
+    ct.covid %>%
     filter(Date==max(Date)) %>%
     ggplot() +
     geom_sf(aes(fill=`N Cases`), color="lightblue", size=.33) +
@@ -162,30 +202,44 @@ ct.covid %>%
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank())
 
+ggsave(filename=fs::path_ext_set(paste0(today, "map-today"), ftype),
+       plot=map.today,
+       path=fig.path,
+       device=ftype,
+       width=width, height=height,
+       units=units,
+       dpi=dpi)
+
 #######################
 ## rate plot by Town ##
 #######################
 
 x.labs <- unique(ct.covid$date.string)
-ct.covid %>%
+rate.plt <-
+    ct.covid %>%
     filter(`N Cases` > 3) %>%
     ggplot() +
     geom_line(aes(x=Date, y=`N Cases`, group=NAME10),
               size=4/3, color="blue", alpha=1/3) +
-    geom_text(data = subset(ct.covid, date.string == "Apr 01" & `N Cases` > 75),
+    geom_text(data = subset(ct.covid, date.string == "Apr 03" & `N Cases` > 75),
               aes(label = NAME10, x = Date, y = `N Cases`),
               hjust = -.1) +
     scale_x_date(labels=x.labs,
                  breaks=unique(ct.covid$Date),
-                 expand = expansion(add=c(0,4/3)),
+                 expand = expansion(add=c(1/3,4/3)),
                  name=NULL) +
-    ## scale_y_continuous(trans="log",
-    ##                    breaks=c(3,6,12, 25,50,100,200,400)) +
     labs(title="Cumulative Lab Confirmed Covid-19 Cases per Connecticut Town",
          caption=caption) +
-   ylab("Number of Cases") +
-   coord_equal(ratio =.02) +
+    ylab("Number of Cases") +
+    coord_equal(ratio =.02) +
     theme_cowplot() +
     theme(legend.position="top",
           plot.margin = unit(c(1,6,1,1), "lines"))
 
+ggsave(filename=fs::path_ext_set(paste0(today, "rate"), ftype),
+       plot=rate.plt,
+       path=fig.path,
+       device=ftype,
+       width=width, height=height,
+       units=units,
+       dpi=dpi)
