@@ -243,3 +243,52 @@ ggsave(filename=fs::path_ext_set(paste0(today, "rate"), ftype),
        width=width, height=height,
        units=units,
        dpi=dpi)
+
+##################################
+## bar plot for state-wide data ##
+##################################
+
+## reorganize the data
+ct.summary <-
+    covid %>%
+    select(-c(`N Cases`, Town)) %>%
+    group_by(Date) %>%
+    summarize(date=unique(Date),
+              date.string=unique(date.string),
+              tests.complete=unique(tests.complete),
+              Cases=unique(cases.confirmed),
+              Hospitalized=unique(hospitalized),
+              Deaths=unique(fatalities)) %>%
+    select(-Date) %>%
+    tidyr::pivot_longer(cols=-c(date, date.string)) %>%
+    mutate(name = forcats::as_factor(name))
+
+ct.summary.plt <-
+    ct.summary %>%
+    filter(!name=="tests.complete") %>%
+    ggplot(aes(y=value, x=date.string)) +
+    geom_bar(aes(fill=name),
+             position="dodge", stat="identity") +
+    geom_text(aes(color=name, label=value),
+              position=position_dodge(width=1),
+              vjust=.5, hjust=-.1,
+              angle=90,
+              show.legend=FALSE) +
+    geom_text(data=filter(ct.summary, name=="tests.complete"),
+              aes(label=value, x=date.string, y=-150), color="grey70") +
+    ylim(-150, NA) +
+    guides(fill=guide_legend(title=NULL)) +
+    labs(title="Covid-19 Cases, Hospitalizations, & Deaths for Connecticut",
+         subtitle="(number of tests conducted under each group of bars)",
+         caption=caption) +
+    ylab("Count") + xlab(NULL) +
+    theme_cowplot() +
+    theme(legend.position=c(.05, .90))
+
+ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
+       plot=ct.summary.plt,
+       path=fig.path,
+       device=ftype,
+       width=width, height=height,
+       units=units,
+       dpi=dpi)
