@@ -131,13 +131,14 @@ caption <- paste("Data Source: https://portal.ct.gov/Coronavirus.",
                  "Figure by David Braze (davebraze@gmail.com)",
                  "using R statistical software.", sep="\n")
 
+font.size  <- 10
 today <- strftime(today(), "%Y%m%d-")
 ftype <- "png"
 fig.path <- here::here("figures")
-width <- 14
-height <- 14
+width <- 7
+height <- 7
 units <- "in"
-dpi <- 96
+dpi <- 300
 
 #########################################################
 ## map cumulative confirmed case count by Town and Day ##
@@ -158,7 +159,7 @@ map.days <-
     facet_wrap(~date.string, ncol=4) +
     labs(title="Cumulative Lab Confirmed Covid-19 Cases per Connecticut Town",
          caption=caption) +
-    theme_cowplot() +
+    theme_cowplot(font_size=font.size) +
     theme(legend.position="top",
           axis.text.x = element_blank(),
           axis.ticks.x = element_blank(),
@@ -183,7 +184,7 @@ map.today <-
     filter(Date==max(Date)) %>%
     ggplot() +
     geom_sf(aes(fill=`N Cases`), color="lightblue", size=.33) +
-    geom_sf_text(aes(label=`N Cases`), color="white") +
+    geom_sf_text(aes(label=`N Cases`), color="white", size=2) +
     scale_fill_continuous(type="viridis",
                           trans="log",
                           breaks=breaks,
@@ -195,7 +196,7 @@ map.today <-
     labs(title="Cumulative Lab Confirmed Covid-19 Cases per Connecticut Town",
          caption=caption) +
     xlab(NULL) + ylab(NULL) +
-    theme_cowplot() +
+    theme_cowplot(font_size=font.size) +
     theme(legend.position="top",
           axis.text.x = element_blank(),
           axis.ticks.x = element_blank(),
@@ -223,7 +224,7 @@ rate.plt <-
               size=4/3, color="blue", alpha=1/3) +
     geom_text(data = subset(ct.covid, date.string == "Apr 03" & `N Cases` > 75),
               aes(label = NAME10, x = Date, y = `N Cases`),
-              hjust = -.1) +
+              hjust = -.1, size=2) +
     scale_x_date(labels=x.labs,
                  breaks=unique(ct.covid$Date),
                  expand = expansion(add=c(1/3,4/3)),
@@ -232,9 +233,10 @@ rate.plt <-
          caption=caption) +
     ylab("Number of Cases") +
     coord_equal(ratio =.02) +
-    theme_cowplot() +
+    theme_cowplot(font_size=font.size) +
     theme(legend.position="top",
-          plot.margin = unit(c(1,6,1,1), "lines"))
+          plot.margin = unit(c(1,6,1,1), "lines"),
+          axis.text.x = element_text(angle=45, hjust=1))
 
 ggsave(filename=fs::path_ext_set(paste0(today, "rate"), ftype),
        plot=rate.plt,
@@ -270,20 +272,22 @@ ct.summary.plt <-
     geom_bar(aes(fill=name),
              position="dodge", stat="identity") +
     geom_text(aes(color=name, label=value),
+              size=2,
               position=position_dodge(width=1),
               vjust=.5, hjust=-.1,
               angle=90,
               show.legend=FALSE) +
     geom_text(data=filter(ct.summary, name=="tests.complete"),
-              aes(label=value, x=date.string, y=-150), color="grey70") +
+              aes(label=value, x=date.string, y=-150), color="grey70", size=2) +
     ylim(-150, NA) +
     guides(fill=guide_legend(title=NULL)) +
     labs(title="Covid-19 Cases, Hospitalizations, & Deaths for Connecticut",
          subtitle="(number of tests conducted under each group of bars)",
          caption=caption) +
     ylab("Count") + xlab(NULL) +
-    theme_cowplot() +
-    theme(legend.position=c(.05, .90))
+    theme_cowplot(font_size=font.size) +
+    theme(legend.position=c(.05, .90),
+          axis.text.x = element_text(angle=45, hjust=1))
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
        plot=ct.summary.plt,
