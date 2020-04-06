@@ -169,6 +169,7 @@ map.days <-
                                title.vjust=1)) +
     facet_wrap(~date.string, ncol=4) +
     labs(title="Cumulative Lab Confirmed Covid-19 Cases per Connecticut Town",
+         subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption) +
     theme_cowplot(font_size=font.size) +
     theme(legend.position="top",
@@ -205,6 +206,7 @@ map.today <-
                                title.vjust=1)) +
     facet_wrap(~date.string, ncol=4) +
     labs(title="Cumulative Lab Confirmed Covid-19 Cases per Connecticut Town",
+         subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption) +
     xlab(NULL) + ylab(NULL) +
     theme_cowplot(font_size=font.size) +
@@ -249,6 +251,7 @@ rate.plt <-
                  expand = expansion(add=c(1/4,3)),
                  name=NULL) +
     labs(title="Cumulative Lab Confirmed Covid-19 Cases per Connecticut Town",
+         subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption) +
     ylab("Number of Cases") +
     coord_equal(ratio =.02) +
