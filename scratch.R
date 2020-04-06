@@ -1,11 +1,16 @@
-library(httr)
+## library(httr)
 library(here)
 library(fs)
+library(RCurl)
+library(readr)
+library(sf)
+
 library(tabulizer)
 library(stringr)
 library(lubridate)
 library(wordstonumbers)
-library(sf)
+library(forcats)
+
 library(dplyr)
 library(ggplot2)
 library(cowplot)
@@ -20,7 +25,7 @@ library(cowplot)
 ## Must first download the relevant shape files by hand, unzip them, and then load them up.
 ## URL for town shape files is here: http://magic.lib.uconn.edu/magic_2/vector/37800/townct_37800_0000_2010_s100_census_1_shp.zip
 ct.shp <-
-    sf::st_read(here::here("shapefiles/townct_37800_0000_2010_s100_census_1_shp/townct_37800_0000_2010_s100_census_1_shp/nad83",
+    sf::st_read(here::here("02-shapefiles/townct_37800_0000_2010_s100_census_1_shp/townct_37800_0000_2010_s100_census_1_shp/nad83",
                            "townct_37800_0000_2010_s100_census_1_shp_nad83_feet.shp")) %>%
     filter(NAME10 != "County subdivisions not defined") %>%
     mutate(LAT = as.numeric(INTPTLAT10),
@@ -44,7 +49,7 @@ httr::parse_url("https://portal.ct.gov/-/media/Coronavirus/CTDPHCOVID19summary32
 #######################################
 
 ## get list of ctdph covid reports at hand
-covid.fnames <- fs::dir_ls(here::here("ctdph-daily-reports")) %>%
+covid.fnames <- fs::dir_ls(here::here("01-ctdph-daily-reports")) %>%
     str_subset("CTDPHCOVID19summary[0-9]+.pdf")
 
 ## filename for most recent covid-19 report
@@ -82,7 +87,7 @@ read_covid_data <- function(covid.fname) {
 
     ##### get cases-by-town data
     ## manually get page areas for town data table
-    ## tabulizer::locate_areas(covid.fnames[12], pages=rep(10, 3))
+    ## tabulizer::locate_areas(covid.fnames[16], pages=rep(10, 3))
 
     ## find page for cases-by-town table, assume town names occur only there
     page.tab <- which(str_detect(covid.text, "West Haven"))
@@ -111,14 +116,14 @@ read_covid_data <- function(covid.fname) {
 
 ##### read all available covid reports
 
-covid <- purrr::map_dfr(covid.fnames, read_covid_data)
+covid <- purrr::map_dfr(covid.fnames[[16]], read_covid_data)
 covid[779, "Town"] <- "North Stonington" ## repair bad line from one input file
 covid <- covid[-778,]
 
 covid  <-
     covid %>%
     arrange(Date) %>%
-    mutate(date.string = forcats::as_factor(strftime(Date, "%b %d")))
+    mutate(date.string = as_factor(strftime(Date, "%b %d")))
 
 ## Merge shapes covid data
 ct.covid <-
@@ -131,10 +136,13 @@ caption <- paste("Data Source: https://portal.ct.gov/Coronavirus.",
                  "Figure by David Braze (davebraze@gmail.com)",
                  "using R statistical software.", sep="\n")
 
-font.size  <- 10
+## file names/types
 today <- strftime(today(), "%Y%m%d-")
 ftype <- "png"
 fig.path <- here::here("figures")
+
+## layout
+font.size  <- 10
 width <- 7
 height <- 7
 units <- "in"
@@ -222,12 +230,20 @@ rate.plt <-
     ggplot() +
     geom_line(aes(x=Date, y=`N Cases`, group=NAME10),
               size=4/3, color="blue", alpha=1/3) +
-    geom_text(data = subset(ct.covid, date.string == "Apr 03" & `N Cases` > 75),
-              aes(label = NAME10, x = Date, y = `N Cases`),
-              hjust = -.1, size=2) +
+    ## geom_text(data = subset(ct.covid, date.string == "Apr 04" & `N Cases` > 75),
+    ##           aes(label = NAME10, x = Date, y = `N Cases`),
+    ##           hjust = -.1, size=2) +
+    ggrepel::geom_text_repel(data = subset(ct.covid,
+                                           Date == max(Date) & `N Cases` > 75),
+                             aes(label = NAME10, x = Date, y = `N Cases`),
+                             size=2,
+                             hjust = -0,
+                             direction="y",
+                             force=1/4,
+                             nudge_x=5) +
     scale_x_date(labels=x.labs,
                  breaks=unique(ct.covid$Date),
-                 expand = expansion(add=c(1/3,4/3)),
+                 expand = expansion(add=c(1/4,5/3)),
                  name=NULL) +
     labs(title="Cumulative Lab Confirmed Covid-19 Cases per Connecticut Town",
          caption=caption) +
@@ -263,7 +279,7 @@ ct.summary <-
               Deaths=unique(fatalities)) %>%
     select(-Date) %>%
     tidyr::pivot_longer(cols=-c(date, date.string)) %>%
-    mutate(name = forcats::as_factor(name))
+    mutate(name = as_factor(name))
 
 ct.summary.plt <-
     ct.summary %>%
@@ -291,6 +307,80 @@ ct.summary.plt <-
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
        plot=ct.summary.plt,
+       path=fig.path,
+       device=ftype,
+       width=width, height=height,
+       units=units,
+       dpi=dpi)
+
+
+####################################
+## NYT state-by-state corona data ##
+####################################
+
+## NY Times maintains a github repo with "a series of data files with
+## cumulative counts of coronavirus cases in the United States, at the
+## state and county level, over time. We are compiling this time series
+## data from state and local governments and health departments in an
+## attempt to provide a complete record of the ongoing outbreak." The repo
+## is here: https://github.com/nytimes/covid-19-data. It is updated
+## regularly.
+##
+## State csv file: https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv
+##
+## County csv file: https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv
+
+
+##### Get the data
+usa.state.corona <-
+    getURL("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv?accessType=DOWNLOAD") %>%
+    readr::read_csv()
+
+##### Get state meta data
+state.meta <-
+    readr::read_csv(here::here(fs::path("03-other-source-data", "state_table.csv")), skip=1) %>%
+    select(-c(country, sort, status, occupied, id, fips_state, notes))
+
+usa.state.corona <- dplyr::left_join(usa.state.corona, state.meta, by=c("state" = "name")) %>%
+    mutate(state = fct_relevel(as_factor(state), "Connecticut"),
+           date.string = as_factor(strftime(date, "%b %d")))
+
+caption <- paste("Data Source: https://github.com/nytimes/covid-19-data.",
+                 "Figure by David Braze (davebraze@gmail.com)",
+                 "using R statistical software.", sep="\n")
+
+tmp <-
+    usa.state.corona %>%
+    filter(date>ymd("2020-03-15"))
+
+usa.state.corona.plt <-
+    ggplot(tmp) +
+    geom_line(aes(x=date, y=cases, group=state, color=(state!="Connecticut")),
+              size=4/3, alpha=1/3) +
+    ggrepel::geom_text_repel(data = subset(usa.state.corona,
+                                           date == max(date) & cases > 3500),
+                             aes(label = assoc_press, x = date, y = cases),
+                             size=2,
+                             hjust = -0,
+                             direction="y",
+                             force=1/4,
+                             nudge_x=5) +
+    scale_x_date(expand = expansion(add=c(1/4,5)),
+                 breaks= unique(tmp$date),
+                 labels = unique(tmp$date.string),
+                 name=NULL) +
+    guides(color=FALSE) +
+    labs(title="Cumulative Covid-19 Cases per US State",
+         subtitle="Data compiled by the New York Times",
+         caption=caption) +
+    ylab("Number of Cases") +
+    theme_cowplot(font_size=font.size) +
+    theme(legend.position="top",
+          plot.margin = unit(c(1,6,1,1), "lines"),
+          axis.text.x = element_text(angle=45, hjust=1))
+
+ggsave(filename=fs::path_ext_set(paste0(today, "usa-rate"), ftype),
+       plot=usa.state.corona.plt,
        path=fig.path,
        device=ftype,
        width=width, height=height,
