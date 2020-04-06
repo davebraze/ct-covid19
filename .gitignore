@@ -1,0 +1,9 @@
+*~
+*/*_cache
+*/*_files
+*/archive
+*/figures
+*/*.log
+*/*.pdf
+*/*.html
+*/*.md
