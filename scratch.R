@@ -72,15 +72,12 @@ read_covid_data <- function(covid.fname) {
     ## get total lab-confirmed cases (cumulative) state wide from first page of report
     cases.confirmed <- str_extract(page1, "[0-9,]+ laboratory-confirmed cases")
     cases.confirmed <- as.integer(str_remove_all(cases.confirmed[!is.na(cases.confirmed)], "[^0-9]"))
-
     ## get total number of fatalities (cumulative) state wide from first page of report
     fatalities <- str_extract(page1, "[0-9]+[^0-9]*died")
     fatalities <- as.integer(str_remove_all(fatalities[!is.na(fatalities)], "[^0-9]"))
-
     ## get current number hospitalized state-wide from first page of report
     hospitalized <- str_extract(page1, "[0-9]+[^0-9]*hospitalized")
     hospitalized <- as.integer(str_remove_all(hospitalized[!is.na(hospitalized)], "[^0-9]"))
-
     ## get approx Number of lab tests completed (cumulative)
     tests.complete <- str_extract(covid.text, "more than [0-9,]+")
     tests.complete <- as.integer(str_remove_all(tests.complete[!is.na(tests.complete)], "[^0-9]"))
@@ -92,16 +89,23 @@ read_covid_data <- function(covid.fname) {
     ## find page for cases-by-town table, assume town names occur only there
     page.tab <- which(str_detect(covid.text, "West Haven"))
 
-    area <- list(c(80,67,730,205), ## data split across 3 "areas" on the page
-                 c(80,234,730,368),
-                 c(80,400,720,540))
+    ## data split across 3 "areas" on the page
+    ## note table format change starting Apr. 5
+    if(date<ymd("2020-04-05")){
+        area <- list(c(80,67,730,205),
+                     c(80,234,730,368),
+                     c(80,400,720,540))
+    } else {
+        area <- list(c(105,82,730,225),
+                     c(105,230,730,380),
+                     c(105,385,720,500))
+    }
 
     tab <- tabulizer::extract_tables(covid.fname,
                                      pages=rep(page.tab, 3),
                                      area=area,
                                      guess=FALSE,
                                      output="data.frame")
-
     covid <- do.call(rbind,tab)  %>%
         rename(`N Cases` = Cases) %>%
         mutate(`N Cases` = as.numeric(`N Cases`),
@@ -110,13 +114,12 @@ read_covid_data <- function(covid.fname) {
                cases.confirmed = cases.confirmed,
                fatalities = fatalities,
                hospitalized = hospitalized)
-
     return(covid)
 }
 
 ##### read all available covid reports
 
-covid <- purrr::map_dfr(covid.fnames[[16]], read_covid_data)
+covid <- purrr::map_dfr(covid.fnames, read_covid_data)
 covid[779, "Town"] <- "North Stonington" ## repair bad line from one input file
 covid <- covid[-778,]
 
@@ -243,7 +246,7 @@ rate.plt <-
                              nudge_x=5) +
     scale_x_date(labels=x.labs,
                  breaks=unique(ct.covid$Date),
-                 expand = expansion(add=c(1/4,5/3)),
+                 expand = expansion(add=c(1/4,3)),
                  name=NULL) +
     labs(title="Cumulative Lab Confirmed Covid-19 Cases per Connecticut Town",
          caption=caption) +
@@ -365,7 +368,7 @@ usa.state.corona.plt <-
                              direction="y",
                              force=1/4,
                              nudge_x=5) +
-    scale_x_date(expand = expansion(add=c(1/4,5)),
+    scale_x_date(expand = expansion(add=c(1/4,6)),
                  breaks= unique(tmp$date),
                  labels = unique(tmp$date.string),
                  name=NULL) +
