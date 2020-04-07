@@ -1,12 +1,12 @@
 # ignore these patterns in the root, but not subdirs
-*~
-*.pdf
+/*.pdf
 
-# ignore contents of these folders
+# ignore these folders
 figures/*
 archive/*
 
 # ignore these patterns from the root down
+*~
 */*_cache
 */*_files
 */*.log
