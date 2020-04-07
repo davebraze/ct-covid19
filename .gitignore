@@ -1,9 +1,15 @@
+# ignore these patterns in the root, but not subdirs
 *~
+*.pdf
+
+# ignore contents of these folders
+figures/*
+archive/*
+
+# ignore these patterns from the root down
 */*_cache
 */*_files
-*/archive
-*/figures
 */*.log
-*/*.pdf
 */*.html
 */*.md
+*/*.url
