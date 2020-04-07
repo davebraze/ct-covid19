@@ -37,7 +37,7 @@ ct.shp <-
 
 ## Manually download DPH daily reports at: https://portal.ct.gov/Coronavirus
 
-## OR, look into writing routine to automate downloads.
+## TODO: look into writing routine to automate downloads.
 ## example url for daily COVID-19 update from CT DPH looks like this
 ## https://portal.ct.gov/-/media/Coronavirus/CTDPHCOVID19summary3282020.pdf?la=en
 ## Maybe use httr::modify_url to pass in different file names, as needed.
@@ -51,9 +51,6 @@ httr::parse_url("https://portal.ct.gov/-/media/Coronavirus/CTDPHCOVID19summary32
 ## get list of ctdph covid reports at hand
 covid.fnames <- fs::dir_ls(here::here("01-ctdph-daily-reports")) %>%
     str_subset("CTDPHCOVID19summary[0-9]+.pdf")
-
-## filename for most recent covid-19 report
-## covid.fname <- covid.fnames[length(covid.fnames)]
 
 read_covid_data <- function(covid.fname) {
     ## extract date from file metadata
@@ -155,7 +152,7 @@ dpi <- 300
 ## map cumulative confirmed case count by Town and Day ##
 #########################################################
 
-breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400)
+breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800)
 map.days <-
     ct.covid %>%
     ggplot() +
@@ -167,8 +164,8 @@ map.days <-
     guides(fill=guide_colorbar(barwidth=20,
                                title="Number of Cases",
                                title.vjust=1)) +
-    facet_wrap(~date.string, ncol=4) +
-    labs(title="Cumulative Lab Confirmed Covid-19 Cases per Connecticut Town",
+    facet_wrap(~date.string, ncol=5) +
+    labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption) +
     theme_cowplot(font_size=font.size) +
@@ -190,7 +187,6 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-days"), ftype),
 ## map cumulative confirmed case count by Town most recent day ##
 #################################################################
 
-breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400)
 map.today <-
     ct.covid %>%
     filter(Date==max(Date)) %>%
@@ -205,7 +201,7 @@ map.today <-
                                title="Number of Cases",
                                title.vjust=1)) +
     facet_wrap(~date.string, ncol=4) +
-    labs(title="Cumulative Lab Confirmed Covid-19 Cases per Connecticut Town",
+    labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption) +
     xlab(NULL) + ylab(NULL) +
@@ -250,14 +246,14 @@ rate.plt <-
                  breaks=unique(ct.covid$Date),
                  expand = expansion(add=c(1/4,3)),
                  name=NULL) +
-    labs(title="Cumulative Lab Confirmed Covid-19 Cases per Connecticut Town",
+    labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption) +
     ylab("Number of Cases") +
     coord_equal(ratio =.02) +
     theme_cowplot(font_size=font.size) +
     theme(legend.position="top",
-          plot.margin = unit(c(1,6,1,1), "lines"),
+          plot.margin = unit(c(1,1,1,1), "lines"),
           axis.text.x = element_text(angle=45, hjust=1))
 
 ggsave(filename=fs::path_ext_set(paste0(today, "rate"), ftype),
@@ -359,10 +355,15 @@ tmp <-
     usa.state.corona %>%
     filter(date>ymd("2020-03-15"))
 
+tmp.ct <- tmp %>%
+    filter(state=="Connecticut")
+
 usa.state.corona.plt <-
     ggplot(tmp) +
-    geom_line(aes(x=date, y=cases, group=state, color=(state!="Connecticut")),
-              size=4/3, alpha=1/3) +
+    geom_line(aes(x=date, y=cases, group=state),
+              size=4/3, color="orange", alpha=1/3) +
+    geom_line(data=tmp.ct, aes(x=date, y=cases, group=state), ## highlight CT
+              size=1, color="blue", alpha=.8) +
     ggrepel::geom_text_repel(data = subset(usa.state.corona,
                                            date == max(date) & cases > 3500),
                              aes(label = assoc_press, x = date, y = cases),
@@ -375,14 +376,15 @@ usa.state.corona.plt <-
                  breaks= unique(tmp$date),
                  labels = unique(tmp$date.string),
                  name=NULL) +
-    guides(color=FALSE) +
-    labs(title="Cumulative Covid-19 Cases per US State",
+    labs(title="Cumulative Covid-19 Cases per U.S. State",
          subtitle="Data compiled by the New York Times",
          caption=caption) +
+    ## annotate(geom="text", x=.1, y=.9,                 ## TODO: use ggpmisc::geom_text_npc()
+    ##          label="Connecticut in Blue", color="blue") +
     ylab("Number of Cases") +
     theme_cowplot(font_size=font.size) +
     theme(legend.position="top",
-          plot.margin = unit(c(1,6,1,1), "lines"),
+          plot.margin = unit(c(1,1,1,1), "lines"),
           axis.text.x = element_text(angle=45, hjust=1))
 
 ggsave(filename=fs::path_ext_set(paste0(today, "usa-rate"), ftype),
