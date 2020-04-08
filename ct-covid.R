@@ -402,7 +402,6 @@ ggsave(filename=fs::path_ext_set(paste0(today, "usa-rate"), ftype),
        units=units,
        dpi=dpi)
 
-
 ####################################################
 ## Uni of Washington IMHE modeling data           ##
 ## http://www.healthdata.org/covid/data-downloads ##
