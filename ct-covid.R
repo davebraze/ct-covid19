@@ -46,6 +46,10 @@ ct.shp <-
 
 httr::parse_url("https://portal.ct.gov/-/media/Coronavirus/CTDPHCOVID19summary3282020.pdf?la=en")
 
+## David Lucey points out that the data seem to be available more directly on the state's data
+## portal at: https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library
+## I'll need to sort out the 'Socrata' API. Looks like R package RSocrata:: is the way to go.
+
 #######################################
 ## Extract info from CTDPH pdf files ##
 #######################################
@@ -230,6 +234,14 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-today"), ftype),
 ## rate plot by Town ##
 #######################
 
+label.cut <-
+    ct.covid %>%
+    filter(Date == max(Date)) %>%
+    select(NAME10, town.cases, Date) %>%
+    arrange(desc(town.cases)) %>%
+    pull(town.cases)
+label.count <- 17
+
 x.labs <- unique(ct.covid$date.string)
 rate.plt <-
     ct.covid %>%
@@ -238,7 +250,7 @@ rate.plt <-
     geom_line(aes(x=Date, y=town.cases, group=NAME10),
               size=4/3, color="blue", alpha=1/3) +
     ggrepel::geom_text_repel(data = subset(ct.covid,
-                                           Date == max(Date) & town.cases > 85),
+                                           Date == max(Date) & town.cases >= label.cut[label.count]),
                              aes(label = NAME10, x = Date, y = town.cases),
                              segment.size=.25,
                              size=2,
@@ -253,6 +265,10 @@ rate.plt <-
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption) +
+    geom_text_npc(aes(npcx=.1, npcy=.9,
+                      label=paste0("The top ", label.count, " towns are labeled\n",
+                                   "(those with at least ", label.cut[label.count], " cases)")),
+                  size=2.5) +
     ylab("Number of Cases") +
     coord_equal(ratio =.02) +
     theme_cowplot(font_size=font.size) +
@@ -301,7 +317,7 @@ ct.summary.plt <-
               show.legend=FALSE) +
     geom_text(data=filter(ct.summary, name=="tests.complete"),
               aes(label=value, x=date.string, y=-150), color="grey70", size=2.25) +
-    geom_text_npc(aes(npcx=.05, npcy=.85, label="Cumulative No. of tests each day"),
+    geom_text_npc(aes(npcx=.05, npcy=.85, label="Cumulative No. of tests administered"),
                   size=3,
                   color="grey70") +
     ylim(-150, NA) +
@@ -365,6 +381,14 @@ tmp <-
 tmp.ct <- tmp %>%
     filter(state=="Connecticut")
 
+label.cut <-
+    tmp %>%
+    filter(date == max(date)) %>%
+    select(state, cases, date) %>%
+    arrange(desc(cases)) %>%
+    pull(cases)
+label.count <- 17 ## label the top third of states
+
 usa.state.corona.plt <-
     ggplot(tmp) +
     geom_line(aes(x=date, y=cases, group=state),
@@ -372,7 +396,7 @@ usa.state.corona.plt <-
     geom_line(data=tmp.ct, aes(x=date, y=cases, group=state), ## highlight CT
               size=1, color="blue", alpha=.8) +
     ggrepel::geom_text_repel(data = subset(usa.state.corona,
-                                           date == max(date) & cases > 3500),
+                                           date == max(date) & cases >= label.cut[label.count]),
                              aes(label = assoc_press, x = date, y = cases),
                              segment.size=.25,
                              size=2,
@@ -387,7 +411,11 @@ usa.state.corona.plt <-
     labs(title="Cumulative Covid-19 Cases per U.S. State",
          subtitle="Data compiled by the New York Times",
          caption=caption) +
-    geom_text_npc(aes(npcx=.1, npcy=.9, label="Connecticut in Blue"), color="blue") +
+    geom_text_npc(aes(npcx=.1, npcy=.9,
+                      label=paste0("The top ", label.count, " states are labeled\n",
+                                   "(those with at least ", label.cut[label.count], " cases)")),
+                  size=2.5) +
+    geom_text_npc(aes(npcx=.1, npcy=.8, label="Connecticut in Blue"), color="blue", size=2.5) +
     ylab("Number of Cases") +
     theme_cowplot(font_size=font.size) +
     theme(legend.position="top",
