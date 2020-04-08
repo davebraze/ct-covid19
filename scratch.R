@@ -70,8 +70,8 @@ read_ctcovid_data <- function(covid.fname) {
     page1 <- str_remove_all(page1, "COVID-19")
 
     ## get total lab-confirmed cases (cumulative) state wide from first page of report
-    cases.confirmed <- str_extract(page1, "[0-9,]+ laboratory-confirmed cases")
-    cases.confirmed <- as.integer(str_remove_all(cases.confirmed[!is.na(cases.confirmed)], "[^0-9]"))
+    state.cases <- str_extract(page1, "[0-9,]+ laboratory-confirmed cases")
+    state.cases <- as.integer(str_remove_all(state.cases[!is.na(state.cases)], "[^0-9]"))
     ## get total number of fatalities (cumulative) state wide from first page of report
     fatalities <- str_extract(page1, "[0-9]+[^0-9]*(died|deaths)")   ## "[0-9]+[^0-9]*died")
     fatalities <- as.integer(str_remove_all(fatalities[!is.na(fatalities)], "[^0-9]"))
@@ -110,15 +110,15 @@ read_ctcovid_data <- function(covid.fname) {
                                      area=area,
                                      guess=FALSE,
                                      output="data.frame")
-    covid <- do.call(rbind,tab)  %>%
-        rename(`N Cases` = Cases) %>%
-        mutate(`N Cases` = as.numeric(`N Cases`),
+    retval <- do.call(rbind,tab)  %>%
+        rename(town.cases = Cases) %>%
+        mutate(town.cases = as.numeric(town.cases),
                Date = date,
                tests.complete = tests.complete,
-               cases.confirmed = cases.confirmed,
+               state.cases = state.cases,
                fatalities = fatalities,
                hospitalized = hospitalized)
-    return(covid)
+    retval
 }
 
 ##### read all available covid reports
@@ -162,7 +162,7 @@ breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800)
 map.days <-
     ct.covid %>%
     ggplot() +
-    geom_sf(aes(fill=`N Cases`), color="lightblue", size=.33) +
+    geom_sf(aes(fill=town.cases), color="lightblue", size=.33) +
     scale_fill_continuous(type="viridis",
                           trans="log",
                           breaks=breaks,
@@ -197,8 +197,8 @@ map.today <-
     ct.covid %>%
     filter(Date==max(Date)) %>%
     ggplot() +
-    geom_sf(aes(fill=`N Cases`), color="lightblue", size=.33) +
-    geom_sf_text(aes(label=`N Cases`), color="white", size=2) +
+    geom_sf(aes(fill=town.cases), color="lightblue", size=.33) +
+    geom_sf_text(aes(label=town.cases), color="white", size=2) +
     scale_fill_continuous(type="viridis",
                           trans="log",
                           breaks=breaks,
@@ -233,13 +233,14 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-today"), ftype),
 x.labs <- unique(ct.covid$date.string)
 rate.plt <-
     ct.covid %>%
-    filter(`N Cases` > 3) %>%
+    filter(town.cases > 3) %>%
     ggplot() +
-    geom_line(aes(x=Date, y=`N Cases`, group=NAME10),
+    geom_line(aes(x=Date, y=town.cases, group=NAME10),
               size=4/3, color="blue", alpha=1/3) +
     ggrepel::geom_text_repel(data = subset(ct.covid,
-                                           Date == max(Date) & `N Cases` > 75),
-                             aes(label = NAME10, x = Date, y = `N Cases`),
+                                           Date == max(Date) & town.cases > 85),
+                             aes(label = NAME10, x = Date, y = town.cases),
+                             segment.size=.25,
                              size=2,
                              hjust = -0,
                              direction="y",
@@ -274,12 +275,12 @@ ggsave(filename=fs::path_ext_set(paste0(today, "rate"), ftype),
 ## reorganize the data
 ct.summary <-
     covid %>%
-    select(-c(`N Cases`, Town)) %>%
+    select(-c(town.cases, Town)) %>%
     group_by(Date) %>%
     summarize(date=unique(Date),
               date.string=unique(date.string),
               tests.complete=unique(tests.complete),
-              Cases=unique(cases.confirmed),
+              Cases=unique(state.cases),
               Hospitalized=unique(hospitalized),
               Deaths=unique(fatalities)) %>%
     select(-Date) %>%
@@ -373,6 +374,7 @@ usa.state.corona.plt <-
     ggrepel::geom_text_repel(data = subset(usa.state.corona,
                                            date == max(date) & cases > 3500),
                              aes(label = assoc_press, x = date, y = cases),
+                             segment.size=.25,
                              size=2,
                              hjust = -0,
                              direction="y",
