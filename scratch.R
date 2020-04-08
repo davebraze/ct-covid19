@@ -10,9 +10,11 @@ library(stringr)
 library(lubridate)
 library(wordstonumbers)
 library(forcats)
-
 library(dplyr)
+
 library(ggplot2)
+library(ggpmisc)
+library(ggrepel)
 library(cowplot)
 
 #######################
@@ -52,7 +54,7 @@ httr::parse_url("https://portal.ct.gov/-/media/Coronavirus/CTDPHCOVID19summary32
 covid.fnames <- fs::dir_ls(here::here("01-ctdph-daily-reports")) %>%
     str_subset("CTDPHCOVID19summary[0-9]+.pdf")
 
-read_covid_data <- function(covid.fname) {
+read_ctcovid_data <- function(covid.fname) {
     ## extract date from file metadata
     meta <- tabulizer::extract_metadata(covid.fname)
 
@@ -65,12 +67,13 @@ read_covid_data <- function(covid.fname) {
     ## several variable values are given in prose on page 1.
     ## Clean it up before extracting them
     page1 <- words_to_numbers(str_remove_all(covid.text[[1]], "\r\n"))
+    page1 <- str_remove_all(page1, "COVID-19")
 
     ## get total lab-confirmed cases (cumulative) state wide from first page of report
     cases.confirmed <- str_extract(page1, "[0-9,]+ laboratory-confirmed cases")
     cases.confirmed <- as.integer(str_remove_all(cases.confirmed[!is.na(cases.confirmed)], "[^0-9]"))
     ## get total number of fatalities (cumulative) state wide from first page of report
-    fatalities <- str_extract(page1, "[0-9]+[^0-9]*died")
+    fatalities <- str_extract(page1, "[0-9]+[^0-9]*(died|deaths)")   ## "[0-9]+[^0-9]*died")
     fatalities <- as.integer(str_remove_all(fatalities[!is.na(fatalities)], "[^0-9]"))
     ## get current number hospitalized state-wide from first page of report
     hospitalized <- str_extract(page1, "[0-9]+[^0-9]*hospitalized")
@@ -81,7 +84,7 @@ read_covid_data <- function(covid.fname) {
 
     ##### get cases-by-town data
     ## manually get page areas for town data table
-    ## tabulizer::locate_areas(covid.fnames[16], pages=rep(10, 3))
+    ## tabulizer::locate_areas(covid.fnames[18], pages=rep(10, 3))
 
     ## find page for cases-by-town table, assume town names occur only there
     page.tab <- which(str_detect(covid.text, "West Haven"))
@@ -92,10 +95,14 @@ read_covid_data <- function(covid.fname) {
         area <- list(c(80,67,730,205),
                      c(80,234,730,368),
                      c(80,400,720,540))
-    } else {
+    } else if(date<ymd("2020-04-07")) {
         area <- list(c(105,82,730,225),
                      c(105,230,730,380),
                      c(105,385,720,500))
+    } else {
+        area <- list(c(105,90,700,235),
+                     c(105,236,700,379),
+                     c(105,378,680,523))
     }
 
     tab <- tabulizer::extract_tables(covid.fname,
@@ -115,8 +122,7 @@ read_covid_data <- function(covid.fname) {
 }
 
 ##### read all available covid reports
-
-covid <- purrr::map_dfr(covid.fnames, read_covid_data)
+covid <- purrr::map_dfr(covid.fnames, read_ctcovid_data)
 covid[779, "Town"] <- "North Stonington" ## repair bad line from one input file
 covid <- covid[-778,]
 
@@ -231,9 +237,6 @@ rate.plt <-
     ggplot() +
     geom_line(aes(x=Date, y=`N Cases`, group=NAME10),
               size=4/3, color="blue", alpha=1/3) +
-    ## geom_text(data = subset(ct.covid, date.string == "Apr 04" & `N Cases` > 75),
-    ##           aes(label = NAME10, x = Date, y = `N Cases`),
-    ##           hjust = -.1, size=2) +
     ggrepel::geom_text_repel(data = subset(ct.covid,
                                            Date == max(Date) & `N Cases` > 75),
                              aes(label = NAME10, x = Date, y = `N Cases`),
@@ -296,11 +299,14 @@ ct.summary.plt <-
               angle=90,
               show.legend=FALSE) +
     geom_text(data=filter(ct.summary, name=="tests.complete"),
-              aes(label=value, x=date.string, y=-150), color="grey70", size=2) +
+              aes(label=value, x=date.string, y=-150), color="grey70", size=2.25) +
+    geom_text_npc(aes(npcx=.05, npcy=.85, label="Cumulative No. of tests each day"),
+                  size=3,
+                  color="grey70") +
     ylim(-150, NA) +
     guides(fill=guide_legend(title=NULL)) +
     labs(title="Covid-19 Cases, Hospitalizations, & Deaths for Connecticut",
-         subtitle="(number of tests conducted under each group of bars)",
+         subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption) +
     ylab("Count") + xlab(NULL) +
     theme_cowplot(font_size=font.size) +
@@ -379,8 +385,7 @@ usa.state.corona.plt <-
     labs(title="Cumulative Covid-19 Cases per U.S. State",
          subtitle="Data compiled by the New York Times",
          caption=caption) +
-    ## annotate(geom="text", x=.1, y=.9,                 ## TODO: use ggpmisc::geom_text_npc()
-    ##          label="Connecticut in Blue", color="blue") +
+    geom_text_npc(aes(npcx=.1, npcy=.9, label="Connecticut in Blue"), color="blue") +
     ylab("Number of Cases") +
     theme_cowplot(font_size=font.size) +
     theme(legend.position="top",
@@ -394,3 +399,11 @@ ggsave(filename=fs::path_ext_set(paste0(today, "usa-rate"), ftype),
        width=width, height=height,
        units=units,
        dpi=dpi)
+
+
+####################################################
+## Uni of Washington IMHE modeling data           ##
+## http://www.healthdata.org/covid/data-downloads ##
+####################################################
+
+
