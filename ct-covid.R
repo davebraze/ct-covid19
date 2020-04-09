@@ -4,6 +4,7 @@ library(fs)
 library(RCurl)
 library(readr)
 library(sf)
+library(RSocrata)
 
 library(tabulizer)
 library(stringr)
@@ -46,10 +47,6 @@ ct.shp <-
 
 httr::parse_url("https://portal.ct.gov/-/media/Coronavirus/CTDPHCOVID19summary3282020.pdf?la=en")
 
-## David Lucey points out that the data seem to be available more directly on the state's data
-## portal at: https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library
-## I'll need to sort out the 'Socrata' API. Looks like R package RSocrata:: is the way to go.
-
 #######################################
 ## Extract info from CTDPH pdf files ##
 #######################################
@@ -58,7 +55,7 @@ httr::parse_url("https://portal.ct.gov/-/media/Coronavirus/CTDPHCOVID19summary32
 covid.fnames <- fs::dir_ls(here::here("01-ctdph-daily-reports")) %>%
     str_subset("CTDPHCOVID19summary[0-9]+.pdf")
 
-read_ctcovid_data <- function(covid.fname) {
+read_ctcovid_pdf <- function(covid.fname, town.table=TRUE) {
     ## extract date from file metadata
     meta <- tabulizer::extract_metadata(covid.fname)
 
@@ -86,58 +83,131 @@ read_ctcovid_data <- function(covid.fname) {
     tests.complete <- str_extract(covid.text, "more than [0-9,]+")
     tests.complete <- as.integer(str_remove_all(tests.complete[!is.na(tests.complete)], "[^0-9]"))
 
+    ct.tab <- tibble(
+        Date = date,
+        tests.complete = tests.complete,
+        state.cases = state.cases,
+        fatalities = fatalities,
+        hospitalized = hospitalized
+    )
+
+    retval <- ct.tab
+
+    if (town.table == TRUE) {
     ##### get cases-by-town data
-    ## manually get page areas for town data table
-    ## tabulizer::locate_areas(covid.fnames[18], pages=rep(10, 3))
+        ## manually get page areas for town data table
+        ## tabulizer::locate_areas(covid.fnames[19], pages=rep(10, 3))
 
-    ## find page for cases-by-town table, assume town names occur only there
-    page.tab <- which(str_detect(covid.text, "West Haven"))
+        ## find page for cases-by-town table, assume town names occur only there
+        page.tab <- which(str_detect(covid.text, "West Haven"))
 
-    ## data split across 3 "areas" on the page
-    ## note table format change starting Apr. 5
-    if(date<ymd("2020-04-05")){
-        area <- list(c(80,67,730,205),
-                     c(80,234,730,368),
-                     c(80,400,720,540))
-    } else if(date<ymd("2020-04-07")) {
-        area <- list(c(105,82,730,225),
-                     c(105,230,730,380),
-                     c(105,385,720,500))
-    } else {
-        area <- list(c(105,90,700,235),
-                     c(105,236,700,379),
-                     c(105,378,680,523))
+        ## data split across 3 "areas" on the page
+        ## note table format change starting Apr. 5
+        if(date<ymd("2020-04-05")){
+            area <- list(c(80,67,730,205),
+                         c(80,234,730,368),
+                         c(80,400,720,540))
+        } else if(date<ymd("2020-04-07")) {
+            area <- list(c(105,82,730,225),
+                         c(105,230,730,380),
+                         c(105,385,720,500))
+        } else if(date<ymd("2020-04-08")) {
+            area <- list(c(105,90,700,235),
+                         c(105,236,700,379),
+                         c(105,378,680,523))
+        } else {
+            area <- list(c(101,90,730,235),
+                         c(101,236,730,379),
+                         c(101,378,710,523))
+        }
+
+        town.tab <- tabulizer::extract_tables(covid.fname,
+                                              pages=rep(page.tab, 3),
+                                              area=area,
+                                              guess=FALSE,
+                                              output="data.frame")
+
+        town.tab <- do.call(rbind,town.tab)  %>%
+            rename(town.cases = Cases) %>%
+            mutate(town.cases = as.numeric(town.cases),
+                   Date = date) %>%
+            left_join(ct.tab)
+        retval <- town.tab
     }
 
-    tab <- tabulizer::extract_tables(covid.fname,
-                                     pages=rep(page.tab, 3),
-                                     area=area,
-                                     guess=FALSE,
-                                     output="data.frame")
-    retval <- do.call(rbind,tab)  %>%
-        rename(town.cases = Cases) %>%
-        mutate(town.cases = as.numeric(town.cases),
-               Date = date,
-               tests.complete = tests.complete,
-               state.cases = state.cases,
-               fatalities = fatalities,
-               hospitalized = hospitalized)
     retval
 }
 
-##### read all available covid reports
-covid <- purrr::map_dfr(covid.fnames, read_ctcovid_data)
-covid[779, "Town"] <- "North Stonington" ## repair bad line from one input file
-covid <- covid[-778,]
+## ##### read all available covid pdfs
+## town.tab <- TRUE
+## covid <- purrr::map_dfr(covid.fnames[1:19], read_ctcovid_pdf, town.tab=town.tab)
 
-covid  <-
-    covid %>%
-    arrange(Date) %>%
-    mutate(date.string = as_factor(strftime(Date, "%b %d")))
+## if (town.tab == TRUE){
+##     covid[779, "Town"] <- "North Stonington" ## repair bad line from one input file
+##     covid <- covid[-778,]
+## }
+
+## covid  <-
+##     covid %>%
+##     arrange(Date) %>%
+##     mutate(date.string = as_factor(strftime(Date, "%b %d")))
+
+
+##################################################
+## Use the Socrata API to access state DPH data ##
+##################################################
+
+## David Lucey points out that the data seem to be available more directly on the state's data
+## portal at: https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library
+
+## State data is accessed using the Socrata API. The R package
+## RSocrata:: package facilitates this.
+##
+## initial set up involves
+## 1. registering with https://opendata.socrata.com/login
+## 2. create an app_token to access the api via read.socrata()
+
+
+
+socrata.app.token <- Sys.getenv("SOCRATA_APP_TOKEN_CTCOVID19")
+
+##### cases and deaths by town
+covid.api <- read.socrata("https://data.ct.gov/resource/28fr-iqnx.json",
+                          app_token=socrata.app.token) %>%
+    rename(Town = town) %>%
+    mutate(town.cases = as.integer(confirmedcases),
+           town.deaths = as.integer(deaths),
+           Date = as.Date(lastupdatedate)) %>%
+    select(-c(town_no, lastupdatedate, confirmedcases, deaths))
 
 ## Merge shapes covid data
 ct.covid <-
-    right_join(ct.shp, covid, by=c("NAME10" = "Town"))
+    right_join(ct.shp, covid.api, by=c("NAME10" = "Town"))
+
+
+##### state wide counts
+## tests.complete info does not seem to be anywhere in any of the
+## covid-19 data sets provided by the state. The only way to get it is
+## to extract it from their daily reports (pdf files).
+ct.summary <- read.socrata("https://data.ct.gov/resource/rf3k-f8fg.json",
+                           app_token=socrata.app.token) %>%
+    rename(Date = date,
+           Cases = cases,
+           Hospitalized = hospitalizations,
+           Deaths = deaths) %>%
+    mutate(Date = as.Date(Date)) %>%
+    select(-state, -starts_with("cases_")) %>%
+    mutate(Cases = as.integer(Cases),
+           Hospitalized = as.integer(Hospitalized),
+           Deaths = as.integer(Deaths))
+
+tmp <- purrr::map_dfr(covid.fnames, read_ctcovid_pdf, town.tab=FALSE) %>%
+    select(Date, tests.complete)
+
+ct.summary <- left_join(ct.summary, tmp)%>%
+    tidyr::pivot_longer(cols=-c(Date))
+
+
 
 #########################
 ## constants for plots ##
@@ -163,6 +233,7 @@ dpi <- 300
 #########################################################
 
 breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800)
+
 map.days <-
     ct.covid %>%
     ggplot() +
@@ -174,7 +245,8 @@ map.days <-
     guides(fill=guide_colorbar(barwidth=20,
                                title="Number of Cases",
                                title.vjust=1)) +
-    facet_wrap(~date.string, ncol=5) +
+    facet_wrap(~Date,
+               ncol=5) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption) +
@@ -210,7 +282,7 @@ map.today <-
     guides(fill=guide_colorbar(barwidth=20,
                                title="Number of Cases",
                                title.vjust=1)) +
-    facet_wrap(~date.string, ncol=4) +
+    facet_wrap(~Date, ncol=4) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption) +
@@ -242,7 +314,7 @@ label.cut <-
     pull(town.cases)
 label.count <- 17
 
-x.labs <- unique(ct.covid$date.string)
+## x.labs <- unique(ct.covid$date.string)
 rate.plt <-
     ct.covid %>%
     filter(town.cases > 3) %>%
@@ -258,7 +330,7 @@ rate.plt <-
                              direction="y",
                              force=1/4,
                              nudge_x=5) +
-    scale_x_date(labels=x.labs,
+    scale_x_date(labels=strftime(unique(ct.covid$Date), "%b %d"),
                  breaks=unique(ct.covid$Date),
                  expand = expansion(add=c(1/4,3)),
                  name=NULL) +
@@ -288,27 +360,31 @@ ggsave(filename=fs::path_ext_set(paste0(today, "rate"), ftype),
 ## bar plot for state-wide data ##
 ##################################
 
-## reorganize the data
-ct.summary <-
-    covid %>%
-    select(-c(town.cases, Town)) %>%
-    group_by(Date) %>%
-    summarize(date=unique(Date),
-              date.string=unique(date.string),
-              tests.complete=unique(tests.complete),
-              Cases=unique(state.cases),
-              Hospitalized=unique(hospitalized),
-              Deaths=unique(fatalities)) %>%
-    select(-Date) %>%
-    tidyr::pivot_longer(cols=-c(date, date.string)) %>%
-    mutate(name = as_factor(name))
+## ## reorganize the data
+## ct.summary <-
+##     covid %>%
+##     select(-c(town.cases, Town)) %>%
+##     group_by(Date) %>%
+##     summarize(date=unique(Date),
+##               date.string=unique(date.string),
+##               tests.complete=unique(tests.complete),
+##               Cases=unique(state.cases),
+##               Hospitalized=unique(hospitalized),
+##               Deaths=unique(fatalities)) %>%
+##     select(-Date) %>%
+##     tidyr::pivot_longer(cols=-c(date, date.string)) %>%
+##     mutate(name = as_factor(name))
 
 ct.summary.plt <-
     ct.summary %>%
     filter(!name=="tests.complete") %>%
-    ggplot(aes(y=value, x=date.string)) +
+    ggplot(aes(y=value, x=Date)) +
     geom_bar(aes(fill=name),
              position="dodge", stat="identity") +
+    scale_x_date(labels=strftime(unique(ct.summary$Date), "%b %d"),
+                 breaks=unique(ct.summary$Date),
+                 expand = expansion(add=c(1/4,3)),
+                 name=NULL) +
     geom_text(aes(color=name, label=value),
               size=2,
               position=position_dodge(width=1),
@@ -316,7 +392,7 @@ ct.summary.plt <-
               angle=90,
               show.legend=FALSE) +
     geom_text(data=filter(ct.summary, name=="tests.complete"),
-              aes(label=value, x=date.string, y=-150), color="grey70", size=2.25) +
+              aes(label=value, x=Date, y=-150), color="grey70", size=2.25) +
     geom_text_npc(aes(npcx=.05, npcy=.85, label="Cumulative No. of tests administered"),
                   size=3,
                   color="grey70") +
