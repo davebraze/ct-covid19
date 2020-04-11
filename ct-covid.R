@@ -18,6 +18,8 @@ library(ggpmisc)
 library(ggrepel)
 library(cowplot)
 
+source(here::here("locals.R"))
+
 #######################
 ## load up map files ##
 #######################
@@ -28,7 +30,7 @@ library(cowplot)
 ## Must first download the relevant shape files by hand, unzip them, and then load them up.
 ## URL for town shape files is here: http://magic.lib.uconn.edu/magic_2/vector/37800/townct_37800_0000_2010_s100_census_1_shp.zip
 ct.shp <-
-    sf::st_read(here::here("02-shapefiles/townct_37800_0000_2010_s100_census_1_shp/townct_37800_0000_2010_s100_census_1_shp/nad83",
+    sf::st_read(here::here("02-shapefiles/CT/townct_37800_0000_2010_s100_census_1_shp/townct_37800_0000_2010_s100_census_1_shp/nad83",
                            "townct_37800_0000_2010_s100_census_1_shp_nad83_feet.shp")) %>%
     filter(NAME10 != "County subdivisions not defined") %>%
     mutate(LAT = as.numeric(INTPTLAT10),
@@ -54,89 +56,6 @@ httr::parse_url("https://portal.ct.gov/-/media/Coronavirus/CTDPHCOVID19summary32
 ## get list of ctdph covid reports at hand
 covid.fnames <- fs::dir_ls(here::here("01-ctdph-daily-reports")) %>%
     str_subset("CTDPHCOVID19summary[0-9]+.pdf")
-
-read_ctcovid_pdf <- function(covid.fname, town.table=TRUE) {
-    ## extract date from file metadata
-    meta <- tabulizer::extract_metadata(covid.fname)
-
-    ## Using file creation date for this purpose is dodgy. Will fail if there is a delay in building the daily report
-    date <- as.Date(lubridate::parse_date_time(meta$created, "a b! d! T* Y!", tz="EST"))
-
-    covid.text <- tabulizer::extract_text(covid.fname,
-                                          pages=1:meta$pages)
-
-    ## several variable values are given in prose on page 1.
-    ## Clean it up before extracting them
-    page1 <- words_to_numbers(str_remove_all(covid.text[[1]], "\r\n"))
-    page1 <- str_remove_all(page1, "COVID-19")
-
-    ## get total lab-confirmed cases (cumulative) state wide from first page of report
-    state.cases <- str_extract(page1, "[0-9,]+ laboratory-confirmed cases")
-    state.cases <- as.integer(str_remove_all(state.cases[!is.na(state.cases)], "[^0-9]"))
-    ## get total number of fatalities (cumulative) state wide from first page of report
-    fatalities <- str_extract(page1, "[0-9]+[^0-9]*(died|deaths)")   ## "[0-9]+[^0-9]*died")
-    fatalities <- as.integer(str_remove_all(fatalities[!is.na(fatalities)], "[^0-9]"))
-    ## get current number hospitalized state-wide from first page of report
-    hospitalized <- str_extract(page1, "[0-9]+[^0-9]*hospitalized")
-    hospitalized <- as.integer(str_remove_all(hospitalized[!is.na(hospitalized)], "[^0-9]"))
-    ## get approx Number of lab tests completed (cumulative)
-    tests.complete <- str_extract(covid.text, "more than [0-9,]+")
-    tests.complete <- as.integer(str_remove_all(tests.complete[!is.na(tests.complete)], "[^0-9]"))
-
-    ct.tab <- tibble(
-        Date = date,
-        tests.complete = tests.complete,
-        state.cases = state.cases,
-        fatalities = fatalities,
-        hospitalized = hospitalized
-    )
-
-    retval <- ct.tab
-
-    if (town.table == TRUE) {
-    ##### get cases-by-town data
-        ## manually get page areas for town data table
-        ## tabulizer::locate_areas(covid.fnames[19], pages=rep(10, 3))
-
-        ## find page for cases-by-town table, assume town names occur only there
-        page.tab <- which(str_detect(covid.text, "West Haven"))
-
-        ## data split across 3 "areas" on the page
-        ## note table format change starting Apr. 5
-        if(date<ymd("2020-04-05")){
-            area <- list(c(80,67,730,205),
-                         c(80,234,730,368),
-                         c(80,400,720,540))
-        } else if(date<ymd("2020-04-07")) {
-            area <- list(c(105,82,730,225),
-                         c(105,230,730,380),
-                         c(105,385,720,500))
-        } else if(date<ymd("2020-04-08")) {
-            area <- list(c(105,90,700,235),
-                         c(105,236,700,379),
-                         c(105,378,680,523))
-        } else {
-            area <- list(c(101,90,730,235),
-                         c(101,236,730,379),
-                         c(101,378,710,523))
-        }
-
-        town.tab <- tabulizer::extract_tables(covid.fname,
-                                              pages=rep(page.tab, 3),
-                                              area=area,
-                                              guess=FALSE,
-                                              output="data.frame")
-
-        town.tab <- do.call(rbind,town.tab)  %>%
-            rename(town.cases = Cases) %>%
-            mutate(town.cases = as.numeric(town.cases),
-                   Date = date) %>%
-            left_join(ct.tab)
-        retval <- town.tab
-    }
-
-    retval
-}
 
 ## ##### read all available covid pdfs
 ## town.tab <- TRUE
@@ -166,8 +85,6 @@ read_ctcovid_pdf <- function(covid.fname, town.table=TRUE) {
 ## initial set up involves
 ## 1. registering with https://opendata.socrata.com/login
 ## 2. create an app_token to access the api via read.socrata()
-
-
 
 socrata.app.token <- Sys.getenv("SOCRATA_APP_TOKEN_CTCOVID19")
 
@@ -205,14 +122,13 @@ tmp <- purrr::map_dfr(covid.fnames, read_ctcovid_pdf, town.tab=FALSE) %>%
     select(Date, tests.complete)
 
 ct.summary <- left_join(ct.summary, tmp)%>%
-    tidyr::pivot_longer(cols=-c(Date))
-
-
+    tidyr::pivot_longer(cols=-c(Date)) %>%
+    mutate(name = forcats::fct_relevel(name, "Cases", "Hospitalized", "Deaths"))
 
 #########################
 ## constants for plots ##
 #########################
-caption <- paste("Data Source: https://portal.ct.gov/Coronavirus.",
+caption <- paste("Data Source: https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library",
                  "Figure by David Braze (davebraze@gmail.com)",
                  "using R statistical software.", sep="\n")
 
@@ -246,7 +162,8 @@ map.days <-
                                title="Number of Cases",
                                title.vjust=1)) +
     facet_wrap(~Date,
-               ncol=5) +
+               ncol=5,
+               labeller=label_date) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption) +
@@ -282,7 +199,9 @@ map.today <-
     guides(fill=guide_colorbar(barwidth=20,
                                title="Number of Cases",
                                title.vjust=1)) +
-    facet_wrap(~Date, ncol=4) +
+    facet_wrap(~Date,
+               ncol=4,
+               labeller=label_date) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption) +
@@ -314,13 +233,17 @@ label.cut <-
     pull(town.cases)
 label.count <- 17
 
-## x.labs <- unique(ct.covid$date.string)
+highlight <- ct.covid %>%
+    filter(NAME10 %in% c("Bridgeport"))
+
 rate.plt <-
     ct.covid %>%
     filter(town.cases > 3) %>%
     ggplot() +
     geom_line(aes(x=Date, y=town.cases, group=NAME10),
               size=4/3, color="blue", alpha=1/3) +
+    geom_line(data=highlight, aes(x=Date, y=town.cases, group=NAME10),
+              size=3/3, color="darkorange", alpha=1) +
     ggrepel::geom_text_repel(data = subset(ct.covid,
                                            Date == max(Date) & town.cases >= label.cut[label.count]),
                              aes(label = NAME10, x = Date, y = town.cases),
@@ -342,7 +265,6 @@ rate.plt <-
                                    "(those with at least ", label.cut[label.count], " cases)")),
                   size=2.5) +
     ylab("Number of Cases") +
-    coord_equal(ratio =.02) +
     theme_cowplot(font_size=font.size) +
     theme(legend.position="top",
           plot.margin = unit(c(1,1,1,1), "lines"),
@@ -360,30 +282,18 @@ ggsave(filename=fs::path_ext_set(paste0(today, "rate"), ftype),
 ## bar plot for state-wide data ##
 ##################################
 
-## ## reorganize the data
-## ct.summary <-
-##     covid %>%
-##     select(-c(town.cases, Town)) %>%
-##     group_by(Date) %>%
-##     summarize(date=unique(Date),
-##               date.string=unique(date.string),
-##               tests.complete=unique(tests.complete),
-##               Cases=unique(state.cases),
-##               Hospitalized=unique(hospitalized),
-##               Deaths=unique(fatalities)) %>%
-##     select(-Date) %>%
-##     tidyr::pivot_longer(cols=-c(date, date.string)) %>%
-##     mutate(name = as_factor(name))
-
+##    mutate(name = fct_relevel(name, `Cases (complete)` = "Cases")) %>%
 ct.summary.plt <-
     ct.summary %>%
-    filter(!name=="tests.complete") %>%
+    filter(!name %in% c("tests.complete")) %>%
+    mutate(name = fct_recode(name, "Cases, cumulative" = "Cases",
+                                     "Hospitalized, daily" = "Hospitalized",
+                                     "Deaths, cumulative" = "Deaths")) %>%
     ggplot(aes(y=value, x=Date)) +
-    geom_bar(aes(fill=name),
-             position="dodge", stat="identity") +
+    geom_bar(aes(fill=name), position="dodge", stat="identity") +
+    scale_fill_brewer(type="qual", palette="Dark2") +
     scale_x_date(labels=strftime(unique(ct.summary$Date), "%b %d"),
                  breaks=unique(ct.summary$Date),
-                 expand = expansion(add=c(1/4,3)),
                  name=NULL) +
     geom_text(aes(color=name, label=value),
               size=2,
@@ -391,6 +301,7 @@ ct.summary.plt <-
               vjust=.5, hjust=-.1,
               angle=90,
               show.legend=FALSE) +
+    scale_color_brewer(type="qual", palette="Dark2") +
     geom_text(data=filter(ct.summary, name=="tests.complete"),
               aes(label=value, x=Date, y=-150), color="grey70", size=2.25) +
     geom_text_npc(aes(npcx=.05, npcy=.85, label="Cumulative No. of tests administered"),
@@ -413,7 +324,6 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
        width=width, height=height,
        units=units,
        dpi=dpi)
-
 
 ####################################
 ## NYT state-by-state corona data ##
@@ -454,8 +364,8 @@ tmp <-
     usa.state.corona %>%
     filter(date>ymd("2020-03-15"))
 
-tmp.ct <- tmp %>%
-    filter(state=="Connecticut")
+highlight <- tmp %>%
+    filter(state %in% c("Connecticut"))
 
 label.cut <-
     tmp %>%
@@ -469,7 +379,7 @@ usa.state.corona.plt <-
     ggplot(tmp) +
     geom_line(aes(x=date, y=cases, group=state),
               size=4/3, color="orange", alpha=1/3) +
-    geom_line(data=tmp.ct, aes(x=date, y=cases, group=state), ## highlight CT
+    geom_line(data=highlight, aes(x=date, y=cases, group=state), ## highlight CT
               size=1, color="blue", alpha=.8) +
     ggrepel::geom_text_repel(data = subset(usa.state.corona,
                                            date == max(date) & cases >= label.cut[label.count]),
