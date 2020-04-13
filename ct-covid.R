@@ -128,9 +128,9 @@ ct.summary <- left_join(ct.summary, tmp)%>%
 #########################
 ## constants for plots ##
 #########################
-caption <- paste("Data Source: https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library",
-                 "Figure by David Braze (davebraze@gmail.com)",
-                 "using R statistical software.", sep="\n")
+caption.ctdph <- paste("Data Source: https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library",
+                       "Figure by David Braze (davebraze@gmail.com) using R statistical software.",
+                       sep="\n")
 
 ## file names/types
 today <- strftime(today(), "%Y%m%d-")
@@ -166,7 +166,7 @@ map.days <-
                labeller=label_date) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
-         caption=caption) +
+         caption=caption.ctdph) +
     theme_cowplot(font_size=font.size) +
     theme(legend.position="top",
           axis.text.x = element_blank(),
@@ -204,7 +204,7 @@ map.today <-
                labeller=label_date) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
-         caption=caption) +
+         caption=caption.ctdph) +
     xlab(NULL) + ylab(NULL) +
     theme_cowplot(font_size=font.size) +
     theme(legend.position="top",
@@ -234,11 +234,11 @@ label.cut <-
 label.count <- 17
 
 highlight <- ct.covid %>%
-    filter(NAME10 %in% c("Bridgeport"))
+    filter(NAME10 %in% c("Bristol", "Manchester"))
 
 rate.plt <-
     ct.covid %>%
-    filter(town.cases > 3) %>%
+##    filter(town.cases > 3) %>%
     ggplot() +
     geom_line(aes(x=Date, y=town.cases, group=NAME10),
               size=4/3, color="blue", alpha=1/3) +
@@ -259,7 +259,7 @@ rate.plt <-
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
-         caption=caption) +
+         caption=caption.ctdph) +
     geom_text_npc(aes(npcx=.1, npcy=.9,
                       label=paste0("The top ", label.count, " towns are labeled\n",
                                    "(those with at least ", label.cut[label.count], " cases)")),
@@ -278,11 +278,44 @@ ggsave(filename=fs::path_ext_set(paste0(today, "rate"), ftype),
        units=units,
        dpi=dpi)
 
+########################################################
+## line plot for hospitalization rate (daily change). ##
+## Includes 3 day running average                     ##
+########################################################
+
+ct.hosp.rate.plt  <-
+    ct.summary %>%
+    filter(name == "Hospitalized") %>%
+    mutate(value.diff = c(NA, diff(value)),
+           value.diff.3mn = TTR::runMean(value.diff,3)) %>%
+    ggplot(aes(x=Date)) +
+    geom_line(aes(y=value.diff), size=2, alpha=.67, color="blue") +
+    geom_line(aes(y=value.diff.3mn), size=1, alpha=1, color="lightblue") +
+    scale_x_date(labels=strftime(unique(ct.summary$Date), "%b %d"),
+                 breaks=unique(ct.summary$Date),
+                 name=NULL) +
+##    scale_color_brewer(type="qual", palette="Dark2") +
+    labs(title="Daily Change in Covid-19 Hospitalizations for Connecticut",
+         subtitle="Data compiled by CT Dept. of Public Health",
+         caption=caption.ctdph) +
+    guides(fill=guide_legend(title=NULL)) +
+    ylab("Count") + xlab(NULL) +
+    theme_cowplot(font_size=font.size) +
+    theme(legend.position=c(.05, .90),
+          axis.text.x = element_text(angle=45, hjust=1))
+
+ggsave(filename=fs::path_ext_set(paste0(today, "ct-hosp-rate"), ftype),
+       plot=ct.hosp.rate.plt,
+       path=fig.path,
+       device=ftype,
+       width=width*(16/9), height=height,
+       units=units,
+       dpi=dpi)
+
 ##################################
 ## bar plot for state-wide data ##
 ##################################
 
-##    mutate(name = fct_relevel(name, `Cases (complete)` = "Cases")) %>%
 ct.summary.plt <-
     ct.summary %>%
     filter(!name %in% c("tests.complete")) %>%
@@ -311,7 +344,7 @@ ct.summary.plt <-
     guides(fill=guide_legend(title=NULL)) +
     labs(title="Covid-19 Cases, Hospitalizations, & Deaths for Connecticut",
          subtitle="Data compiled by CT Dept. of Public Health",
-         caption=caption) +
+         caption=caption.ctdph) +
     ylab("Count") + xlab(NULL) +
     theme_cowplot(font_size=font.size) +
     theme(legend.position=c(.05, .90),
@@ -356,9 +389,9 @@ usa.state.corona <- dplyr::left_join(usa.state.corona, state.meta, by=c("state" 
     mutate(state = fct_relevel(as_factor(state), "Connecticut"),
            date.string = as_factor(strftime(date, "%b %d")))
 
-caption <- paste("Data Source: https://github.com/nytimes/covid-19-data.",
-                 "Figure by David Braze (davebraze@gmail.com)",
-                 "using R statistical software.", sep="\n")
+caption.nyt <- paste("Data Source: https://github.com/nytimes/covid-19-data.",
+                     "Figure by David Braze (davebraze@gmail.com)",
+                     "using R statistical software.", sep="\n")
 
 tmp <-
     usa.state.corona %>%
@@ -396,7 +429,7 @@ usa.state.corona.plt <-
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases per U.S. State",
          subtitle="Data compiled by the New York Times",
-         caption=caption) +
+         caption=caption.nyt) +
     geom_text_npc(aes(npcx=.1, npcy=.9,
                       label=paste0("The top ", label.count, " states are labeled\n",
                                    "(those with at least ", label.cut[label.count], " cases)")),
@@ -421,4 +454,27 @@ ggsave(filename=fs::path_ext_set(paste0(today, "usa-rate"), ftype),
 ## http://www.healthdata.org/covid/data-downloads ##
 ####################################################
 
+
+#############################################
+## Other data sets that may be of interest ##
+#############################################
+
+## from the CDC
+## https://data.cdc.gov/browse?category=NCHS&sortBy=last_modified
+
+## from the Johns Hopkins project
+## https://github.com/CSSEGISandData/COVID-19
+
+## for help with JHU data see
+## https://github.com/strengejacke/Corona-19-shiny
+## https://github.com/lorindavies/R_Downloadtoolkit_CSSEGISandData
+
+## from U of Washington
+## https://covid19.healthdata.org/
+
+## covid tracking project (USA)
+## https://covidtracking.com/data
+
+## Need Population data for CT Towns, CT Counties, nearby counties in
+## adjacent states (plus maybe NJ)
 
