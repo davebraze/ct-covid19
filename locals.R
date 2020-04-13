@@ -4,8 +4,14 @@ label_date <- function(variable, value) {
     strftime(unique(value), "%b %d")
 }
 
+
 read_ctcovid_pdf <- function(covid.fname, town.table=TRUE) {
     ## extract data from CT COVID-19 daily reports (PDF files).
+
+    if(FALSE) {
+        covid.fname <- covid.fnames[20]
+        town.table=TRUE
+    }
 
     ## extract date from file metadata
     meta <- tabulizer::extract_metadata(covid.fname)
@@ -13,13 +19,19 @@ read_ctcovid_pdf <- function(covid.fname, town.table=TRUE) {
     ## Using file creation date for this purpose is dodgy. Will fail if there is a delay in building the daily report
     date <- as.Date(lubridate::parse_date_time(meta$created, "a b! d! T* Y!", tz="EST"))
 
-    covid.text <- tabulizer::extract_text(covid.fname,
-                                          pages=1:meta$pages)
+    covid.text <-
+        tabulizer::extract_text(covid.fname,
+                                pages=1:meta$pages) %>%
+        str_remove_all("\r\n")
+    names(covid.text) <- 1:length(covid.text)
+    covid.text <- purrr::map_dfr(covid.text, words_to_numbers) %>%
+        purrr::map_dfr(str_remove_all, "COVID-19")
 
     ## several variable values are given in prose on page 1.
     ## Clean it up before extracting them
-    page1 <- words_to_numbers(str_remove_all(covid.text[[1]], "\r\n"))
-    page1 <- str_remove_all(page1, "COVID-19")
+    ## page1 <- words_to_numbers(str_remove_all(covid.text[[1]], "\r\n"))
+    ## page1 <- str_remove_all(page1, "COVID-19")
+    page1 <- covid.text[[1]]
 
     ## get total lab-confirmed cases (cumulative) state wide from first page of report
     state.cases <- str_extract(page1, "[0-9,]+ laboratory-confirmed cases")
@@ -31,8 +43,8 @@ read_ctcovid_pdf <- function(covid.fname, town.table=TRUE) {
     hospitalized <- str_extract(page1, "[0-9]+[^0-9]*hospitalized")
     hospitalized <- as.integer(str_remove_all(hospitalized[!is.na(hospitalized)], "[^0-9]"))
     ## get approx Number of lab tests completed (cumulative)
-    tests.complete <- str_extract(covid.text, "more than [0-9,]+")
-    tests.complete <- as.integer(str_remove_all(tests.complete[!is.na(tests.complete)], "[^0-9]"))
+    tests.complete <- str_extract(covid.text, "(more than|Patients tested for) +[0-9,]+")
+    tests.complete <- max(as.integer(str_remove_all(tests.complete[!is.na(tests.complete)], "[^0-9]")))
 
     ct.tab <- tibble(
         Date = date,
