@@ -71,7 +71,6 @@ covid.fnames <- fs::dir_ls(here::here("01-ctdph-daily-reports")) %>%
 ##     arrange(Date) %>%
 ##     mutate(date.string = as_factor(strftime(Date, "%b %d")))
 
-
 ##################################################
 ## Use the Socrata API to access state DPH data ##
 ##################################################
@@ -234,7 +233,7 @@ label.cut <-
 label.count <- 17
 
 highlight <- ct.covid %>%
-    filter(NAME10 %in% c("Bristol", "Manchester"))
+    filter(NAME10 %in% c("Bridgeport", "Waterbury", "New Haven", "Hartford"))
 
 rate.plt <-
     ct.covid %>%
@@ -279,26 +278,34 @@ ggsave(filename=fs::path_ext_set(paste0(today, "rate"), ftype),
        dpi=dpi)
 
 ########################################################
-## line plot for hospitalization rate (daily change). ##
+## line plot for daily change in core statistics.     ##
 ## Includes 3 day running average                     ##
 ########################################################
 
 ct.hosp.rate.plt  <-
     ct.summary %>%
-    filter(name == "Hospitalized") %>%
+    group_by(name) %>%
     mutate(value.diff = c(NA, diff(value)),
            value.diff.3mn = TTR::runMean(value.diff,3)) %>%
     ggplot(aes(x=Date)) +
-    geom_line(aes(y=value.diff), size=2, alpha=.67, color="blue") +
-    geom_line(aes(y=value.diff.3mn), size=1, alpha=1, color="lightblue") +
+    geom_line(aes(y=value.diff, group=name, color=name), size=2, alpha=.50) +
+    geom_line(aes(y=value.diff.3mn, group=name, color=name), size=1, alpha=1, linetype="52") +
+    geom_text(aes(y=value.diff, group=name, label=value.diff), size=2) +
     scale_x_date(labels=strftime(unique(ct.summary$Date), "%b %d"),
                  breaks=unique(ct.summary$Date),
                  name=NULL) +
-##    scale_color_brewer(type="qual", palette="Dark2") +
-    labs(title="Daily Change in Covid-19 Hospitalizations for Connecticut",
+    scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
+    facet_wrap(~name, scales="free_y") +
+    geom_text_npc(aes(npcx=.067, npcy=.9,
+                  label=paste("Heavy line = raw counts.",
+                               "Dashed line = 3 day average.",
+                               "\nNote different y scales.",
+                               sep="\n")),
+                  size=2.5) +
+    ylim(0, NA) +
+    labs(title="Daily Change in Covid-19 Statistics for Connecticut",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
-    guides(fill=guide_legend(title=NULL)) +
     ylab("Count") + xlab(NULL) +
     theme_cowplot(font_size=font.size) +
     theme(legend.position=c(.05, .90),
@@ -425,7 +432,7 @@ usa.state.corona.plt <-
                              nudge_x=5) +
     scale_x_date(expand = expansion(add=c(1/4,6)),
                  breaks= unique(tmp$date),
-                 labels = unique(tmp$date.string),
+                 labels = strftime(unique(tmp$date), "%b %d"),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases per U.S. State",
          subtitle="Data compiled by the New York Times",
@@ -454,6 +461,9 @@ ggsave(filename=fs::path_ext_set(paste0(today, "usa-rate"), ftype),
 ## http://www.healthdata.org/covid/data-downloads ##
 ####################################################
 
+## from U of Washington
+## https://covid19.healthdata.org/
+
 
 #############################################
 ## Other data sets that may be of interest ##
@@ -468,9 +478,6 @@ ggsave(filename=fs::path_ext_set(paste0(today, "usa-rate"), ftype),
 ## for help with JHU data see
 ## https://github.com/strengejacke/Corona-19-shiny
 ## https://github.com/lorindavies/R_Downloadtoolkit_CSSEGISandData
-
-## from U of Washington
-## https://covid19.healthdata.org/
 
 ## covid tracking project (USA)
 ## https://covidtracking.com/data
