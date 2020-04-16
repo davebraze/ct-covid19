@@ -1,4 +1,4 @@
-## library(httr)
+library(httr)
 library(here)
 library(fs)
 library(RCurl)
@@ -95,6 +95,22 @@ covid.api <- read.socrata("https://data.ct.gov/resource/28fr-iqnx.json",
            town.deaths = as.integer(deaths),
            Date = as.Date(lastupdatedate)) %>%
     select(-c(town_no, lastupdatedate, confirmedcases, deaths))
+
+
+##### scrape town/county data from wikipedia
+
+url <- "https://en.wikipedia.org/wiki/List_of_towns_in_Connecticut"
+tab <- GET(url) %>%
+    htmlParse() %>%
+    readHTMLTable(header=TRUE, which=2, skip=170) %>%
+    janitor::clean_names() %>%
+    select(-c(number, form_ofgovernment, native_americanname)) %>%
+    rename(year_est = dateestablished,
+           land_area_sq_miles = land_area_square_miles,
+           pop_2010 = population_in_2010) %>%
+    mutate(pop_2010 = as.integer(str_remove(pop_2010, ",")),
+           land_area_sq_miles = as.numeric(land_area_sq_miles),
+           county = str_replace(county, "County", "Co."))
 
 ## Merge shapes covid data
 ct.covid <-
