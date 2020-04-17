@@ -163,7 +163,7 @@ dpi <- 300
 ## map cumulative confirmed case count by Town and Day ##
 #########################################################
 
-breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800)
+breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600)
 
 map.days <-
     ct.covid %>%
@@ -377,7 +377,7 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
        plot=ct.summary.plt,
        path=fig.path,
        device=ftype,
-       width=width, height=height,
+       width=width*16/9, height=height,
        units=units,
        dpi=dpi)
 
