@@ -1,4 +1,5 @@
 library(httr)
+library(XML)
 library(here)
 library(fs)
 library(RCurl)
@@ -47,7 +48,7 @@ ct.shp <-
 ## https://portal.ct.gov/-/media/Coronavirus/CTDPHCOVID19summary3282020.pdf?la=en
 ## Maybe use httr::modify_url to pass in different file names, as needed.
 
-httr::parse_url("https://portal.ct.gov/-/media/Coronavirus/CTDPHCOVID19summary3282020.pdf?la=en")
+## httr::parse_url("https://portal.ct.gov/-/media/Coronavirus/CTDPHCOVID19summary3282020.pdf?la=en")
 
 #######################################
 ## Extract info from CTDPH pdf files ##
@@ -90,9 +91,11 @@ socrata.app.token <- Sys.getenv("SOCRATA_APP_TOKEN_CTCOVID19")
 ##### cases and deaths by town
 covid.api <- read.socrata("https://data.ct.gov/resource/28fr-iqnx.json",
                           app_token=socrata.app.token) %>%
-    rename(Town = town) %>%
+    rename(Town = town,
+           case.rate = caserate) %>%
     mutate(town.cases = as.integer(confirmedcases),
            town.deaths = as.integer(deaths),
+           case.rate = as.integer(case.rate),
            Date = as.Date(lastupdatedate)) %>%
     select(-c(town_no, lastupdatedate, confirmedcases, deaths))
 
@@ -105,16 +108,19 @@ tab <- GET(url) %>%
     readHTMLTable(header=TRUE, which=2, skip=170) %>%
     janitor::clean_names() %>%
     select(-c(number, form_ofgovernment, native_americanname)) %>%
-    rename(year_est = dateestablished,
-           land_area_sq_miles = land_area_square_miles,
-           pop_2010 = population_in_2010) %>%
-    mutate(pop_2010 = as.integer(str_remove(pop_2010, ",")),
-           land_area_sq_miles = as.numeric(land_area_sq_miles),
+    rename(year.est = dateestablished,
+           land.area.sq.miles = land_area_square_miles,
+           pop.2010 = population_in_2010,
+           council.of.governments = council_of_governments) %>%
+    mutate(pop.2010 = as.integer(str_remove(pop.2010, ",")),
+           land.area.sq.miles = as.numeric(land.area.sq.miles),
            county = str_replace(county, "County", "Co."))
 
 ## Merge shapes covid data
 ct.covid <-
-    right_join(ct.shp, covid.api, by=c("NAME10" = "Town"))
+    covid.api %>%
+    left_join(tab, by=c("Town" = "town")) %>%
+    left_join(ct.shp, by=c("Town" = "NAME10"))
 
 
 ##### state wide counts
@@ -168,7 +174,7 @@ breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600)
 map.days <-
     ct.covid %>%
     ggplot() +
-    geom_sf(aes(fill=town.cases), color="lightblue", size=.33) +
+    geom_sf(aes(fill=town.cases, geometry=geometry), color="lightblue", size=.33) +
     scale_fill_continuous(type="viridis",
                           trans="log",
                           breaks=breaks,
@@ -182,7 +188,7 @@ map.days <-
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
-    theme_cowplot(font_size=font.size) +
+    theme_fdbplot(font_size=font.size) +
     theme(legend.position="top",
           axis.text.x = element_blank(),
           axis.ticks.x = element_blank(),
@@ -205,8 +211,8 @@ map.today <-
     ct.covid %>%
     filter(Date==max(Date)) %>%
     ggplot() +
-    geom_sf(aes(fill=town.cases), color="lightblue", size=.33) +
-    geom_sf_text(aes(label=town.cases), color="white", size=2) +
+    geom_sf(aes(fill=town.cases, geometry=geometry), color="lightblue", size=.33) +
+    geom_sf_text(aes(label=town.cases, geometry=geometry), color="white", size=2) +
     scale_fill_continuous(type="viridis",
                           trans="log",
                           breaks=breaks,
@@ -221,7 +227,7 @@ map.today <-
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
     xlab(NULL) + ylab(NULL) +
-    theme_cowplot(font_size=font.size) +
+    theme_fdbplot(font_size=font.size) +
     theme(legend.position="top",
           axis.text.x = element_blank(),
           axis.ticks.x = element_blank(),
@@ -243,25 +249,25 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-today"), ftype),
 label.cut <-
     ct.covid %>%
     filter(Date == max(Date)) %>%
-    select(NAME10, town.cases, Date) %>%
+    select(Town, town.cases, Date) %>%
     arrange(desc(town.cases)) %>%
     pull(town.cases)
 label.count <- 17
 
 highlight <- ct.covid %>%
-    filter(NAME10 %in% c("Bridgeport", "Waterbury", "New Haven", "Hartford"))
+    filter(Town %in% c("Bridgeport", "Waterbury", "New Haven", "Hartford"))
 
 rate.plt <-
     ct.covid %>%
 ##    filter(town.cases > 3) %>%
     ggplot() +
-    geom_line(aes(x=Date, y=town.cases, group=NAME10),
+    geom_line(aes(x=Date, y=town.cases, group=Town),
               size=4/3, color="blue", alpha=1/3) +
-    geom_line(data=highlight, aes(x=Date, y=town.cases, group=NAME10),
+    geom_line(data=highlight, aes(x=Date, y=town.cases, group=Town),
               size=3/3, color="darkorange", alpha=1) +
     ggrepel::geom_text_repel(data = subset(ct.covid,
                                            Date == max(Date) & town.cases >= label.cut[label.count]),
-                             aes(label = NAME10, x = Date, y = town.cases),
+                             aes(label = Town, x = Date, y = town.cases),
                              segment.size=.25,
                              size=2,
                              hjust = -0,
@@ -280,16 +286,16 @@ rate.plt <-
                                    "(those with at least ", label.cut[label.count], " cases)")),
                   size=2.5) +
     ylab("Number of Cases") +
-    theme_cowplot(font_size=font.size) +
+    theme_fdbplot(font_size=font.size) +
     theme(legend.position="top",
           plot.margin = unit(c(1,1,1,1), "lines"),
           axis.text.x = element_text(angle=45, hjust=1))
 
-ggsave(filename=fs::path_ext_set(paste0(today, "rate"), ftype),
+ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate"), ftype),
        plot=rate.plt,
        path=fig.path,
        device=ftype,
-       width=width, height=height,
+       width=width*16/9, height=height,
        units=units,
        dpi=dpi)
 
@@ -310,6 +316,7 @@ ct.hosp.rate.plt  <-
     scale_x_date(labels=strftime(unique(ct.summary$Date), "%b %d"),
                  breaks=unique(ct.summary$Date),
                  name=NULL) +
+    scale_y_continuous(limits=my_limits) +
     scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
     facet_wrap(~name, scales="free_y") +
     geom_text_npc(aes(npcx=.067, npcy=.9,
@@ -318,16 +325,15 @@ ct.hosp.rate.plt  <-
                                "\nNote different y scales.",
                                sep="\n")),
                   size=2.5) +
-    ylim(0, NA) +
     labs(title="Daily Change in Covid-19 Statistics for Connecticut",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
     ylab("Count") + xlab(NULL) +
-    theme_cowplot(font_size=font.size) +
+    theme_fdbplot(font_size=font.size) +
     theme(legend.position=c(.05, .90),
           axis.text.x = element_text(angle=45, hjust=1))
 
-ggsave(filename=fs::path_ext_set(paste0(today, "ct-hosp-rate"), ftype),
+ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-rate"), ftype),
        plot=ct.hosp.rate.plt,
        path=fig.path,
        device=ftype,
@@ -343,12 +349,13 @@ ct.summary.plt <-
     ct.summary %>%
     filter(!name %in% c("tests.complete")) %>%
     mutate(name = fct_recode(name, "Cases, cumulative" = "Cases",
-                                     "Hospitalized, daily" = "Hospitalized",
-                                     "Deaths, cumulative" = "Deaths")) %>%
+                             "Hospitalized, daily" = "Hospitalized",
+                             "Deaths, cumulative" = "Deaths")) %>%
     ggplot(aes(y=value, x=Date)) +
     geom_bar(aes(fill=name), position="dodge", stat="identity") +
     scale_fill_brewer(type="qual", palette="Dark2") +
-    scale_x_date(labels=strftime(unique(ct.summary$Date), "%b %d"),
+    scale_x_date(expand = expansion(add=c(1/4, 1/4)),
+                 labels=strftime(unique(ct.summary$Date), "%b %d"),
                  breaks=unique(ct.summary$Date),
                  name=NULL) +
     geom_text(aes(color=name, label=value),
@@ -369,7 +376,7 @@ ct.summary.plt <-
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
     ylab("Count") + xlab(NULL) +
-    theme_cowplot(font_size=font.size) +
+    theme_fdbplot(font_size=font.size) +
     theme(legend.position=c(.05, .90),
           axis.text.x = element_text(angle=45, hjust=1))
 
@@ -442,12 +449,12 @@ usa.state.corona.plt <-
                              aes(label = assoc_press, x = date, y = cases),
                              segment.size=.25,
                              size=2,
-                             hjust = -0,
+                             hjust = 0,
                              direction="y",
                              force=1/4,
                              nudge_x=5) +
-    scale_x_date(expand = expansion(add=c(1/4,6)),
-                 breaks= unique(tmp$date),
+    scale_x_date(expand = expansion(add=c(1/4, 4)),
+                 breaks = unique(tmp$date),
                  labels = strftime(unique(tmp$date), "%b %d"),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases per U.S. State",
@@ -459,7 +466,7 @@ usa.state.corona.plt <-
                   size=2.5) +
     geom_text_npc(aes(npcx=.1, npcy=.8, label="Connecticut in Blue"), color="blue", size=2.5) +
     ylab("Number of Cases") +
-    theme_cowplot(font_size=font.size) +
+    theme_fdbplot(font_size=font.size) +
     theme(legend.position="top",
           plot.margin = unit(c(1,1,1,1), "lines"),
           axis.text.x = element_text(angle=45, hjust=1))
@@ -468,7 +475,7 @@ ggsave(filename=fs::path_ext_set(paste0(today, "usa-rate"), ftype),
        plot=usa.state.corona.plt,
        path=fig.path,
        device=ftype,
-       width=width, height=height,
+       width=width*16/9, height=height,
        units=units,
        dpi=dpi)
 

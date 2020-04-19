@@ -1,9 +1,30 @@
+theme_fdbplot <- function (font_size = 14,
+                           font_family = "",
+                           line_size = 0.5,
+                           rel_small = 12/14,
+                           rel_tiny = 11/14,
+                           rel_large = 16/14) {
+    ## custom ggplot theme using theme_cowplot() as a starting point
 
-label_date <- function(variable, value) {
-    ## for use with ggplot2 facet_* functions
-    strftime(unique(value), "%b %d")
+    cowplot::theme_cowplot(font_size = font_size,
+                           font_family = font_family,
+                           line_size = line_size,
+                           rel_small = rel_small,
+                           rel_tiny = rel_tiny,
+                           rel_large = rel_large) +
+        theme(plot.caption = element_text(size = rel(rel_tiny*.75), color = "grey90"))
 }
 
+my_limits <- function(limits) {
+    ## force y range to include 0
+    if(limits[1] > 0) return(c(0, limits[2]))
+    else return(limits)
+}
+
+label_date <- function(variable, value) {
+    ## formatted dates for use with ggplot2 facet_* functions
+    strftime(unique(value), "%b %d")
+}
 
 read_ctcovid_pdf <- function(covid.fname, town.table=TRUE) {
     ## extract data from CT COVID-19 daily reports (PDF files).
