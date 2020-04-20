@@ -12,7 +12,7 @@ theme_fdbplot <- function (font_size = 14,
                            rel_small = rel_small,
                            rel_tiny = rel_tiny,
                            rel_large = rel_large) +
-        theme(plot.caption = element_text(size = rel(rel_tiny*.75), color = "grey90"))
+        theme(plot.caption = element_text(size = rel(rel_tiny*.75), color = "grey50"))
 }
 
 my_limits <- function(limits) {

@@ -255,16 +255,15 @@ label.cut <-
 label.count <- 17
 
 highlight <- ct.covid %>%
-    filter(Town %in% c("Bridgeport", "Waterbury", "New Haven", "Hartford"))
+    filter(Town %in% c(""))
 
-rate.plt <-
+town.rate.plt <-
     ct.covid %>%
-##    filter(town.cases > 3) %>%
     ggplot() +
     geom_line(aes(x=Date, y=town.cases, group=Town),
-              size=4/3, color="blue", alpha=1/3) +
+              size=4/3, alpha=1/2, color="blue") +
     geom_line(data=highlight, aes(x=Date, y=town.cases, group=Town),
-              size=3/3, color="darkorange", alpha=1) +
+              size=1/2, color="darkorange", alpha=1) +
     ggrepel::geom_text_repel(data = subset(ct.covid,
                                            Date == max(Date) & town.cases >= label.cut[label.count]),
                              aes(label = Town, x = Date, y = town.cases),
@@ -274,6 +273,7 @@ rate.plt <-
                              direction="y",
                              force=1/4,
                              nudge_x=5) +
+    scale_color_brewer(type="qual", palette="Dark2") +
     scale_x_date(labels=strftime(unique(ct.covid$Date), "%b %d"),
                  breaks=unique(ct.covid$Date),
                  expand = expansion(add=c(1/4,3)),
@@ -292,7 +292,66 @@ rate.plt <-
           axis.text.x = element_text(angle=45, hjust=1))
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate"), ftype),
-       plot=rate.plt,
+       plot=town.rate.plt,
+       path=fig.path,
+       device=ftype,
+       width=width*16/9, height=height,
+       units=units,
+       dpi=dpi)
+
+########################################
+## rate plot by town, facet by county ##
+########################################
+
+label.cut <-
+    ct.covid %>%
+    filter(Date == max(Date)) %>%
+    select(Town, town.cases, Date) %>%
+    arrange(desc(town.cases)) %>%
+    pull(town.cases)
+label.count <- 17
+
+highlight <- ct.covid %>%
+    filter(Town %in% c(""))
+
+town.by.county.rate.plt <-
+    ct.covid %>%
+    ggplot() +
+    geom_line(aes(x=Date, y=town.cases, group=Town, color=county),
+              size=4/3, alpha=1/2) +
+    geom_line(data=highlight, aes(x=Date, y=town.cases, group=Town),
+              size=1/2, color="darkorange", alpha=1) +
+    facet_wrap(~county, nrow=4) +
+    ggrepel::geom_text_repel(data = subset(ct.covid,
+                                           Date == max(Date) & town.cases >= label.cut[label.count]),
+                             aes(label = Town, x = Date, y = town.cases),
+                             segment.size=.25,
+                             min.segment.length = .1,
+                             size=2,
+                             hjust = -0,
+                             direction="y",
+                             force=1/4,
+                             nudge_x=5) +
+    scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
+    scale_x_date(labels=strftime(unique(ct.covid$Date), "%b %d"),
+                 breaks=unique(ct.covid$Date),
+                 expand = expansion(add=c(1/4,3)),
+                 name=NULL) +
+    labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns, split by county",
+         subtitle="Data compiled by CT Dept. of Public Health",
+         caption=caption.ctdph) +
+    geom_text_npc(aes(npcx=.1, npcy=.9,
+                      label=paste0("The top ", label.count, " towns are labeled\n",
+                                   "(those with at least ", label.cut[label.count], " cases)")),
+                  size=2.5) +
+    ylab("Number of Cases") +
+    theme_fdbplot(font_size=font.size) +
+    theme(legend.position="top",
+          plot.margin = unit(c(1,1,1,1), "lines"),
+          axis.text.x = element_text(angle=45, hjust=1))
+
+ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-by-county-rate"), ftype),
+       plot=town.by.county.rate.plt,
        path=fig.path,
        device=ftype,
        width=width*16/9, height=height,
