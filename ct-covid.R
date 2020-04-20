@@ -149,8 +149,9 @@ ct.summary <- left_join(ct.summary, tmp)%>%
 #########################
 ## constants for plots ##
 #########################
-caption.ctdph <- paste("Data Source: https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library",
-                       "Figure by David Braze (davebraze@gmail.com) using R statistical software.",
+caption.ctdph <- paste("Data Source: https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library.",
+                       "Figure by David Braze (davebraze@gmail.com) using R statistical software,",
+                       "Released under the Creative Commons v4.0 CC-by license."
                        sep="\n")
 
 ## file names/types
@@ -479,8 +480,8 @@ usa.state.corona <- dplyr::left_join(usa.state.corona, state.meta, by=c("state" 
            date.string = as_factor(strftime(date, "%b %d")))
 
 caption.nyt <- paste("Data Source: https://github.com/nytimes/covid-19-data.",
-                     "Figure by David Braze (davebraze@gmail.com)",
-                     "using R statistical software.", sep="\n")
+                     "Figure by David Braze (davebraze@gmail.com) using R statistical software,",
+                     "Released under the Creative Commons v4.0 CC-by license.", sep="\n")
 
 tmp <-
     usa.state.corona %>%
