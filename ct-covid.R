@@ -93,17 +93,16 @@ covid.api <- read.socrata("https://data.ct.gov/resource/28fr-iqnx.json",
                           app_token=socrata.app.token) %>%
     rename(Town = town,
            case.rate = caserate) %>%
-    mutate(town.cases = as.integer(confirmedcases),
-           town.deaths = as.integer(deaths),
-           case.rate = as.integer(case.rate),
+    mutate(town.cases = as.integer(confirmedcases), ## cumulative confirmed cases
+           town.deaths = as.integer(deaths),  ## cumulative deaths
+           case.rate = as.integer(case.rate), ## don't know what this means
            Date = as.Date(lastupdatedate)) %>%
     select(-c(town_no, lastupdatedate, confirmedcases, deaths))
-
 
 ##### scrape town/county data from wikipedia
 
 url <- "https://en.wikipedia.org/wiki/List_of_towns_in_Connecticut"
-tab <- GET(url) %>%
+town.info <- GET(url) %>%
     htmlParse() %>%
     readHTMLTable(header=TRUE, which=2, skip=170) %>%
     janitor::clean_names() %>%
@@ -114,14 +113,19 @@ tab <- GET(url) %>%
            council.of.governments = council_of_governments) %>%
     mutate(pop.2010 = as.integer(str_remove(pop.2010, ",")),
            land.area.sq.miles = as.numeric(land.area.sq.miles),
-           county = str_replace(county, "County", "Co."))
+           county = str_replace(county, "County", "Co."),
+           pop.2010.bin = cut(pop.2010,
+                              breaks=c(0, 5000, 15000, 35000, 75000, Inf),
+                              labels=c("less than 5,000", "5k, <15k", "15k, <35k", "35k, <75k", "75,000 or more"),
+                              ordered_result=TRUE))
 
 ## Merge shapes covid data
 ct.covid <-
     covid.api %>%
-    left_join(tab, by=c("Town" = "town")) %>%
+    left_join(town.info, by=c("Town" = "town")) %>%
+    mutate(town.cases.10k = (10000/pop.2010)*town.cases,
+           town.deaths.10k = (10000/pop.2010)*town.deaths) %>%
     left_join(ct.shp, by=c("Town" = "NAME10"))
-
 
 ##### state wide counts
 ## tests.complete info does not seem to be anywhere in any of the
@@ -151,7 +155,7 @@ ct.summary <- left_join(ct.summary, tmp)%>%
 #########################
 caption.ctdph <- paste("Data Source: https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library.",
                        "Figure by David Braze (davebraze@gmail.com) using R statistical software,",
-                       "Released under the Creative Commons v4.0 CC-by license."
+                       "Released under the Creative Commons v4.0 CC-by license.",
                        sep="\n")
 
 ## file names/types
@@ -304,36 +308,32 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate"), ftype),
 ## rate plot by town, facet by county ##
 ########################################
 
+label.count <- 6
 label.cut <-
     ct.covid %>%
     filter(Date == max(Date)) %>%
-    select(Town, town.cases, Date) %>%
-    arrange(desc(town.cases)) %>%
-    pull(town.cases)
-label.count <- 17
-
-highlight <- ct.covid %>%
-    filter(Town %in% c(""))
+    select(Town, county, town.cases, Date) %>%
+    group_by(county) %>%
+    arrange(town.cases, .by_group=TRUE) %>%
+    top_n(label.count, town.cases)
 
 town.by.county.rate.plt <-
     ct.covid %>%
     ggplot() +
     geom_line(aes(x=Date, y=town.cases, group=Town, color=county),
               size=4/3, alpha=1/2) +
-    geom_line(data=highlight, aes(x=Date, y=town.cases, group=Town),
-              size=1/2, color="darkorange", alpha=1) +
-    facet_wrap(~county, nrow=4) +
-    ggrepel::geom_text_repel(data = subset(ct.covid,
-                                           Date == max(Date) & town.cases >= label.cut[label.count]),
+    facet_wrap(~county, nrow=4, scales="free_y") +
+    ggrepel::geom_text_repel(data = label.cut,
                              aes(label = Town, x = Date, y = town.cases),
                              segment.size=.25,
-                             min.segment.length = .1,
+                             min.segment.length = .01,
                              size=2,
                              hjust = -0,
                              direction="y",
                              force=1/4,
                              nudge_x=5) +
     scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
+    scale_y_continuous(limits=my_limits) +
     scale_x_date(labels=strftime(unique(ct.covid$Date), "%b %d"),
                  breaks=unique(ct.covid$Date),
                  expand = expansion(add=c(1/4,3)),
@@ -342,8 +342,8 @@ town.by.county.rate.plt <-
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
     geom_text_npc(aes(npcx=.1, npcy=.9,
-                      label=paste0("The top ", label.count, " towns are labeled\n",
-                                   "(those with at least ", label.cut[label.count], " cases)")),
+                      label=paste0("The top ", label.count, " towns/county are labeled.",
+                                  "\nNote differing y scales for each county.")),
                   size=2.5) +
     ylab("Number of Cases") +
     theme_fdbplot(font_size=font.size) +
@@ -464,7 +464,6 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
 ##
 ## County csv file: https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv
 
-
 ##### Get the data
 usa.state.corona <-
     getURL("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv?accessType=DOWNLOAD") %>%
@@ -475,31 +474,28 @@ state.meta <-
     readr::read_csv(here::here(fs::path("03-other-source-data", "state_table.csv")), skip=1) %>%
     select(-c(country, sort, status, occupied, id, fips_state, notes))
 
-usa.state.corona <- dplyr::left_join(usa.state.corona, state.meta, by=c("state" = "name")) %>%
-    mutate(state = fct_relevel(as_factor(state), "Connecticut"),
-           date.string = as_factor(strftime(date, "%b %d")))
-
-caption.nyt <- paste("Data Source: https://github.com/nytimes/covid-19-data.",
-                     "Figure by David Braze (davebraze@gmail.com) using R statistical software,",
-                     "Released under the Creative Commons v4.0 CC-by license.", sep="\n")
-
-tmp <-
+usa.state.corona <-
     usa.state.corona %>%
+    left_join(state.meta, by = c("state" = "name")) %>%
     filter(date>ymd("2020-03-15"))
 
-highlight <- tmp %>%
+highlight <- usa.state.corona %>%
     filter(state %in% c("Connecticut"))
 
 label.cut <-
-    tmp %>%
+    usa.state.corona %>%
     filter(date == max(date)) %>%
     select(state, cases, date) %>%
     arrange(desc(cases)) %>%
     pull(cases)
 label.count <- 17 ## label the top third of states
 
+caption.nyt <- paste("Data Source: https://github.com/nytimes/covid-19-data.",
+                     "Figure by David Braze (davebraze@gmail.com) using R statistical software,",
+                     "Released under the Creative Commons v4.0 CC-by license.", sep="\n")
+
 usa.state.corona.plt <-
-    ggplot(tmp) +
+    ggplot(usa.state.corona) +
     geom_line(aes(x=date, y=cases, group=state),
               size=4/3, color="orange", alpha=1/3) +
     geom_line(data=highlight, aes(x=date, y=cases, group=state), ## highlight CT
@@ -514,8 +510,8 @@ usa.state.corona.plt <-
                              force=1/4,
                              nudge_x=5) +
     scale_x_date(expand = expansion(add=c(1/4, 4)),
-                 breaks = unique(tmp$date),
-                 labels = strftime(unique(tmp$date), "%b %d"),
+                 breaks = unique(usa.state.corona$date),
+                 labels = strftime(unique(usa.state.corona$date), "%b %d"),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases per U.S. State",
          subtitle="Data compiled by the New York Times",

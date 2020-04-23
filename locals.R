@@ -55,14 +55,18 @@ read_ctcovid_pdf <- function(covid.fname, town.table=TRUE) {
     page1 <- covid.text[[1]]
 
     ## get total lab-confirmed cases (cumulative) state wide from first page of report
-    state.cases <- str_extract(page1, "[0-9,]+ laboratory-confirmed cases")
+    ## NOTE: On April 21, DPH changed reporting to include "probable" covid19 cases, per CDC recommendation
+    state.cases <- str_extract(page1, "([0-9,]+ laboratory-confirmed cases|a total of [0-9,]+ cases of)")
     state.cases <- as.integer(str_remove_all(state.cases[!is.na(state.cases)], "[^0-9]"))
+
     ## get total number of fatalities (cumulative) state wide from first page of report
     fatalities <- str_extract(page1, "[0-9]+[^0-9]*(died|deaths)")   ## "[0-9]+[^0-9]*died")
     fatalities <- as.integer(str_remove_all(fatalities[!is.na(fatalities)], "[^0-9]"))
+
     ## get current number hospitalized state-wide from first page of report
     hospitalized <- str_extract(page1, "[0-9]+[^0-9]*hospitalized")
     hospitalized <- as.integer(str_remove_all(hospitalized[!is.na(hospitalized)], "[^0-9]"))
+
     ## get approx Number of lab tests completed (cumulative)
     tests.complete <- str_extract(covid.text, "(more than|Patients tested for) +[0-9,]+")
     tests.complete <- max(as.integer(str_remove_all(tests.complete[!is.na(tests.complete)], "[^0-9]")))
