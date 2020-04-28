@@ -7,12 +7,6 @@ email: davebraze@gmail.com
 institution: FDB Research
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 
-abstract: |
-
-  Aliquam erat volutpat. Nunc eleifend leo vitae magna. In id erat non orci commodo lobortis. Proin neque massa, cursus ut, gravida ut, lobortis eget, lacus. Sed diam. Praesent fermentum tempor tellus. Nullam tempus. Mauris ac felis vel velit tristique imperdiet. Donec at pede. Etiam vel neque nec dui dignissim bibendum. Vivamus id enim. Phasellus neque orci, porta a, aliquet quis, semper a, massa. Phasellus purus. Pellentesque tristique imperdiet tortor. Nam euismod tellus id erat.
-
-  \pagebreak
-
 # bibliography: ["al-report.bib"]
 # biblio-style: "apalike"
 # link-citations: true
@@ -52,7 +46,7 @@ output:
 ## environment, make the following call at the R prompt:
 
 knitr::opts_chunk$set(fig.width=7,
-                      fig.height=4,
+                      fig.height=4, ## 7/3.9375 == 16/9
                       dpi=96,
                       tinytex.verbose=TRUE, ## PDFs very slow to compile.
                       echo=FALSE,
@@ -76,4 +70,18 @@ set.seed(112358)
 
 ```
 
-Work in progress. Check back soon.
+# Read This First
+
+```{r readme, include=TRUE}
+
+cat(paste0(readLines("readme.md", n=-1), collapse="\n"))
+
+```
+
+# Statewide Summary
+
+```{r statewide}
+
+
+
+````

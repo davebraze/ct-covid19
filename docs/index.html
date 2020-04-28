@@ -253,16 +253,6 @@ if (window.hljs) {
 </script>
 
 
-<style type="text/css">
-  p.abstract{
-    text-align: center;
-    font-weight: bold;
-  }
-  div.abstract{
-    margin: auto;
-    width: 90%;
-  }
-</style>
 
 
 
@@ -280,15 +270,38 @@ if (window.hljs) {
 <h3 class="subtitle">Data Visualizations</h3>
 <h4 class="author">David Braze</h4>
 <h4 class="date">April 28, 2020</h4>
-<div class="abstract">
-<p class="abstract">Abstract</p>
-<p>Aliquam erat volutpat. Nunc eleifend leo vitae magna. In id erat non orci commodo lobortis. Proin neque massa, cursus ut, gravida ut, lobortis eget, lacus. Sed diam. Praesent fermentum tempor tellus. Nullam tempus. Mauris ac felis vel velit tristique imperdiet. Donec at pede. Etiam vel neque nec dui dignissim bibendum. Vivamus id enim. Phasellus neque orci, porta a, aliquet quis, semper a, massa. Phasellus purus. Pellentesque tristique imperdiet tortor. Nam euismod tellus id erat.</p>
-<div style="page-break-after: always;"></div>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#read-this-first">Read This First</a><ul>
+<li><a href="#other-takes-on-connecticut-covid-19-data">Other Takes on Connecticut COVID-19 Data</a></li>
+<li><a href="#warning">WARNING</a></li>
+</ul></li>
+<li><a href="#statewide-summary">Statewide Summary</a></li>
+</ul>
 </div>
 
-
-
-<p>Work in progress. Check back soon.</p>
+<div id="read-this-first" class="section level1">
+<h1>Read This First</h1>
+<p>This repo holds R code for visualizations of Connecticut COVID-19 data. The data are (mostly) pulled from the state’s <a href="https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library">open data portal</a> using the Socrata API and the RSocrata R package.</p>
+<p>I built these visualizations for a couple of reasons. On the one hand, they are an excuse to play with several R features that I wanted to get more familiar with: scraping data from PDF files (<a href="https://docs.ropensci.org/tabulizer/">tabulizer</a>), using an API for data access (<a href="https://github.com/Chicago/RSocrata">RSocrata</a>), working with geo-linked data and building choropleths (<a href="https://r-spatial.github.io/sf/">sf</a>), and animated dataviz. Haven’t got around to the animations yet, but you’ll find examples of the other stuff in this repo. Another reason for making these graphs is that I was not satisfied with other visualizations of Connecticut’s COVID-19 data that I had seen. There are links to some of those below. All are based on the same state DPH data as my own dataviz.</p>
+<div id="other-takes-on-connecticut-covid-19-data" class="section level2">
+<h2>Other Takes on Connecticut COVID-19 Data</h2>
+<ul>
+<li>The State of Connecticut’s own portal for COVID-19 information is <a href="https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc">here</a>. At the bottom of that page, you’ll find links to the state’s COVID-19 datasets, which are the source of the numbers for my own visualizations.</li>
+<li>Connecticut’s <a href="https://www.ctdatahaven.org">DataHaven</a> has created a “live” report of Connecticut COVID-19 data. It can be found <a href="https://www.ctdatahaven.org/reports/covid-19-connecticut-data-analysis">here</a>.</li>
+<li>The <a href="https://www.ctdata.org">Connecticut Data Collaborative</a> has created an interactive dashboard of Connecticut COVID-19 data. It is available <a href="https://www.ctdata.org/covid19">here</a>.</li>
+</ul>
+</div>
+<div id="warning" class="section level2">
+<h2>WARNING</h2>
+<p>I am not even close to being an epidemiologist or infectious disease expert. If you’re looking for an expert take on anything to do with COVID-19, then you’re in the wrong place.</p>
+</div>
+</div>
+<div id="statewide-summary" class="section level1">
+<h1>Statewide Summary</h1>
+</div>
 
 
 
