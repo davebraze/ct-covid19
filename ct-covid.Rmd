@@ -76,5 +76,4 @@ set.seed(112358)
 
 ```
 
-
-This is a test.
+Work in progress. Check back soon.

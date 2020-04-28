@@ -15,7 +15,7 @@ figs:
 
 webpage:
 	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::tufte_html2')"
-	mv --backup $(fname).html index.html
+	mv --backup $(fname).html ./docs/index.html
 
 pdf:
 	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::tufte_handout2')"
