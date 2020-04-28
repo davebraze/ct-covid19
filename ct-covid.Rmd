@@ -1,0 +1,80 @@
+---
+title: Covid-19 in Connecticut
+subtitle: Data Visualizations
+author:
+  - David Braze
+email: davebraze@gmail.com
+institution: FDB Research
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+
+abstract: |
+
+  Aliquam erat volutpat. Nunc eleifend leo vitae magna. In id erat non orci commodo lobortis. Proin neque massa, cursus ut, gravida ut, lobortis eget, lacus. Sed diam. Praesent fermentum tempor tellus. Nullam tempus. Mauris ac felis vel velit tristique imperdiet. Donec at pede. Etiam vel neque nec dui dignissim bibendum. Vivamus id enim. Phasellus neque orci, porta a, aliquet quis, semper a, massa. Phasellus purus. Pellentesque tristique imperdiet tortor. Nam euismod tellus id erat.
+
+  \pagebreak
+
+# bibliography: ["al-report.bib"]
+# biblio-style: "apalike"
+# link-citations: true
+
+always_allow_html: false
+fontsize: 11pt
+geometry: margin=1in
+header-includes:
+  - \usepackage{booktabs}
+
+output:
+  bookdown::tufte_html2:
+    keep_md: true
+    toc: yes
+    toc_depth: 2
+    pandoc_args:
+    - --lua-filter
+    - "c:/Program Files/R/R-3.6.1/library/rmarkdown/rmd/lua/pagebreak.lua"
+  bookdown::pdf_document2:
+    keep_tex: true
+    highlight: tango
+    toc: yes
+    number_sections: no
+    pandoc_args:
+    - --lua-filter
+    - "c:/Program Files/R/R-3.6.1/library/rmarkdown/rmd/lua/pagebreak.lua"
+
+---
+
+
+```{r setup, echo=FALSE, include=FALSE}
+
+## To render this document from a guaranteed clean R environment, use
+## the provided Makefile.
+
+## To load all objects referenced in this file into the current R
+## environment, make the following call at the R prompt:
+
+knitr::opts_chunk$set(fig.width=7,
+                      fig.height=4,
+                      dpi=96,
+                      tinytex.verbose=TRUE, ## PDFs very slow to compile.
+                      echo=FALSE,
+                      include=FALSE,
+                      results='asis',
+                      cache=TRUE,
+                      warning=FALSE)
+
+## Also see knitr::opts_current$get() within a chunk to inspect then-active options.
+
+options(tinytex.verbose=TRUE,
+        tinytex.clean=FALSE)
+
+set.seed(112358)
+```
+
+
+```{r workhorse}
+
+## source("./ct-covid.R")
+
+```
+
+
+This is a test.

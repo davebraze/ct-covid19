@@ -1,11 +1,10 @@
 R_OPTS = --vanilla
 fname = ct-covid
-# rmd = .Rmd
+rmd = $(fname).Rmd
 source = $(fname).R
 
 date:
 	date.exe "+%Y%m%d"
-	echo "base::source('"$(source)"')"
 
 ### build figures only
 
@@ -14,15 +13,12 @@ figs:
 
 ### building reports
 
-# html:
-# 	R $(R_OPTS) -e "rmarkdown::render('"$(source)"', output_format='bookdown::html_document2')"
+webpage:
+	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::tufte_html2')"
+	mv --backup $(fname).html index.html
 
-# pdf:
-# 	R $(R_OPTS) -e "rmarkdown::render('"$(source)"', output_format='bookdown::pdf_document2')"
-
-# docx:
-# 	# make tidy nocache
-# 	R $(R_OPTS) -e "rmarkdown::render('"$(source)"', output_format='bookdown::word_document2')"
+pdf:
+	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::tufte_handout2')"
 
 # all:
 # 	make html
