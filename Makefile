@@ -8,16 +8,16 @@ date:
 
 ### build figures only
 
-figs:
+figs: $(source) locals.R
 	R $(R_OPTS) -e "base::source('"$(source)"')"
 
 ### building reports
 
-webpage:
+webpage: $(rmd) $(source) locals.R
 	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::tufte_html2')"
 	mv --backup $(fname).html ./docs/index.html
 
-pdf:
+pdf: $(rmd) $(source) locals.R
 	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::tufte_handout2')"
 
 # all:
