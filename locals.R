@@ -16,7 +16,7 @@ theme_fdbplot <- function (font_size = 14,
 }
 
 my_limits <- function(limits) {
-    ## force y range to include 0
+    ## force axis range to include 0
     if(limits[1] > 0) return(c(0, limits[2]))
     else return(limits)
 }
