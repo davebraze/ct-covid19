@@ -6,23 +6,25 @@ source = $(fname).R
 date:
 	date.exe "+%Y%m%d"
 
-### build figures only
-
-figs: 
-	R $(R_OPTS) -e "base::source('"$(source)"')"
 
 ### building reports
 
-webpage: 
+tuftehtml: 
 	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::tufte_html2')"
-	mv --backup $(fname).html ./docs/index.html
+
+html: 
+	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::html_document2')"
 
 pdf: 
 	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::tufte_handout2')"
 
-# all:
-# 	make webpage
-# 	make pdf
+### maintenance
+
+figs: 
+	R $(R_OPTS) -e "base::source('"$(source)"')"
+
+html2page:
+	mv --backup $(fname).html ./docs/index.html
 
 ### cleaning up
 

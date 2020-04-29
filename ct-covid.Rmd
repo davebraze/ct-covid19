@@ -20,6 +20,14 @@ header-includes:
 output:
   bookdown::tufte_html2:
     keep_md: true
+#    toc: yes
+#    toc_depth: 2
+    pandoc_args:
+    - --lua-filter
+    - "c:/Program Files/R/R-3.6.1/library/rmarkdown/rmd/lua/pagebreak.lua"
+
+  bookdown::html_document2:
+    keep_md: true
     toc: yes
     toc_depth: 2
     pandoc_args:
@@ -45,8 +53,8 @@ output:
 ## To load all objects referenced in this file into the current R
 ## environment, make the following call at the R prompt:
 
-knitr::opts_chunk$set(fig.width=7,
-                      fig.height=4, ## 7/3.9375 == 16/9
+knitr::opts_chunk$set(fig.width=8,
+                      fig.height=4.5,
                       dpi=96,
                       tinytex.verbose=TRUE, ## PDFs very slow to compile.
                       echo=FALSE,
