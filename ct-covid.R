@@ -369,8 +369,9 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-by-county-rate"), ftype)
 ########################################################
 
 ct.stat.daily.change.plt  <-
-tmp <-     ct.summary %>%
+    ct.summary %>%
     group_by(name) %>%
+    arrange(Date) %>%
     mutate(value.diff = c(NA, diff(value)),
            value.diff.3mn = TTR::runMean(value.diff,3)) %>%
     ggplot(aes(x=Date)) +
