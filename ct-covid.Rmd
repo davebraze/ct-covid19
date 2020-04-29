@@ -66,7 +66,7 @@ set.seed(112358)
 
 ```{r workhorse}
 
-## source("./ct-covid.R")
+source("./ct-covid.R")
 
 ```
 
@@ -78,10 +78,39 @@ cat(paste0(readLines("readme.md", n=-1), collapse="\n"))
 
 ```
 
-# Statewide Summary
+# Show Me the Pictures
 
-```{r statewide}
+## Statewide Summary
+
+```{r ct-stat-daily-change, include=TRUE}
+
+ct.stat.daily.change.plt
+
+```
+
+```{r usa-state-corona, include=TRUE}
+
+usa.state.corona.plt
+
+```
 
 
+## Each Town
 
-````
+```{r town-rate, include=TRUE}
+
+town.rate.plt
+
+```
+
+```{r town-by-county-rate, include=TRUE}
+
+town.by.county.rate.plt
+
+```
+
+```{r map-today, include=TRUE}
+
+map.today
+
+```

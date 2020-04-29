@@ -136,17 +136,21 @@ ct.summary <- read.socrata("https://data.ct.gov/resource/rf3k-f8fg.json",
     rename(Date = date,
            Cases = cases,
            Hospitalized = hospitalizations,
-           Deaths = deaths) %>%
+           Deaths = deaths,
+           `Tests Reported` = covid_19_tests_reported) %>%
     mutate(Date = as.Date(Date)) %>%
     select(-state, -starts_with("cases_")) %>%
     mutate(Cases = as.integer(Cases),
            Hospitalized = as.integer(Hospitalized),
-           Deaths = as.integer(Deaths))
+           Deaths = as.integer(Deaths),
+           `Tests Reported` = as.integer(`Tests Reported`))
 
 tmp <- purrr::map_dfr(covid.fnames, read_ctcovid_pdf, town.tab=FALSE) %>%
     select(Date, tests.complete)
 
-ct.summary <- left_join(ct.summary, tmp)%>%
+ct.summary <- left_join(ct.summary, tmp) %>%
+    mutate(`Tests Reported` = if_else(is.na(`Tests Reported`), tests.complete, `Tests Reported`)) %>%
+    select(-tests.complete) %>%
     tidyr::pivot_longer(cols=-c(Date)) %>%
     mutate(name = forcats::fct_relevel(name, "Cases", "Hospitalized", "Deaths"))
 
@@ -364,8 +368,8 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-by-county-rate"), ftype)
 ## Includes 3 day running average                     ##
 ########################################################
 
-ct.hosp.rate.plt  <-
-    ct.summary %>%
+ct.stat.daily.change.plt  <-
+tmp <-     ct.summary %>%
     group_by(name) %>%
     mutate(value.diff = c(NA, diff(value)),
            value.diff.3mn = TTR::runMean(value.diff,3)) %>%
@@ -394,7 +398,7 @@ ct.hosp.rate.plt  <-
           axis.text.x = element_text(angle=45, hjust=1))
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-rate"), ftype),
-       plot=ct.hosp.rate.plt,
+       plot=ct.stat.daily.change.plt,
        path=fig.path,
        device=ftype,
        width=width*(16/9), height=height,
@@ -407,7 +411,7 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-rate"), ftype),
 
 ct.summary.plt <-
     ct.summary %>%
-    filter(!name %in% c("tests.complete")) %>%
+    filter(!name %in% c("Tests Reported")) %>%
     mutate(name = fct_recode(name, "Cases, cumulative" = "Cases",
                              "Hospitalized, daily" = "Hospitalized",
                              "Deaths, cumulative" = "Deaths")) %>%
@@ -425,7 +429,7 @@ ct.summary.plt <-
               angle=90,
               show.legend=FALSE) +
     scale_color_brewer(type="qual", palette="Dark2") +
-    geom_text(data=filter(ct.summary, name=="tests.complete"),
+    geom_text(data=filter(ct.summary, name=="Tests Reported"),
               aes(label=value, x=Date, y=-150), color="grey70", size=2.25) +
     geom_text_npc(aes(npcx=.05, npcy=.85, label="Cumulative No. of tests administered"),
                   size=3,
