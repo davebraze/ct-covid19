@@ -20,19 +20,22 @@ header-includes:
 output:
   bookdown::tufte_html2:
     keep_md: true
-#    toc: yes
-#    toc_depth: 2
     pandoc_args:
     - --lua-filter
     - "c:/Program Files/R/R-3.6.1/library/rmarkdown/rmd/lua/pagebreak.lua"
 
   bookdown::html_document2:
     keep_md: true
+    theme: cerulean
+    number_sections: no
+    highlight: tango
     toc: yes
     toc_depth: 2
+    toc_float: yes
     pandoc_args:
     - --lua-filter
     - "c:/Program Files/R/R-3.6.1/library/rmarkdown/rmd/lua/pagebreak.lua"
+    
   bookdown::pdf_document2:
     keep_tex: true
     highlight: tango
@@ -53,9 +56,9 @@ output:
 ## To load all objects referenced in this file into the current R
 ## environment, make the following call at the R prompt:
 
-knitr::opts_chunk$set(fig.width=8,
-                      fig.height=4.5,
-                      dpi=96,
+knitr::opts_chunk$set(fig.width=7,
+                      fig.height=7/(16/9),
+                      dpi=200,
                       tinytex.verbose=TRUE, ## PDFs very slow to compile.
                       echo=FALSE,
                       include=FALSE,
@@ -68,7 +71,6 @@ knitr::opts_chunk$set(fig.width=8,
 options(tinytex.verbose=TRUE,
         tinytex.clean=FALSE)
 
-set.seed(112358)
 ```
 
 
@@ -90,7 +92,7 @@ cat(paste0(readLines("readme.md", n=-1), collapse="\n"))
 
 ## Statewide Summary
 
-```{r ct-stat-daily-change, include=TRUE}
+```{r ct-stat-daily-change, include=TRUE, fig.height=7}
 
 ct.stat.daily.change.plt
 
@@ -111,13 +113,13 @@ town.rate.plt
 
 ```
 
-```{r town-by-county-rate, include=TRUE}
+```{r town-by-county-rate, include=TRUE, fig.height=7}
 
 town.by.county.rate.plt
 
 ```
 
-```{r map-today, include=TRUE}
+```{r map-today, include=TRUE, fig.height=7}
 
 map.today
 

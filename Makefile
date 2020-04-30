@@ -23,7 +23,7 @@ pdf:
 figs: 
 	R $(R_OPTS) -e "base::source('"$(source)"')"
 
-html2page:
+html2web:
 	mv --backup $(fname).html ./docs/index.html
 
 ### cleaning up
@@ -40,7 +40,7 @@ tidy:
 
 noreports:
 	# delete formatted reports
-	rm -f $(fname).html $(fname).pdf $(fname).docx
+	rm -f $(fname).html $(fname).pdf
 
 clean:
 	make nocache
