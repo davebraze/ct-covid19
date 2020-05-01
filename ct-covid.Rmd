@@ -73,7 +73,6 @@ options(tinytex.verbose=TRUE,
 
 ```
 
-
 ```{r workhorse}
 
 source("./ct-covid.R")
@@ -87,6 +86,13 @@ source("./ct-covid.R")
 cat(paste0(readLines("readme.md", n=-1), collapse="\n"))
 
 ```
+
+# Introduction to this Page
+
+I started putting together graphs based on Connecticut Department of Public Health (DPH) data in late March, and I've been tweeting some of those graphs since the first week of April. If you're interested in what some of those earlier graphs looked like, you can find them on Twitter at 
+[https://twitter.com/search?q=%23Connecticut%20%23covid19%20%40davidbraze&src=typed_query](https://twitter.com/search?q=%23Connecticut%20%23covid19%20%40davidbraze&src=typed_query). 
+
+This page (the one you're looking at now) doesn't have all the graphs I've built. I expect to grow the collection, and add some narrative around the graphs, as time permits. Of course, I'll update the graphs as new data rolls in. Don't expect daily updates, but I guess I'll get around to it at least a couple of times a week. The date at the top of the page will always indicate when it was last updated.
 
 # Show Me the Pictures
 
