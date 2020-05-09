@@ -88,6 +88,19 @@ covid.fnames <- fs::dir_ls(here::here("01-ctdph-daily-reports")) %>%
 
 socrata.app.token <- Sys.getenv("SOCRATA_APP_TOKEN_CTCOVID19")
 
+
+
+if(FALSE) {
+    url <- httr::parse_url("https://data.ct.gov/resource/28fr-iqnx.json")
+    url$path <- NULL
+    url <- httr::build_url(url)
+    D.ct <- RSocrata::ls.socrata(url)
+
+    D.covid <- D.ct %>%
+        filter(str_detect(.$title, "COVID"))
+
+}
+
 ##### cases and deaths by town
 covid.api <- read.socrata("https://data.ct.gov/resource/28fr-iqnx.json",
                           app_token=socrata.app.token) %>%

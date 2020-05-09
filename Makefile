@@ -5,11 +5,6 @@ source = $(fname).R
 
 date:
 	date.exe "+%Y%m%d"
-#	cat readme.md
-#	sed 's/visualizations/picturez/' < readme.md > new.md
-#	sed 's/\(vis\)ualizations/\1/' < readme.md > new.md
-#	sed 's/\(## WARNING\)/\1 TEST/' < readme.md > new.md
-	sed '/WARNING/ r gtag.js' < readme.md > new.md
 
 ### building reports
 
@@ -28,8 +23,10 @@ figs:
 	R $(R_OPTS) -e "base::source('"$(source)"')"
 
 html2web:
-	sed '/Covid-19 in Connecticut/ r gtag.js' < $(fname).html > index.html ## insert google analytics tag
+	sed '/Covid-19 in Connecticut/ r gtag.js' < $(fname).html > tmp0.html ## insert google analytics tag
+	sed '/Covid-19 in Connecticut/ r html-meta.txt' < tmp0.html > index.html ## insert meta tags
 	mv --backup index.html ./docs/.
+	rm -f tmp0.html
 
 ### cleaning up
 

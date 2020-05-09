@@ -94,6 +94,12 @@ I started putting together graphs based on Connecticut Department of Public Heal
 
 This page (the one you're looking at now) doesn't have all the graphs I've built. I expect to grow the collection, and add some narrative around the graphs, as time permits. Of course, I'll update the graphs as new data rolls in. Don't expect daily updates, but I guess I'll get around to it at least a couple of times a week. The date at the top of the page will always indicate when it was last updated.
 
+Most of my time is spent with data focused on the topics of language, literacy, and education. My website, with occasional blog posts, can be found at [davebraze.org](https://davebraze.org/).
+
+## Copyright & License
+
+This page, and the graphs it contains, is copyright 2020 by me, David Braze. The page content and graphs are released under the [Creative Commons v4.0 CC-by license](https://creativecommons.org/licenses/by/4.0/). In short, you're free to re-use the graphs so long as you give clear attribution of their source.
+
 # Show Me the Pictures
 
 ## Statewide Summary

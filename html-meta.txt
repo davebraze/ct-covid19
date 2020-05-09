@@ -1,0 +1,3 @@
+
+<meta name="description" content="Graphs of Connecticut DPH Covid-19 data.">
+<meta name="robots" content="index, follow">
