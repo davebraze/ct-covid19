@@ -89,16 +89,16 @@ cat(paste0(readLines("readme.md", n=-1), collapse="\n"))
 
 # Introduction to this Page
 
-I started putting together graphs based on Connecticut Department of Public Health (DPH) data in late March, and I've been tweeting some of those graphs since the first week of April. If you're interested in what some of those earlier graphs looked like, you can find them on Twitter at 
-[https://twitter.com/search?q=%23Connecticut%20%23covid19%20%40davidbraze&src=typed_query](https://twitter.com/search?q=%23Connecticut%20%23covid19%20%40davidbraze&src=typed_query). 
+I started putting together graphs based on Connecticut Department of Public Health (DPH) data in late March, and I've been putting graphs up on various social media platforms since the first week of April. If you're interested in what those earlier efforts looked like, you can find some of them on Twitter at 
+[https://twitter.com/search?q=%23Connecticut%20%23covid19%20%40davidbraze&src=typed_query](https://twitter.com/search?q=%23Connecticut%20%23covid19%20%40davidbraze&src=typed_query). You could also [follow me on twitter](https://twitter.com/davidbraze).
 
-This page (the one you're looking at now) doesn't have all the graphs I've built. I expect to grow the collection, and add some narrative around the graphs, as time permits. Of course, I'll update the graphs as new data rolls in. Don't expect daily updates, but I guess I'll get around to it at least a couple of times a week. The date at the top of the page will always indicate when it was last updated.
+This web page (the one you're looking at now) is home to my most recent Connecticut Covid-19 graphs, although won't have every figure I've built. I expect to grow the collection and add some narrative around the graphs, when I have time. Of course, I'll also update the graphs when new data rolls in. Don't expect that to happen every day, but I guess I'll get around to it a couple of times a week. The date at the top of the page will always indicate when it was last updated. At the bottom of this page, you'll find a few general [Covid-19 resources](#resources) that might be useful to you. 
 
-Most of my time is spent with data focused on the topics of language, literacy, and education. My website, with occasional blog posts, can be found at [davebraze.org](https://davebraze.org/).
+Most of my time in my day job is spent working with research and data focused on the topics of education, language, and literacy. I am a freelance consultant for hire. My website and blog can be found at [davebraze.org](https://davebraze.org/).
 
 ## Copyright & License
 
-This page, and the graphs it contains, is copyright 2020 by me, David Braze. The page content and graphs are released under the [Creative Commons v4.0 CC-by license](https://creativecommons.org/licenses/by/4.0/). In short, you're free to re-use the graphs so long as you give clear attribution of their source.
+This page and the graphs it contains are copyright 2020 by me, David Braze. The page content and graphs are released under the [Creative Commons v4.0 CC-by license](https://creativecommons.org/licenses/by/4.0/).  Cutting through the legalese, it means that you're free to re-use the graphs (do what you want with them) so long as you say who made them and where you got them.
 
 # Show Me the Pictures
 
@@ -137,26 +137,25 @@ map.today
 
 ```
 
-# General Covid-19 Resources
+# General Covid-19 Resources {#resources}
 
 ## How Covid-19 Spreads, & How it Doesn't
 
-Here is a nice blog post by Erin Bromage, PhD in microbiology and immunology, about how person to person transmission of Covid-19 actually works. It includes what specific information about what we know about what situations are more risky, and which ones are less risky: https://www.erinbromage.com/post/the-risks-know-them-avoid-them. 
-
-I think this is a valuable article for people who are worried about how to manage their risk as governments start to scale back on Covid-19 restrictions on movement and business activities. 
+There is a nice blog post by Erin Bromage, PhD in microbiology and immunology, about how person-to-person transmission of Covid-19 actually works. It includes specific information on what the experts know about which situations are more risky, and which ones are less risky: https://www.erinbromage.com/post/the-risks-know-them-avoid-them. This is a great article for people who are worried about how to manage risk for themselves and their loved ones as governments start to scale back on Covid-19 restrictions on movement and business activities. 
 
 ## Plans for Re-opening
 
-Staying home was always intended as a temporary measure. The point of it is to prevent the healthcare system from being overwhelmed and to allow time to build capacity for managing the spread of Covid-19 and treatment of those who become ill despite best efforts for containment. The question has always been how and when to reopen. It was never about whether or not to reopen at all.
+Keeping people at home and cutting back on public activities, including some kinds of business activities, was always intended as a temporary measure. The point of it is to keep the healthcare system from being overloaded and to give it time to build capacity for managing the spread of Covid-19. The question has always been how and when to re-open. It was never about whether or not to re-open at all. So, how do we go from the emergency situation with some businesses closed and many people sheltering in place?
+Several credible road maps have been proposed for how and when to re-open in a responsible way. Here are three of them:
 
-Several credible "road maps" have been proposed for how re-open in a responsible way:
+* American Enterprise Institute: https://www.aei.org/research-products/report/national-coronavirus-response-a-road-map-to-reopening/
+* Johns Hopkins University School of Public Health: https://www.centerforhealthsecurity.org/our-work/publications/public-health-principles-for-a-phased-reopening-during-covid-19-guidance-for-governors
+* Duke University Center for Health Policy: https://healthpolicy.duke.edu/sites/default/files/atoms/files/covid-19_surveillance_roadmap_final.pdf
 
-* American Enterprise Institute's plan is here: https://www.aei.org/research-products/report/national-coronavirus-response-a-road-map-to-reopening/
-* Johns Hopkins University School of Public Health plan is here: https://www.centerforhealthsecurity.org/our-work/publications/public-health-principles-for-a-phased-reopening-during-covid-19-guidance-for-governors
-* Duke University Center for Health Policy's plan is here: https://healthpolicy.duke.edu/sites/default/files/atoms/files/covid-19_surveillance_roadmap_final.pdf
+What they all have in common are specific milestones to use for deciding when and how to phase in the re-opening process ***after*** the spread of Covid-19 has been brought under control.
 
 ```{r eval=FALSE}
 
-## More info here: https://twitter.com/cmyeaton/status/1258512373750435842?s=20
+## More info on re-opening here: https://twitter.com/cmyeaton/status/1258512373750435842?s=20
 
 ``` 
