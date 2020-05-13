@@ -102,6 +102,10 @@ This page and the graphs it contains are copyright 2020 by me, David Braze. The 
 
 # Show Me the Pictures
 
+Connecticut DPH provides its most comprehensive set of statistics at the state level. As of April 1, there are four basic statistics available. These are: Number of Covid-19 ***tests completed***; Number of ***confirmed cases*** of Covid19; Number of Covid-19 related ***Deaths***; Number of Covid-19 ***Hospitalizations***. The first three statistics are all cumulative counts. In other words, each represents the total number since record keeping began. So, those numbers can only go up from one day to the next, or stay the same. On the other hand, ***Hospitalizations*** is the number of people in the hospital on a given day. That statistic can go up or down from one day to the next. For two of those statistics, ***confirmed cases*** and ***deaths***, the state also gives the breakdown by Age, Gender, and Race. But, there are no cross-tabulations provided. 
+
+Only three of those statistics are available at the county level, ***tests completed*** is not. Only two statistics available at the town level, ***hospitalizations*** is not. Age, Gender, and Race breakdowns are not available for any statistic for county and town level data.
+
 ## Statewide Summary
 
 ```{r ct-stat-daily-change, include=TRUE, fig.height=7}
@@ -117,7 +121,8 @@ usa.state.corona.plt
 ```
 
 
-## Each Town
+## Town by Town
+
 
 ```{r town-rate, include=TRUE}
 
