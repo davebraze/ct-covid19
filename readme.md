@@ -9,4 +9,4 @@ I built these graphs for a couple of reasons. On the one hand, they are an excus
 
 ## WARNING 
 
-I am not even close to being an epidemiologist or infectious disease expert. If you're looking for an expert take on anything to do with COVID-19, then you're in the wrong place.
+I am not even close to being an epidemiologist or infectious disease expert. If you're looking for an expert take on anything to do with COVID-19, then you're in the wrong place. That said, at the bottom of the web page mentioned above, you’ll [find links to a few general Covid-19 resources](https://davebraze.github.io/ct-covid19/#resources) that might be useful to you.

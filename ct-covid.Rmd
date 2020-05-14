@@ -61,7 +61,7 @@ knitr::opts_chunk$set(fig.width=7,
                       dpi=200,
                       tinytex.verbose=TRUE, ## PDFs very slow to compile.
                       echo=FALSE,
-                      include=FALSE,
+                      include=TRUE,
                       results='asis',
                       cache=TRUE,
                       warning=FALSE)
@@ -73,7 +73,7 @@ options(tinytex.verbose=TRUE,
 
 ```
 
-```{r workhorse}
+```{r workhorse, include=FALSE}
 
 source("./ct-covid.R")
 
@@ -89,12 +89,13 @@ cat(paste0(readLines("readme.md", n=-1), collapse="\n"))
 
 # Introduction to this Page
 
-I started putting together graphs based on Connecticut Department of Public Health (DPH) data in late March, and I've been putting graphs up on various social media platforms since the first week of April. If you're interested in what those earlier efforts looked like, you can find some of them on Twitter at 
-[https://twitter.com/search?q=%23Connecticut%20%23covid19%20%40davidbraze&src=typed_query](https://twitter.com/search?q=%23Connecticut%20%23covid19%20%40davidbraze&src=typed_query). You could also [follow me on twitter](https://twitter.com/davidbraze).
+I started putting together graphs based on Connecticut Department of Public Health (DPH) data in late March, and I've been putting graphs up on various social media platforms since the first week of April. If you're interested in what those earlier efforts looked like, you can [find some of them on Twitter](https://twitter.com/search?q=%23Connecticut%20%23covid19%20%40davidbraze&src=typed_query). You could also [follow me on twitter](https://twitter.com/davidbraze), which is where I'll usually announce updates to this page.
 
 This web page (the one you're looking at now) is home to my most recent Connecticut Covid-19 graphs, although won't have every figure I've built. I expect to grow the collection and add some narrative around the graphs, when I have time. Of course, I'll also update the graphs when new data rolls in. Don't expect that to happen every day, but I guess I'll get around to it a couple of times a week. The date at the top of the page will always indicate when it was last updated. At the bottom of this page, you'll find a few general [Covid-19 resources](#resources) that might be useful to you. 
 
-Most of my time in my day job is spent working with research and data focused on the topics of education, language, and literacy. I am a freelance consultant for hire. My website and blog can be found at [davebraze.org](https://davebraze.org/).
+## About Dave Braze
+
+I am a freelance consultant for hire. Most of my time in my day job is spent working with research and data focused on the topics of education, language, and literacy. Although, I work with other sorts of data as well. My website and blog are at [davebraze.org](https://davebraze.org/).
 
 ## Copyright & License
 
@@ -102,19 +103,19 @@ This page and the graphs it contains are copyright 2020 by me, David Braze. The 
 
 # Show Me the Pictures
 
-Connecticut DPH provides its most comprehensive set of statistics at the state level. As of April 1, there are four basic statistics available. These are: Number of Covid-19 ***tests completed***; Number of ***confirmed cases*** of Covid19; Number of Covid-19 related ***Deaths***; Number of Covid-19 ***Hospitalizations***. The first three statistics are all cumulative counts. In other words, each represents the total number since record keeping began. So, those numbers can only go up from one day to the next, or stay the same. On the other hand, ***Hospitalizations*** is the number of people in the hospital on a given day. That statistic can go up or down from one day to the next. For two of those statistics, ***confirmed cases*** and ***deaths***, the state also gives the breakdown by Age, Gender, and Race. But, there are no cross-tabulations provided. 
+Connecticut DPH provides its most comprehensive set of statistics at the state level. As of April 1, there are four basic statistics available for the state as a whole. These are: Number of Covid-19 ***tests completed***; Number of ***confirmed cases*** of Covid19; Number of Covid-19 related ***Deaths***; Number of Covid-19 ***Hospitalizations***. The first three statistics are all cumulative counts. In other words, each represents the total number since record keeping began. So, those numbers can only go up (or stay the same) from one day to the next. On the other hand, ***Hospitalizations*** is the number of people in the hospital on a given day. That statistic can go up or down from one day to the next. For two of those statistics, ***confirmed cases*** and ***deaths***, the state also gives the breakdown by Age, Gender, and Race. But, there are no cross-tabulations provided. Only three of those statistics are available at the county level, ***tests completed*** is not. Only ***confirmed cases*** and ***deaths*** are available for individual towns. Age, Gender, and Race breakdowns are not available for county or town data.
 
-Only three of those statistics are available at the county level, ***tests completed*** is not. Only two statistics available at the town level, ***hospitalizations*** is not. Age, Gender, and Race breakdowns are not available for any statistic for county and town level data.
+Another thing to keep in mind is that the numbers reported for any of these statistics is not perfect. DPH is trying to keep policy makers and the public informed in a timely way. But getting those numbers out as quickly as possible means that they are sometimes not exactly right. There has been some news [coverage of Covid-19 reporting discrepancies in Connecticut](https://www.courant.com/news/connecticut/hc-news-coronavirus-death-numbers-20200407-l5edq4vne5g3zhmcadxfrt5d2u-story.html) in local news outlets.
 
 ## Statewide Summary
 
-```{r ct-stat-daily-change, include=TRUE, fig.height=7}
+```{r ct-stat-daily-change, fig.height=7}
 
 ct.stat.daily.change.plt
 
 ```
 
-```{r usa-state-corona, include=TRUE}
+```{r usa-state-corona}
 
 usa.state.corona.plt
 
@@ -124,19 +125,19 @@ usa.state.corona.plt
 ## Town by Town
 
 
-```{r town-rate, include=TRUE}
+```{r town-rate}
 
 town.rate.plt
 
 ```
 
-```{r town-by-county-rate, include=TRUE, fig.height=7}
+```{r town-by-county-rate, fig.height=7}
 
 town.by.county.rate.plt
 
 ```
 
-```{r map-today, include=TRUE, fig.height=7}
+```{r map-today, fig.height=7}
 
 map.today
 
@@ -144,13 +145,13 @@ map.today
 
 # General Covid-19 Resources {#resources}
 
-## How Covid-19 Spreads, & How it Doesn't
+## How Covid-19 Spreads
 
 There is a nice blog post by Erin Bromage, PhD in microbiology and immunology, about how person-to-person transmission of Covid-19 actually works. It includes specific information on what the experts know about which situations are more risky, and which ones are less risky: https://www.erinbromage.com/post/the-risks-know-them-avoid-them. This is a great article for people who are worried about how to manage risk for themselves and their loved ones as governments start to scale back on Covid-19 restrictions on movement and business activities. 
 
 ## Plans for Re-opening
 
-Keeping people at home and cutting back on public activities, including some kinds of business activities, was always intended as a temporary measure. The point of it is to keep the healthcare system from being overloaded and to give it time to build capacity for managing the spread of Covid-19. The question has always been how and when to re-open. It was never about whether or not to re-open at all. So, how do we go from the emergency situation with some businesses closed and many people sheltering in place?
+Keeping people at home and cutting back on public activities, including some kinds of business activities, was always intended as a temporary measure. The point of it is to keep the healthcare system from being overloaded and to allow time to build capacity for managing the spread of Covid-19. The question has always been how and when to re-open. It was never about whether or not to re-open at all. So, how do we move beyond the emergency situation with some businesses closed and many people sheltering in place?
 Several credible road maps have been proposed for how and when to re-open in a responsible way. Here are three of them:
 
 * American Enterprise Institute: https://www.aei.org/research-products/report/national-coronavirus-response-a-road-map-to-reopening/
