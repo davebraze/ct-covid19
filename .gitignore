@@ -1,6 +1,7 @@
 ## ignore these patterns in the root, but not subdirs
 /*.pdf
 /*.html
+/gtag.js
 
 ## ignore these folders
 figures/*
