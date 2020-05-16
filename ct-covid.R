@@ -264,9 +264,10 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-today"), ftype),
        units=units,
        dpi=dpi)
 
-#######################
-## rate plot by Town ##
-#######################
+
+####################################
+## rate plot by Town, raw counts  ##
+####################################
 
 label.cut.towns <-
     ct.covid %>%
@@ -278,7 +279,6 @@ label.count.towns <- 17
 
 highlight <- ct.covid %>%
     filter(Town %in% c(""))
-
 
 ## only label Sundays to avoid xlab overcrowding
 x.labs <- strftime(unique(ct.covid$Date), "%b %d")
@@ -325,6 +325,70 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate"), ftype),
        width=width*16/9, height=height,
        units=units,
        dpi=dpi)
+
+
+####################################
+## rate plot by Town, per 10k pop  ##
+####################################
+
+
+label.cut.towns <-
+    ct.covid %>%
+    filter(Date == max(Date)) %>%
+    select(Town, town.cases.10k, Date) %>%
+    arrange(desc(town.cases.10k)) %>%
+    pull(town.cases.10k)
+label.count.towns <- 17
+
+highlight <- ct.covid %>%
+    filter(Town %in% c(""))
+
+## only label Sundays to avoid xlab overcrowding
+x.labs <- strftime(unique(ct.covid$Date), "%b %d")
+x.labs <- ifelse(strftime(unique(ct.covid$Date), "%w")=="0", x.labs, "")
+
+town.rate.10k.plt <-
+    ct.covid %>%
+    ggplot() +
+    geom_line(aes(x=Date, y=town.cases.10k, group=Town),
+              size=4/3, alpha=1/2, color="blue") +
+    geom_line(data=highlight, aes(x=Date, y=town.cases, group=Town),
+              size=1/2, color="darkorange", alpha=1) +
+    ggrepel::geom_text_repel(data = subset(ct.covid,
+                                           Date == max(Date) & town.cases.10k >= label.cut.towns[label.count.towns]),
+                             aes(label = Town, x = Date, y = town.cases.10k),
+                             segment.size=.25,
+                             size=2,
+                             hjust = -0,
+                             direction="y",
+                             force=1/4,
+                             nudge_x=5) +
+    scale_color_brewer(type="qual", palette="Dark2") +
+    scale_x_date(labels=x.labs,
+                 breaks=unique(ct.covid$Date),
+                 expand = expansion(add=c(1/4,4.5)),
+                 name=NULL) +
+    labs(title="Cumulative Covid-19 Cases for Connecticut Towns (per 10k pop.)",
+         subtitle="Data compiled by CT Dept. of Public Health",
+         caption=caption.ctdph) +
+    geom_text_npc(aes(npcx=.1, npcy=.9,
+                      label=paste0("The top ", label.count.towns, " towns are labeled\n",
+                                   "(those with at least ", trunc(label.cut.towns[label.count.towns]), " cases per 10k population)")),
+                  size=2.5) +
+    ylab("Number of Cases per 10,000 population") +
+    theme_fdbplot(font_size=font.size) +
+    theme(legend.position="top",
+          plot.margin = unit(c(1,1,1,1), "lines"),
+          axis.text.x = element_text(angle=45, hjust=1))
+
+ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate-10k"), ftype),
+       plot=town.rate.10k.plt,
+       path=fig.path,
+       device=ftype,
+       width=width*16/9, height=height,
+       units=units,
+       dpi=dpi)
+
 
 ########################################
 ## rate plot by town, facet by county ##

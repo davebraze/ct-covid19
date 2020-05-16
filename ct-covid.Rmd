@@ -107,6 +107,8 @@ Connecticut DPH provides its most comprehensive set of statistics at the state l
 
 Another thing to keep in mind is that the numbers reported for any of these statistics is not perfect. DPH is trying to keep policy makers and the public informed in a timely way. But getting those numbers out as quickly as possible means that they are sometimes not exactly right. There has been some news [coverage of Covid-19 reporting discrepancies in Connecticut](https://www.courant.com/news/connecticut/hc-news-coronavirus-death-numbers-20200407-l5edq4vne5g3zhmcadxfrt5d2u-story.html) in local news outlets.
 
+The number of ***confirmed cases*** is a cumulative count of people who have tested positive for coronavirus since record keeping began (about March 1). But, most people haven't been tested and there are certainly many more Covid-19 cases among Connecticut residents who have not been tested. ***Confirmed cases*** does not distinguish between people who are currently ill and people who have recovered.
+
 ## Statewide Summary
 
 ```{r ct-stat-daily-change, fig.height=7}
