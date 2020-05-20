@@ -91,55 +91,74 @@ cat(paste0(readLines("readme.md", n=-1), collapse="\n"))
 
 I started putting together graphs based on Connecticut Department of Public Health (DPH) data in late March, and I've been putting graphs up on various social media platforms since the first week of April. If you're interested in what those earlier efforts looked like, you can [find some of them on Twitter](https://twitter.com/search?q=%23Connecticut%20%23covid19%20%40davidbraze&src=typed_query). You could also [follow me on twitter](https://twitter.com/davidbraze), which is where I'll usually announce updates to this page.
 
-This web page (the one you're looking at now) is home to my most recent Connecticut Covid-19 graphs, although won't have every figure I've built. I expect to grow the collection and add some narrative around the graphs, when I have time. Of course, I'll also update the graphs when new data rolls in. Don't expect that to happen every day, but I guess I'll get around to it a couple of times a week. The date at the top of the page will always indicate when it was last updated. At the bottom of this page, you'll find a few general [Covid-19 resources](#resources) that might be useful to you. 
+This web page (the one you're looking at now) is home to my most recent Connecticut Covid-19 graphs, although it won't have every figure I've built. I expect to grow the collection and add some narrative around the graphs, when I have time. Of course, I'll update the graphs as new data rolls in from the state. Don't expect web page updates to happen every day, but I guess I'll get around to it a couple of times a week. The date at the top of the page will always indicate when it was last updated. So, you should think of this web page as a "living document." It's going to change over time. And, yes, there will be typos. 
 
-## About Dave Braze
+Finally, at the bottom of this page, you'll find a few general [Covid-19 resources](#resources) that might be useful to you. 
 
-I am a freelance consultant for hire. Most of my time in my day job is spent working with research and data focused on the topics of education, language, and literacy. Although, I work with other sorts of data as well. My website and blog are at [davebraze.org](https://davebraze.org/).
+## About Me
+
+I am a freelance consultant for hire. Most of my time in my day job is spent with research and data focused in the areas education, language, and literacy. Although, I work with data in other areas as well. You can find out more at my website and blog: [davebraze.org](https://davebraze.org/).
 
 ## Copyright & License
 
-This page and the graphs it contains are copyright 2020 by me, David Braze. The page content and graphs are released under the [Creative Commons v4.0 CC-by license](https://creativecommons.org/licenses/by/4.0/).  Cutting through the legalese, it means that you're free to re-use the graphs (do what you want with them) so long as you say who made them and where you got them.
+This page and the graphs it contains are copyright 2020 by David Braze. The web page content and graphs are released under the [Creative Commons v4.0 CC-by license](https://creativecommons.org/licenses/by/4.0/).  Cutting through the legalese, it means that you're free to re-use the graphs (do what you want with them) so long as you say who made them and where you got them.
 
 # Show Me the Pictures
 
-Connecticut DPH provides its most comprehensive set of statistics at the state level. As of April 1, there are four basic statistics available for the state as a whole. These are: Number of Covid-19 ***tests completed***; Number of ***confirmed cases*** of Covid19; Number of Covid-19 related ***Deaths***; Number of Covid-19 ***Hospitalizations***. The first three statistics are all cumulative counts. In other words, each represents the total number since record keeping began. So, those numbers can only go up (or stay the same) from one day to the next. On the other hand, ***Hospitalizations*** is the number of people in the hospital on a given day. That statistic can go up or down from one day to the next. For two of those statistics, ***confirmed cases*** and ***deaths***, the state also gives the breakdown by Age, Gender, and Race. But, there are no cross-tabulations provided. Only three of those statistics are available at the county level, ***tests completed*** is not. Only ***confirmed cases*** and ***deaths*** are available for individual towns. Age, Gender, and Race breakdowns are not available for county or town data.
+Connecticut DPH provides its most comprehensive set of statistics for the state as a whole (no subdivision for counties or towns). As of April 1, there are four basic daily statistics available for Connecticut. These are: Number of Covid-19 ***tests completed***; Number of ***confirmed cases*** of Covid19; Number of Covid-19 related ***Deaths***; Number of Covid-19 ***Hospitalizations***. The first three statistics are all cumulative counts. In other words, each represents the total number since record keeping began. So, those numbers can only go up (or stay the same) from one day to the next. On the other hand, ***Hospitalizations*** is the number of people in the hospital on a given day. That statistic can go up or down from one day to the next. For two of the statistics, ***confirmed cases*** and ***deaths***, the state also gives the breakdown by Age, Gender, and Race. But, there are no cross-tabulations provided. Only three of those statistics are available at the county level, ***tests completed*** is not. Only ***confirmed cases*** and ***deaths*** are available for individual towns. Age, Gender, and Race breakdowns are not available for county or town data.
 
-Another thing to keep in mind is that the numbers reported for any of these statistics is not perfect. DPH is trying to keep policy makers and the public informed in a timely way. But getting those numbers out as quickly as possible means that they are sometimes not exactly right. There has been some news [coverage of Covid-19 reporting discrepancies in Connecticut](https://www.courant.com/news/connecticut/hc-news-coronavirus-death-numbers-20200407-l5edq4vne5g3zhmcadxfrt5d2u-story.html) in local news outlets.
+Another thing to keep in mind is that the numbers reported for any of these statistics is not perfect. DPH is trying to keep policy makers and the public informed in a timely way. But getting those numbers out as quickly as possible means that they are sometimes not exactly right. There has been some news coverage of [Covid-19 reporting discrepancies in Connecticut](https://www.courant.com/news/connecticut/hc-news-coronavirus-death-numbers-20200407-l5edq4vne5g3zhmcadxfrt5d2u-story.html) in local news outlets.
 
 The number of ***confirmed cases*** is a cumulative count of people who have tested positive for coronavirus since record keeping began (about March 1). But, most people haven't been tested and there are certainly many more Covid-19 cases among Connecticut residents who have not been tested. ***Confirmed cases*** does not distinguish between people who are currently ill and people who have recovered.
 
+The number of ***tests completed*** is the total, cumulative, number of Covid-19 tests that have been reported to the state. My understanding is that Connecticut is reporting the results of PCR-based tests that identify the virus's genetic material in people who are currently infected, but can't tell if they once had the virus and then recovered (they'll test negative). This contrasts with an antibody test which can tell if a person ever had the virus, but can't distinguish between people who are infected at time of test vs. infected as some point in the past. The PCR type is the more useful test for establishing the current rate of infection in the state. Also, up until May 3rd, the number of tests completed equaled the number of people tested, but since May 3rd some people have been tested more than once, so the number of tests completed is more than the number of people tested.
+
+The cumulative ***deaths*** statistic is fairly self-explanatory. It is just the total number of people who have died as a result of, or while sick with Covid-19. It's worth looking at the link above on *Covid-19 reporting discrepancies in Connecticut*. Additional reporting points out that, as of May 2020,  [Connecticut uses an antiquated process for compiling death certificates and reporting them to the CDC](https://ctmirror.org/2020/05/19/as-it-prepares-to-reopen-connecticuts-count-of-covid-19-deaths-is-fragmented-and-incomplete/). So, there is a significant delay in the availability of Connecticut state mortality data, which means that it is not possible to have a real-time view of the increase this year over previous years for "death from all causes." Once available, that statistic will likely give a more accurate measure of lives lost due to Covid-19 than other indicators.
+
+The ***hospitalizations*** count is the number of people who are, on that day, hospitalized due to Covid-19. This is the only one of the 4 counts provided by Connecticut DPH that is not cumulative. Unlike some states, Connecticut does not break out how many of those are in ICU vs standard acute care (e.g., [New York](https://forward.ny.gov/daily-hospitalization-summary-region)). 
+
 ## Statewide Summary
 
-```{r ct-stat-daily-change, fig.height=7}
+While, CT DPH reports cumulative counts, these can be misleading numbers. I've plotted them just the same in Figure \@ref(fig:ct-summary-2-plt). The problem with this kind of graph is that it makes it hard to see how much the numbers are changing from one day to the next. It's easy to see the difference between cumulative and non-cumulative statistics. Cumulative counts (Cases, Deaths, Tests) can never go down, but a non-cumulative count (Hospitalizations) can decrease over time.
+
+```{r ct-summary-2-plt, fig.height=10.5, fig.cap="Covid-19 Cases, Hospitalizations, Deaths, & Tests completed for Connecticut. Note different y scales."}
+
+ct.summary.2.plt
+
+```
+
+One way to visually emphasize day to day change in the numbers is to start with the DPH's cumulative counts (and daily count, in the case of ***Hospitalizations***), and subtract the previous day's count from each number. I'm showing these day-to-day differences in Figure \@ref(fig:ct-stat-daily-change). These difference values can look a little 'spiky', so I've added dashed lines for the three day running averages, which helps to smooth things out and may make trends a little easier to spot. It's important to keep in mind that Figure \@ref(fig:ct-summary-2-plt) and Figure \@ref(fig:ct-stat-daily-change) are based on the same underlying data. They just emphasize different aspects of it.
+
+```{r ct-stat-daily-change, fig.height=10.5, fig.cap=ct.stat.daily.change.cap}
 
 ct.stat.daily.change.plt
 
 ```
 
-```{r usa-state-corona}
+It's also interesting to look at how Connecticut is doing relative to other states. Figure \@ref(fig:usa-state-corona) shows the growth in cumulative Covid-19 cases for all 50 states. Connecticut, shown in blue, is consistently between 9th and 12th place for number of cases. So, Connecticut is really outperforming, not in a good way , considering it is only the 29th most populous state.
+
+```{r usa-state-corona, fig.cap=usa.state.corona.cap}
 
 usa.state.corona.plt
 
 ```
 
-
 ## Town by Town
 
 
-```{r town-rate}
+```{r town-rate, fig.cap=town.rate.cap}
 
 town.rate.plt
 
 ```
 
-```{r town-by-county-rate, fig.height=7}
+```{r town-by-county-rate, fig.height=7, fig.cap=ct.town.by.county.rate.cap}
 
 town.by.county.rate.plt
 
 ```
 
-```{r map-today, fig.height=7}
+```{r map-today, fig.height=7, fig.cap="Cumulative Covid-19 cases by town."}
 
 map.today
 
@@ -149,7 +168,7 @@ map.today
 
 ## How Covid-19 Spreads
 
-There is a nice blog post by Erin Bromage, PhD in microbiology and immunology, about how person-to-person transmission of Covid-19 actually works. It includes specific information on what the experts know about which situations are more risky, and which ones are less risky: https://www.erinbromage.com/post/the-risks-know-them-avoid-them. This is a great article for people who are worried about how to manage risk for themselves and their loved ones as governments start to scale back on Covid-19 restrictions on movement and business activities. 
+There is a nice blog post by Erin Bromage, PhD in microbiology and immunology, about how person-to-person transmission of Covid-19 actually happens. It includes specific information on what the experts know about which situations are more risky, and which ones are less risky: https://www.erinbromage.com/post/the-risks-know-them-avoid-them. This is a great article for people who are worried about how to manage risk for themselves and their loved ones as governments start to scale back on Covid-19 restrictions on movement and business activities. 
 
 ## Plans for Re-opening
 
@@ -160,10 +179,17 @@ Several credible road maps have been proposed for how and when to re-open in a r
 * Johns Hopkins University School of Public Health: https://www.centerforhealthsecurity.org/our-work/publications/public-health-principles-for-a-phased-reopening-during-covid-19-guidance-for-governors
 * Duke University Center for Health Policy: https://healthpolicy.duke.edu/sites/default/files/atoms/files/covid-19_surveillance_roadmap_final.pdf
 
-What they all have in common are specific milestones to use for deciding when and how to phase in the re-opening process ***after*** the spread of Covid-19 has been brought under control.
+What they all have in common are specific milestones to use for deciding when and how to phase in re-opening across different parts of the country, ***after*** the spread of Covid-19 has been brought under control. 
+
+On May 18th, [Governor Lamont issued executive order 7PP](https://portal.ct.gov/-/media/Office-of-the-Governor/Executive-Orders/Lamont-Executive-Orders/Executive-Order-No-7PP.pdf), which introduced rules for a phased re-opening of activity within
+the state, by business sector. Those rules are available here: [Sector Rules for Re-opening](https://portal.ct.gov/DECD/Content/Coronavirus-Business-Recovery/Sector-Rules-for-May-20-Reopen). As far as I can tell, the rules don't differentiate at all by region, even though some parts of the state (e.g., some counties) are clearly more impacted by Covid-19 than others. 
 
 ```{r eval=FALSE}
 
 ## More info on re-opening here: https://twitter.com/cmyeaton/status/1258512373750435842?s=20
+
+## NYC data: https://github.com/nychealth/coronavirus-data
+
+## NYS dashboard: https://forward.ny.gov/regional-monitoring-dashboard
 
 ``` 

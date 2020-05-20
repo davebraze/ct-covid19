@@ -308,15 +308,19 @@ town.rate.plt <-
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
-    geom_text_npc(aes(npcx=.1, npcy=.9,
-                      label=paste0("The top ", label.count.towns, " towns are labeled\n",
-                                   "(those with at least ", label.cut.towns[label.count.towns], " cases)")),
-                  size=2.5) +
+    ## geom_text_npc(aes(npcx=.1, npcy=.9,
+    ##                   label=paste0("The top ", label.count.towns, " towns are labeled\n",
+    ##                                "(those with at least ", label.cut.towns[label.count.towns], " cases)")),
+    ##               size=2.5) +
     ylab("Number of Cases") +
     theme_fdbplot(font_size=font.size) +
     theme(legend.position="top",
           plot.margin = unit(c(1,1,1,1), "lines"),
           axis.text.x = element_text(angle=45, hjust=1))
+
+town.rate.cap <- paste0("Total Covid-19 Cases for Connecticut's 169 Towns.",
+                        "The top ", label.count.towns, " towns are labeled\n",
+                        "(those with at least ", label.cut.towns[label.count.towns], " cases)")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate"), ftype),
        plot=town.rate.plt,
@@ -371,15 +375,20 @@ town.rate.10k.plt <-
     labs(title="Cumulative Covid-19 Cases for Connecticut Towns (per 10k pop.)",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
-    geom_text_npc(aes(npcx=.1, npcy=.9,
-                      label=paste0("The top ", label.count.towns, " towns are labeled\n",
-                                   "(those with at least ", trunc(label.cut.towns[label.count.towns]), " cases per 10k population)")),
-                  size=2.5) +
+    ## geom_text_npc(aes(npcx=.1, npcy=.9,
+    ##                   label=paste0("The top ", label.count.towns, " towns are labeled\n",
+    ##                                "(those with at least ", trunc(label.cut.towns[label.count.towns]), " cases per 10k population)")),
+    ##               size=2.5) +
     ylab("Number of Cases per 10,000 population") +
     theme_fdbplot(font_size=font.size) +
     theme(legend.position="top",
           plot.margin = unit(c(1,1,1,1), "lines"),
           axis.text.x = element_text(angle=45, hjust=1))
+
+town.rate.10k.note <- paste("Cases per 10,000 population for each town.",
+                             "The top ", label.count.towns, " towns are labeled",
+                             "(those with at least", trunc(label.cut.towns[label.count.towns]),
+                             "cases per 10k pop.)")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate-10k"), ftype),
        plot=town.rate.10k.plt,
@@ -402,6 +411,7 @@ label.cut <-
     group_by(county) %>%
     arrange(town.cases, .by_group=TRUE) %>%
     top_n(label.count, town.cases)
+
 
 ## only label Sundays to avoid xlab overcrowding
 x.labs <- strftime(unique(ct.covid$Date), "%b %d")
@@ -431,15 +441,20 @@ town.by.county.rate.plt <-
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns, split by county",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
-    geom_text_npc(aes(npcx=.1, npcy=.9,
-                      label=paste0("The top ", label.count, " towns/county are labeled.",
-                                  "\nNote differing y scales for each county.")),
-                  size=2.5) +
+    ## geom_text_npc(aes(npcx=.1, npcy=.9,
+    ##                   label=paste0("The top ", label.count, " towns/county are labeled.",
+    ##                               "\nNote differing y scales for each county.")),
+    ##               size=2.5) +
     ylab("Number of Cases") +
     theme_fdbplot(font_size=font.size) +
     theme(legend.position="top",
           plot.margin = unit(c(1,1,1,1), "lines"),
           axis.text.x = element_text(angle=45, hjust=1))
+
+ct.town.by.county.rate.cap <- paste(
+    "Cumulative Covid-19 cases by town, split by county.",
+    "The top ", label.count, " towns in each county are labeled.",
+    "Note differing y scales for each county.")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-by-county-rate"), ftype),
        plot=town.by.county.rate.plt,
@@ -474,19 +489,25 @@ ct.stat.daily.change.plt  <-
     scale_y_continuous(limits=my_limits) +
     scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
     facet_wrap(~name, nrow=4, scales="free_y") +
-    geom_text_npc(aes(npcx=.067, npcy=.9,
-                  label=paste("Heavy line = raw counts.",
-                               "Dashed line = 3 day average.",
-                               "\nNote different y scales.",
-                               sep="\n")),
-                  size=2.5) +
+    ## geom_text_npc(aes(npcx=.067, npcy=.9,
+    ##               label=paste("Heavy line = raw counts.",
+    ##                            "Dashed line = 3 day average.",
+    ##                            "\nNote different y scales.",
+    ##                            sep="\n")),
+    ##               size=2.5) +
     labs(title="Daily Change in Covid-19 Statistics for Connecticut",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
-    ylab("Count") + xlab(NULL) +
+    ylab("Count (daily change)") + xlab(NULL) +
     theme_fdbplot(font_size=font.size) +
     theme(legend.position=c(.05, .90),
           axis.text.x = element_text(angle=45, hjust=1))
+
+ct.stat.daily.change.cap <- paste(
+    "Daily Change in Covid-19 Statistics.",
+    "Heavy lines = raw counts.",
+    "Dashed lines = 3 day averages.",
+    "Note different y scales.")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-rate"), ftype),
        plot=ct.stat.daily.change.plt,
@@ -548,6 +569,62 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
        units=units,
        dpi=dpi)
 
+
+####################################
+## bar plot 2 for state-wide data ##
+####################################
+
+
+## only label Sundays to avoid xlab overcrowding
+x.labs <- strftime(unique(ct.summary$Date), "%b %d")
+x.labs <- ifelse(strftime(unique(ct.summary$Date), "%w")=="0", x.labs, "")
+
+ct.summary.2.plt <-
+    ct.summary %>%
+    ##    filter(!name %in% c("Tests Reported")) %>%
+    mutate(name = fct_recode(name,
+                             "Cases, cumulative" = "Cases",
+                             "Tests, cumulative" = "Tests Reported",
+                             "Hospitalized, daily" = "Hospitalized",
+                             "Deaths, cumulative" = "Deaths")) %>%
+    ggplot(aes(y=value, x=Date)) +
+    geom_bar(aes(fill=name), position="dodge", stat="identity") +
+    facet_wrap(~name, nrow=4, scales="free_y") +
+    scale_fill_brewer(type="qual", palette="Dark2") +
+    scale_x_date(expand = expansion(add=c(1/4, 1/4)),
+                 labels=x.labs,
+                 breaks=unique(ct.summary$Date),
+                 name=NULL) +
+    ## geom_text(aes(color=name, label=value),
+    ##           size=2,
+    ##           position=position_dodge(width=1),
+    ##           vjust=.5, hjust=-.1,
+    ##           angle=90,
+    ##           show.legend=FALSE) +
+    scale_color_brewer(type="qual", palette="Dark2") +
+    ## geom_text(data=filter(ct.summary, name=="Tests Reported"),
+    ##           aes(label=value, x=Date, y=-150), color="grey70", size=2.25) +
+    ## geom_text_npc(aes(npcx=.05, npcy=.85, label="Cumulative No. of tests administered"),
+    ##               size=3,
+    ##               color="grey70") +
+    ylim(-150, NA) +
+    guides(fill=guide_legend(title=NULL)) +
+    labs(title="Covid-19 Cases, Hospitalizations, Deaths, & Tests completed for Connecticut",
+         subtitle="Data compiled by CT Dept. of Public Health",
+         caption=caption.ctdph) +
+    ylab("Count") + xlab(NULL) +
+    theme_fdbplot(font_size=font.size) +
+    theme(legend.position=c(.05, .90),
+          axis.text.x = element_text(angle=45, hjust=1))
+
+ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
+       plot=ct.summary.2.plt,
+       path=fig.path,
+       device=ftype,
+       width=width*16/9, height=height,
+       units=units,
+       dpi=dpi)
+
 ####################################
 ## NYT state-by-state corona data ##
 ####################################
@@ -594,7 +671,6 @@ caption.nyt <- paste("Data Source: https://github.com/nytimes/covid-19-data.",
                      "Figure by David Braze (davebraze@gmail.com) using R statistical software,",
                      "Released under the Creative Commons v4.0 CC-by license.", sep="\n")
 
-
 ## only label Sundays to avoid xlab overcrowding
 x.labs <- strftime(unique(usa.state.corona$date), "%b %d")
 x.labs <- ifelse(strftime(unique(usa.state.corona$date), "%w")=="0", x.labs, "")
@@ -621,16 +697,20 @@ usa.state.corona.plt <-
     labs(title="Cumulative Covid-19 Cases per U.S. State",
          subtitle="Data compiled by the New York Times",
          caption=caption.nyt) +
-    geom_text_npc(aes(npcx=.1, npcy=.9,
-                      label=paste0("The top ", label.count.states, " states are labeled\n",
-                                   "(those with at least ", label.cut.states[label.count.states], " cases)")),
-                  size=2.5) +
+    ## geom_text_npc(aes(npcx=.1, npcy=.9,
+    ##                   label=paste0("The top ", label.count.states, " states are labeled\n",
+    ##                                "(those with at least ", label.cut.states[label.count.states], " cases)")),
+    ##               size=2.5) +
     geom_text_npc(aes(npcx=.1, npcy=.8, label="Connecticut in Blue"), color="blue", size=2.5) +
     ylab("Number of Cases") +
     theme_fdbplot(font_size=font.size) +
     theme(legend.position="top",
           plot.margin = unit(c(1,1,1,1), "lines"),
           axis.text.x = element_text(angle=45, hjust=1))
+
+usa.state.corona.cap <- paste("Cumulative Covid-19 Cases per U.S. State",
+                              "The top", label.count.states, "states are labeled",
+                              "(those with at least", label.cut.states[label.count.states], "cases).")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "usa-rate"), ftype),
        plot=usa.state.corona.plt,
