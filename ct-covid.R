@@ -7,7 +7,7 @@ library(readr)
 library(sf)
 library(RSocrata)
 
-library(tabulizer)
+## library(tabulizer)
 library(stringr)
 library(lubridate)
 library(wordstonumbers)
@@ -102,15 +102,20 @@ if(FALSE) {
 }
 
 ##### cases and deaths by town
+
+## upon reviewing the data provided by CT on Nov. 1 2020, for the first time since mid-May, there have been some changes to the variables in the data file. Need to sort that out before pushing new data to the web.
+
 covid.api <- read.socrata("https://data.ct.gov/resource/28fr-iqnx.json",
                           app_token=socrata.app.token) %>%
     rename(Town = town,
-           case.rate = caserate) %>%
-    mutate(town.cases = as.integer(confirmedcases), ## cumulative confirmed cases
-           town.deaths = as.integer(deaths),  ## cumulative deaths
-           case.rate = as.integer(case.rate), ## don't know what this means
-           Date = as.Date(lastupdatedate)) %>%
-    select(-c(town_no, lastupdatedate, confirmedcases, deaths))
+           town.cases = townconfirmedcases) %>%
+    mutate(town.cases = as.integer(town.cases),
+           ## cumulative confirmed cases
+           town.deaths = as.integer(townconfirmeddeaths),
+           ## cumulative CONFIRMED deaths FIXME: entails label changes cascading through the analysis
+##           case.rate = as.integer(case.rate), ## don't know what this means: FIXME: see above
+           Date = as.Date(lastupdatedate))
+##    select(-c(town_no, lastupdatedate, confirmedcases, deaths))
 
 ##### scrape town/county data from wikipedia
 
@@ -147,10 +152,10 @@ ct.covid <-
 ct.summary <- read.socrata("https://data.ct.gov/resource/rf3k-f8fg.json",
                            app_token=socrata.app.token) %>%
     rename(Date = date,
-           Cases = cases,
-           Hospitalized = hospitalizations,
-           Deaths = deaths,
-           `Tests Reported` = covid_19_tests_reported) %>%
+           Cases = totalcases,
+           Hospitalized = hospitalizedcases,
+           Deaths = totaldeaths,
+           `Tests Reported` = covid_19_molecular_tests_reported) %>%
     mutate(Date = as.Date(Date)) %>%
     select(-state, -starts_with("cases_")) %>%
     mutate(Cases = as.integer(Cases),

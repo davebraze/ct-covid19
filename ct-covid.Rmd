@@ -192,4 +192,7 @@ the state, by business sector. Those rules are available here: [Sector Rules for
 
 ## NYS dashboard: https://forward.ny.gov/regional-monitoring-dashboard
 
+## Estimate of transmission rate for each US state in "real-time": https://rt.live/
+
 ``` 
+
