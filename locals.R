@@ -30,7 +30,7 @@ read_ctcovid_pdf <- function(covid.fname, town.table=TRUE) {
     ## extract data from CT COVID-19 daily reports (PDF files).
 
     if(FALSE) {
-        covid.fname <- covid.fnames[20]
+        covid.fname <- covid.fnames[1]
         town.table=TRUE
     }
 

@@ -149,13 +149,17 @@ ct.covid <-
 ## tests.complete info does not seem to be anywhere in any of the
 ## covid-19 data sets provided by the state. The only way to get it is
 ## to extract it from their daily reports (pdf files).
+
+## this kludge may not be needed any longer, give updates to source data files
+
+if(FALSE) {
 ct.summary <- read.socrata("https://data.ct.gov/resource/rf3k-f8fg.json",
                            app_token=socrata.app.token) %>%
     rename(Date = date,
            Cases = totalcases,
            Hospitalized = hospitalizedcases,
            Deaths = totaldeaths,
-           `Tests Reported` = covid_19_molecular_tests_reported) %>%
+           `Tests Reported` = covid_19_tests_reported) %>%
     mutate(Date = as.Date(Date)) %>%
     select(-state, -starts_with("cases_")) %>%
     mutate(Cases = as.integer(Cases),
@@ -163,7 +167,7 @@ ct.summary <- read.socrata("https://data.ct.gov/resource/rf3k-f8fg.json",
            Deaths = as.integer(Deaths),
            `Tests Reported` = as.integer(`Tests Reported`))
 
-tmp <- purrr::map_dfr(covid.fnames, read_ctcovid_pdf, town.tab=FALSE) %>%
+tmp <- purrr::map_dfr(covid.fnames[1], read_ctcovid_pdf, town.tab=FALSE) %>%
     select(Date, tests.complete)
 
 ct.summary <- left_join(ct.summary, tmp) %>%
@@ -171,6 +175,7 @@ ct.summary <- left_join(ct.summary, tmp) %>%
     select(-tests.complete) %>%
     tidyr::pivot_longer(cols=-c(Date)) %>%
     mutate(name = forcats::fct_relevel(name, "Cases", "Hospitalized", "Deaths"))
+}
 
 #########################
 ## constants for plots ##
@@ -196,7 +201,13 @@ dpi <- 300
 ## map cumulative confirmed case count by Town and Day ##
 #########################################################
 
+## This needs updating to accomodate the much larger number of timepoints in the data.
+## one way to do that would be replace this facetted map with an animation.
+
 breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600)
+
+if(FALSE) {
+
 
 map.days <-
     ct.covid %>%
@@ -229,6 +240,7 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-days"), ftype),
        width=width, height=height,
        units=units,
        dpi=dpi)
+}
 
 #################################################################
 ## map cumulative confirmed case count by Town most recent day ##
@@ -268,7 +280,6 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-today"), ftype),
        width=width, height=height,
        units=units,
        dpi=dpi)
-
 
 ####################################
 ## rate plot by Town, raw counts  ##
