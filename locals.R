@@ -30,7 +30,7 @@ read_ctcovid_pdf <- function(covid.fname, town.table=TRUE) {
     ## extract data from CT COVID-19 daily reports (PDF files).
 
     if(FALSE) {
-        covid.fname <- covid.fnames[1]
+        covid.fname <- covid.fnames[29]
         town.table=TRUE
     }
 
@@ -45,13 +45,9 @@ read_ctcovid_pdf <- function(covid.fname, town.table=TRUE) {
                                 pages=1:meta$pages) %>%
         str_remove_all("\r\n")
     names(covid.text) <- 1:length(covid.text)
-    covid.text <- purrr::map_dfr(covid.text, words_to_numbers) %>%
-        purrr::map_dfr(str_remove_all, "COVID-19")
+    covid.text <- purrr::map(covid.text, words_to_numbers) %>%
+        purrr::map(str_remove_all, "COVID-19")
 
-    ## several variable values are given in prose on page 1.
-    ## Clean it up before extracting them
-    ## page1 <- words_to_numbers(str_remove_all(covid.text[[1]], "\r\n"))
-    ## page1 <- str_remove_all(page1, "COVID-19")
     page1 <- covid.text[[1]]
 
     ## get total lab-confirmed cases (cumulative) state wide from first page of report
@@ -84,25 +80,33 @@ read_ctcovid_pdf <- function(covid.fname, town.table=TRUE) {
     if (town.table == TRUE) {
     ##### get cases-by-town data
         ## manually get page areas for town data table
-        ## tabulizer::locate_areas(covid.fnames[19], pages=rep(10, 3))
+        ## tabulizer::locate_areas(covid.fnames[28], pages=rep(7, 3))
 
         ## find page for cases-by-town table, assume town names occur only there
         page.tab <- which(str_detect(covid.text, "West Haven"))
 
-        ## data split across 3 "areas" on the page
-        ## note table format change starting Apr. 5
-        if(date<ymd("2020-04-05")){
+        ## Data split across 3 "areas" on the page
+        ## Handle several table format changes
+        if(date < ymd("2020-04-05")){
             area <- list(c(80,67,730,205),
                          c(80,234,730,368),
                          c(80,400,720,540))
-        } else if(date<ymd("2020-04-07")) {
+        } else if(date < ymd("2020-04-07")) {
             area <- list(c(105,82,730,225),
                          c(105,230,730,380),
                          c(105,385,720,500))
-        } else if(date<ymd("2020-04-08")) {
+        } else if(date < ymd("2020-04-08")) {
             area <- list(c(105,90,700,235),
                          c(105,236,700,379),
                          c(105,378,680,523))
+        } else if(date < ymd("2020-04-13")) {
+            area <- list(c(94,88,722,235),
+                         c(94,234,722,379),
+                         c(94,376,700,523))
+        } else if(date %in% ymd("2020-04-17")) {
+            area <- list(c(86,91,692,234),
+                         c(86,233,692,378),
+                         c(86,377,672,523))
         } else {
             area <- list(c(101,90,730,235),
                          c(101,236,730,379),

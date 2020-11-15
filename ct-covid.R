@@ -7,7 +7,7 @@ library(readr)
 library(sf)
 library(RSocrata)
 
-## library(tabulizer)
+library(tabulizer)
 library(stringr)
 library(lubridate)
 library(wordstonumbers)
@@ -59,8 +59,9 @@ covid.fnames <- fs::dir_ls(here::here("01-ctdph-daily-reports")) %>%
     str_subset("CTDPHCOVID19summary[0-9]+.pdf")
 
 ## ##### read all available covid pdfs
-## town.tab <- TRUE
-## covid <- purrr::map_dfr(covid.fnames[1:19], read_ctcovid_pdf, town.tab=town.tab)
+town.tab <- TRUE
+covid <- purrr::map_dfr(covid.fnames, read_ctcovid_pdf, town.tab=town.tab)
+
 
 ## if (town.tab == TRUE){
 ##     covid[779, "Town"] <- "North Stonington" ## repair bad line from one input file
@@ -88,8 +89,6 @@ covid.fnames <- fs::dir_ls(here::here("01-ctdph-daily-reports")) %>%
 
 socrata.app.token <- Sys.getenv("SOCRATA_APP_TOKEN_CTCOVID19")
 
-
-
 if(FALSE) {
     url <- httr::parse_url("https://data.ct.gov/resource/28fr-iqnx.json")
     url$path <- NULL
@@ -108,12 +107,10 @@ if(FALSE) {
 covid.api <- read.socrata("https://data.ct.gov/resource/28fr-iqnx.json",
                           app_token=socrata.app.token) %>%
     rename(Town = town,
-           town.cases = townconfirmedcases) %>%
-    mutate(town.cases = as.integer(town.cases),
-           ## cumulative confirmed cases
-           town.deaths = as.integer(townconfirmeddeaths),
-           ## cumulative CONFIRMED deaths FIXME: entails label changes cascading through the analysis
-##           case.rate = as.integer(case.rate), ## don't know what this means: FIXME: see above
+           town.cases = towntotalcases) %>%
+    mutate(across(starts_with("town", ignore.case=FALSE), as.integer),
+           across(starts_with("people", ignore.case=FALSE), as.integer),
+           across(starts_with("number", ignore.case=FALSE), as.integer),
            Date = as.Date(lastupdatedate))
 ##    select(-c(town_no, lastupdatedate, confirmedcases, deaths))
 
@@ -152,7 +149,7 @@ ct.covid <-
 
 ## this kludge may not be needed any longer, give updates to source data files
 
-if(FALSE) {
+
 ct.summary <- read.socrata("https://data.ct.gov/resource/rf3k-f8fg.json",
                            app_token=socrata.app.token) %>%
     rename(Date = date,
@@ -163,11 +160,16 @@ ct.summary <- read.socrata("https://data.ct.gov/resource/rf3k-f8fg.json",
     mutate(Date = as.Date(Date)) %>%
     select(-state, -starts_with("cases_")) %>%
     mutate(Cases = as.integer(Cases),
+           confirmedcases = as.integer(confirmedcases),
+           probablecases = as.integer(probablecases),
            Hospitalized = as.integer(Hospitalized),
            Deaths = as.integer(Deaths),
+           confirmeddeaths = as.integer(confirmeddeaths),
+           probabledeaths = as.integer(probabledeaths),
            `Tests Reported` = as.integer(`Tests Reported`))
 
-tmp <- purrr::map_dfr(covid.fnames[1], read_ctcovid_pdf, town.tab=FALSE) %>%
+## FIXME
+tmp <- purrr::map_dfr(covid.fnames, read_ctcovid_pdf, town.tab=FALSE) %>%
     select(Date, tests.complete)
 
 ct.summary <- left_join(ct.summary, tmp) %>%
@@ -175,7 +177,6 @@ ct.summary <- left_join(ct.summary, tmp) %>%
     select(-tests.complete) %>%
     tidyr::pivot_longer(cols=-c(Date)) %>%
     mutate(name = forcats::fct_relevel(name, "Cases", "Hospitalized", "Deaths"))
-}
 
 #########################
 ## constants for plots ##
@@ -299,6 +300,11 @@ highlight <- ct.covid %>%
 ## only label Sundays to avoid xlab overcrowding
 x.labs <- strftime(unique(ct.covid$Date), "%b %d")
 x.labs <- ifelse(strftime(unique(ct.covid$Date), "%w")=="0", x.labs, "")
+
+## only label 1st of each month to avoid xlab overcrowding
+x.labs <- strftime(unique(ct.covid$Date), "%b %d")
+x.labs <- ifelse(strftime(unique(ct.covid$Date), "%d")=="01", x.labs, "")
+
 
 town.rate.plt <-
     ct.covid %>%
