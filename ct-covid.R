@@ -139,7 +139,7 @@ ct.covid <-
     covid.api %>%
     left_join(town.info, by=c("Town" = "town")) %>%
     mutate(town.cases.10k = (10000/pop.2010)*town.cases,
-           town.deaths.10k = (10000/pop.2010)*town.deaths) %>%
+           town.deaths.10k = (10000/pop.2010)*towntotaldeaths) %>%
     left_join(ct.shp, by=c("Town" = "NAME10"))
 
 ##### state wide counts
@@ -149,7 +149,7 @@ ct.covid <-
 
 ## this kludge may not be needed any longer, give updates to source data files
 
-
+if(FALSE) {
 ct.summary <- read.socrata("https://data.ct.gov/resource/rf3k-f8fg.json",
                            app_token=socrata.app.token) %>%
     rename(Date = date,
@@ -177,6 +177,7 @@ ct.summary <- left_join(ct.summary, tmp) %>%
     select(-tests.complete) %>%
     tidyr::pivot_longer(cols=-c(Date)) %>%
     mutate(name = forcats::fct_relevel(name, "Cases", "Hospitalized", "Deaths"))
+}
 
 #########################
 ## constants for plots ##
@@ -247,6 +248,8 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-days"), ftype),
 ## map cumulative confirmed case count by Town most recent day ##
 #################################################################
 
+breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600)
+
 map.today <-
     ct.covid %>%
     filter(Date==max(Date)) %>%
@@ -297,15 +300,6 @@ label.count.towns <- 17
 highlight <- ct.covid %>%
     filter(Town %in% c(""))
 
-## only label Sundays to avoid xlab overcrowding
-x.labs <- strftime(unique(ct.covid$Date), "%b %d")
-x.labs <- ifelse(strftime(unique(ct.covid$Date), "%w")=="0", x.labs, "")
-
-## only label 1st of each month to avoid xlab overcrowding
-x.labs <- strftime(unique(ct.covid$Date), "%b %d")
-x.labs <- ifelse(strftime(unique(ct.covid$Date), "%d")=="01", x.labs, "")
-
-
 town.rate.plt <-
     ct.covid %>%
     ggplot() +
@@ -323,17 +317,13 @@ town.rate.plt <-
                              force=1/4,
                              nudge_x=5) +
     scale_color_brewer(type="qual", palette="Dark2") +
-    scale_x_date(labels=x.labs,
-                 breaks=unique(ct.covid$Date),
-                 expand = expansion(add=c(1/4,4.5)),
+    scale_x_date(date_labels="%b %d",
+                 date_breaks = "1 month",
+                 expand = expansion(add=c(2,20)),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
-    ## geom_text_npc(aes(npcx=.1, npcy=.9,
-    ##                   label=paste0("The top ", label.count.towns, " towns are labeled\n",
-    ##                                "(those with at least ", label.cut.towns[label.count.towns], " cases)")),
-    ##               size=2.5) +
     ylab("Number of Cases") +
     theme_fdbplot(font_size=font.size) +
     theme(legend.position="top",
@@ -369,10 +359,6 @@ label.count.towns <- 17
 highlight <- ct.covid %>%
     filter(Town %in% c(""))
 
-## only label Sundays to avoid xlab overcrowding
-x.labs <- strftime(unique(ct.covid$Date), "%b %d")
-x.labs <- ifelse(strftime(unique(ct.covid$Date), "%w")=="0", x.labs, "")
-
 town.rate.10k.plt <-
     ct.covid %>%
     ggplot() +
@@ -390,9 +376,9 @@ town.rate.10k.plt <-
                              force=1/4,
                              nudge_x=5) +
     scale_color_brewer(type="qual", palette="Dark2") +
-    scale_x_date(labels=x.labs,
-                 breaks=unique(ct.covid$Date),
-                 expand = expansion(add=c(1/4,4.5)),
+    scale_x_date(date_labels="%b %d",
+                 date_breaks="1 month",
+                 expand = expansion(add=c(2,20)),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut Towns (per 10k pop.)",
          subtitle="Data compiled by CT Dept. of Public Health",
@@ -434,11 +420,6 @@ label.cut <-
     arrange(town.cases, .by_group=TRUE) %>%
     top_n(label.count, town.cases)
 
-
-## only label Sundays to avoid xlab overcrowding
-x.labs <- strftime(unique(ct.covid$Date), "%b %d")
-x.labs <- ifelse(strftime(unique(ct.covid$Date), "%w")=="0", x.labs, "")
-
 town.by.county.rate.plt <-
     ct.covid %>%
     ggplot() +
@@ -456,9 +437,9 @@ town.by.county.rate.plt <-
                              nudge_x=5) +
     scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
     scale_y_continuous(limits=my_limits) +
-    scale_x_date(labels=x.labs,
-                 breaks=unique(ct.covid$Date),
-                 expand = expansion(add=c(1/4,8)),
+    scale_x_date(date_labels="%b %d",
+                 date_breaks="1 month",
+                 expand = expansion(add=c(2,30)),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns, split by county",
          subtitle="Data compiled by CT Dept. of Public Health",
