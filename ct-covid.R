@@ -143,41 +143,46 @@ ct.covid <-
     left_join(ct.shp, by=c("Town" = "NAME10"))
 
 ##### state wide counts
-## tests.complete info does not seem to be anywhere in any of the
-## covid-19 data sets provided by the state. The only way to get it is
-## to extract it from their daily reports (pdf files).
+## tests.complete info does not seem to be anywhere in any of the covid-19 data sets provided by the
+## state up until late May. The only way to get it is to extract it from their daily reports (pdf
+## files).
 
-## this kludge may not be needed any longer, give updates to source data files
-
-if(FALSE) {
-ct.summary <- read.socrata("https://data.ct.gov/resource/rf3k-f8fg.json",
+ct.summary.wide <- read.socrata("https://data.ct.gov/resource/rf3k-f8fg.json",
                            app_token=socrata.app.token) %>%
     rename(Date = date,
-           Cases = totalcases,
-           Hospitalized = hospitalizedcases,
-           Deaths = totaldeaths,
-           `Tests Reported` = covid_19_tests_reported) %>%
-    mutate(Date = as.Date(Date)) %>%
-    select(-state, -starts_with("cases_")) %>%
-    mutate(Cases = as.integer(Cases),
-           confirmedcases = as.integer(confirmedcases),
-           probablecases = as.integer(probablecases),
-           Hospitalized = as.integer(Hospitalized),
-           Deaths = as.integer(Deaths),
-           confirmeddeaths = as.integer(confirmeddeaths),
-           probabledeaths = as.integer(probabledeaths),
-           `Tests Reported` = as.integer(`Tests Reported`))
+           Cases.0 = totalcases,
+           Hospitalized.0 = hospitalizedcases,
+           Deaths.0 = totaldeaths,
+           `Tests.0` = covid_19_tests_reported) %>%
+    mutate(Date = as.Date(Date),
+           `Tests.0` = as.integer(`Tests.0`),
+           Cases.0 = as.integer(Cases.0),
+           Deaths.0 = as.integer(Deaths.0),
+           Hospitalized.0 = as.integer(Hospitalized.0),
+           confirmedcasescum = as.integer(confirmedcases),
+           probablecasescum = as.integer(probablecases),
+           confirmeddeathscum = as.integer(confirmeddeaths),
+           probabledeathscum = as.integer(probabledeaths)) %>%
+    select(-c(state, confirmeddeaths, probabledeaths, confirmedcases, probablecases), -starts_with("cases_"))
 
 ## FIXME
 tmp <- purrr::map_dfr(covid.fnames, read_ctcovid_pdf, town.tab=FALSE) %>%
     select(Date, tests.complete)
 
-ct.summary <- left_join(ct.summary, tmp) %>%
-    mutate(`Tests Reported` = if_else(is.na(`Tests Reported`), tests.complete, `Tests Reported`)) %>%
+ct.summary.wide <- left_join(ct.summary.wide, tmp) %>%
+    arrange(Date) %>%
+    mutate(`Tests.0` = if_else(is.na(`Tests.0`), tests.complete, `Tests.0`)) %>%
     select(-tests.complete) %>%
-    tidyr::pivot_longer(cols=-c(Date)) %>%
-    mutate(name = forcats::fct_relevel(name, "Cases", "Hospitalized", "Deaths"))
-}
+    mutate(Cases = c(NA, diff(Cases.0)),
+           Deaths = c(NA, diff(Deaths.0)),
+           `Tests Reported` = c(NA, diff(`Tests.0`)),
+           Hospitalized = Hospitalized.0,
+           `Test Positivity (percent)` = if_else(Date < as.Date("2020-07-01"),
+                                       as.numeric(NA),
+                                       Cases/`Tests Reported`*100)
+           ) ## Handful of x<0 after this. Let it be.
+
+
 
 #########################
 ## constants for plots ##
@@ -248,7 +253,7 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-days"), ftype),
 ## map cumulative confirmed case count by Town most recent day ##
 #################################################################
 
-breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600)
+breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600, 3200, 6400)
 
 map.today <-
     ct.covid %>%
@@ -319,7 +324,7 @@ town.rate.plt <-
     scale_color_brewer(type="qual", palette="Dark2") +
     scale_x_date(date_labels="%b %d",
                  date_breaks = "1 month",
-                 expand = expansion(add=c(2,20)),
+                 expand = expansion(add=c(2,30)),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle="Data compiled by CT Dept. of Public Health",
@@ -346,7 +351,6 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate"), ftype),
 ####################################
 ## rate plot by Town, per 10k pop  ##
 ####################################
-
 
 label.cut.towns <-
     ct.covid %>%
@@ -378,7 +382,7 @@ town.rate.10k.plt <-
     scale_color_brewer(type="qual", palette="Dark2") +
     scale_x_date(date_labels="%b %d",
                  date_breaks="1 month",
-                 expand = expansion(add=c(2,20)),
+                 expand = expansion(add=c(2,30)),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut Towns (per 10k pop.)",
          subtitle="Data compiled by CT Dept. of Public Health",
@@ -429,7 +433,7 @@ town.by.county.rate.plt <-
     ggrepel::geom_text_repel(data = label.cut,
                              aes(label = Town, x = Date, y = town.cases),
                              segment.size=.25,
-                             min.segment.length = .01,
+                             min.segment.length = 0,
                              size=2,
                              hjust = -0,
                              direction="y",
@@ -444,10 +448,6 @@ town.by.county.rate.plt <-
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns, split by county",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
-    ## geom_text_npc(aes(npcx=.1, npcy=.9,
-    ##                   label=paste0("The top ", label.count, " towns/county are labeled.",
-    ##                               "\nNote differing y scales for each county.")),
-    ##               size=2.5) +
     ylab("Number of Cases") +
     theme_fdbplot(font_size=font.size) +
     theme(legend.position="top",
@@ -455,7 +455,7 @@ town.by.county.rate.plt <-
           axis.text.x = element_text(angle=45, hjust=1))
 
 ct.town.by.county.rate.cap <- paste(
-    "Cumulative Covid-19 cases by town, split by county.",
+    "Cumulative Covid-19 case counts by town, split by county.",
     "The top ", label.count, " towns in each county are labeled.",
     "Note differing y scales for each county.")
 
@@ -467,50 +467,149 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-by-county-rate"), ftype)
        units=units,
        dpi=dpi)
 
+
+################################################
+## rate plot by town, facet by population bin ##
+################################################
+
+label.count <- 6
+label.cut <-
+    ct.covid %>%
+    filter(Date == max(Date)) %>%
+    select(Town, county, pop.2010.bin, town.cases, Date) %>%
+    group_by(pop.2010.bin) %>%
+    arrange(town.cases, .by_group=TRUE) %>%
+    top_n(label.count, town.cases)
+
+town.by.pop.rate.plt <-
+    ct.covid %>%
+    ggplot() +
+    geom_line(aes(x=Date, y=town.cases, group=Town, color=county),
+              size=4/3, alpha=1/2) +
+    facet_wrap(~pop.2010.bin, nrow=5, scales="free_y") +
+    ggrepel::geom_text_repel(data = label.cut,
+                             aes(label = Town, x = Date, y = town.cases),
+                             segment.size=.25,
+                             min.segment.length = 0,
+                             size=2,
+                             hjust = -0,
+                             direction="y",
+                             force=1/4,
+                             nudge_x=5) +
+    scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
+    scale_y_continuous(limits=my_limits) +
+    scale_x_date(date_labels="%b %d",
+                 date_breaks="1 month",
+                 expand = expansion(add=c(2,30)),
+                 name=NULL) +
+    labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns, split by population",
+         subtitle="Data compiled by CT Dept. of Public Health",
+         caption=caption.ctdph) +
+    ylab("Number of Cases") +
+    theme_fdbplot(font_size=font.size) +
+    theme(legend.position="top",
+          plot.margin = unit(c(1,1,1,1), "lines"),
+          axis.text.x = element_text(angle=45, hjust=1))
+
+
+ct.town.by.pop.rate.cap <- paste(
+    "Cumulative Covid-19 case counts by town, split by population bin.",
+    "The top ", label.count, " towns in each population group are labeled.",
+    "Note differing y scales for each group.",
+    "Counties are color coded as in the previous plot.")
+
+ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-by-pop-rate"), ftype),
+       plot=town.by.county.rate.plt,
+       path=fig.path,
+       device=ftype,
+       width=width*16/9, height=height,
+       units=units,
+       dpi=dpi)
+
 ########################################################
 ## line plot for daily change in core statistics.     ##
-## Includes 3 day running average                     ##
+## Includes 7 day running average                     ##
 ########################################################
 
-## only label Sundays to avoid xlab overcrowding
-x.labs <- strftime(unique(ct.summary$Date), "%b %d")
-x.labs <- ifelse(strftime(unique(ct.summary$Date), "%w")=="0", x.labs, "")
+## FIXME:
+## o label average value at end date for each subplot
+## o fix positivity rate to use confirmedcases only
+## o add "(confirmed + probable)" to Cases & Deaths labels
+
+ct.summary.1 <-
+    ct.summary.wide %>%
+    select(- c("confirmeddeathscum",
+               "probabledeathscum",
+               "confirmedcasescum",
+               "probablecasescum")) %>%
+    mutate(`Tests Reported.7mn` = TTR::runMean(`Tests Reported`,7),
+           Cases.7mn = TTR::runMean(Cases,7),
+           Hospitalized.7mn = TTR::runMean(Hospitalized,7),
+           Deaths.7mn = TTR::runMean(Deaths,7),
+           `Test Positivity (percent).7mn` = TTR::runMean(`Test Positivity (percent)`,7))
+
+ct.summary.long <-
+    ct.summary.1 %>%
+    tidyr::pivot_longer(cols=-c(Date)) %>%
+    ## tidyr::separate() might be useful for the following
+    mutate(type = if_else(str_detect(name, "7mn"), "7mn", "daily"),
+           name = forcats::fct_collapse(name,
+                                        "Tests Reported" = c("Tests Reported", "Tests Reported.7mn"),
+                                        "Cases" = c("Cases", "Cases.7mn"),
+                                        "Test Positivity (percent)" = c("Test Positivity (percent)", "Test Positivity (percent).7mn"),
+                                        "Hospitalized" = c("Hospitalized", "Hospitalized.7mn"),
+                                        "Deaths" = c("Deaths", "Deaths.7mn"))) %>%
+    mutate(name = forcats::fct_relevel(name, "Tests Reported",
+                                       "Cases", "Test Positivity (percent)",
+                                       "Hospitalized", "Deaths"),
+           type = forcats::fct_relevel(type, "daily", "7mn"))
+
+ct.stats.label <-
+    ct.summary.long %>%
+    filter(! name %in% c("Tests.0", "Cases.0", "Hospitalized.0", "Deaths.0")) %>%
+    filter(Date == max(Date)) %>%
+    mutate(label = str_replace(sprintf("%.2f", value), "\\.00", ""))
 
 ct.stat.daily.change.plt  <-
-    ct.summary %>%
-    group_by(name) %>%
-    arrange(Date) %>%
-    mutate(value.diff = c(NA, diff(value)),
-           value.diff.3mn = TTR::runMean(value.diff,3)) %>%
+    ct.summary.long %>%
+    filter(! name %in% c("Tests.0", "Cases.0", "Hospitalized.0", "Deaths.0")) %>%
     ggplot(aes(x=Date)) +
-    geom_line(aes(y=value.diff, group=name, color=name), size=2, alpha=.50) +
-    geom_line(aes(y=value.diff.3mn, group=name, color=name), size=1, alpha=1, linetype="52") +
-    geom_text(aes(y=value.diff, group=name, label=value.diff), size=2) +
-    scale_x_date(labels=x.labs,
-                 breaks=unique(ct.summary$Date),
+    geom_line(aes(y=value, color=name, linetype=type, size=rev(type), alpha=type), show.legend=FALSE) +
+    scale_size_manual(values=c(1,2)) +
+    scale_alpha_manual(values=c(1/3,1)) +
+    scale_linetype_manual(values=c(1,5)) +
+    scale_x_date(date_labels="%b %d",
+                 date_breaks="1 month",
+                 expand = expansion(add=c(2,30)),
                  name=NULL) +
     scale_y_continuous(limits=my_limits) +
     scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
-    facet_wrap(~name, nrow=4, scales="free_y") +
-    ## geom_text_npc(aes(npcx=.067, npcy=.9,
-    ##               label=paste("Heavy line = raw counts.",
-    ##                            "Dashed line = 3 day average.",
-    ##                            "\nNote different y scales.",
-    ##                            sep="\n")),
-    ##               size=2.5) +
-    labs(title="Daily Change in Covid-19 Statistics for Connecticut",
+    facet_wrap(~name, nrow=5, scales="free_y") +
+    labs(title="Daily Values for Covid-19 Statistics in Connecticut",
          subtitle="Data compiled by CT Dept. of Public Health",
          caption=caption.ctdph) +
-    ylab("Count (daily change)") + xlab(NULL) +
+    ylab("Daily Value (non-cumulative)") + xlab(NULL) +
     theme_fdbplot(font_size=font.size) +
-    theme(legend.position=c(.05, .90),
-          axis.text.x = element_text(angle=45, hjust=1))
+    background_grid(major="xy") +
+    theme(axis.text.x = element_text(angle=45, hjust=1)) +
+    ggrepel::geom_text_repel(data = ct.stats.label,
+                             aes(label = label, x = Date, y = value),
+                             segment.size=.25,
+                             min.segment.length = 0,
+                             size=2.5,
+                             hjust = 0,
+                             direction="y",
+                             force=1/4,
+                             nudge_x=10)
+
 
 ct.stat.daily.change.cap <- paste(
-    "Daily Change in Covid-19 Statistics.",
+    "Daily Values (non-cumulative) for Covid-19 Statistics.",
     "Heavy lines = raw counts.",
-    "Dashed lines = 3 day averages.",
-    "Note different y scales.")
+    "Dashed lines = 7 day running averages.",
+    "Tests before July 1 were in short supply and largely limited to those suspected of being infected.",
+    "So, 'Test Positivity' for the period before July 1 is not shown.",
+    "Note different y scales on subplots.")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-rate"), ftype),
        plot=ct.stat.daily.change.plt,
@@ -523,8 +622,9 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-rate"), ftype),
 ##################################
 ## bar plot for state-wide data ##
 ##################################
+## This plot is retired, has not been updated since May
 
-
+if (FALSE){
 ## only label Sundays to avoid xlab overcrowding
 x.labs <- strftime(unique(ct.summary$Date), "%b %d")
 x.labs <- ifelse(strftime(unique(ct.summary$Date), "%w")=="0", x.labs, "")
@@ -539,8 +639,8 @@ ct.summary.plt <-
     geom_bar(aes(fill=name), position="dodge", stat="identity") +
     scale_fill_brewer(type="qual", palette="Dark2") +
     scale_x_date(expand = expansion(add=c(1/4, 1/4)),
-                 labels=x.labs,
-                 breaks=unique(ct.summary$Date),
+                 date_labels="%b %d",
+                 date_breaks="1 month",
                  name=NULL) +
     geom_text(aes(color=name, label=value),
               size=2,
@@ -571,45 +671,33 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
        width=width*16/9, height=height,
        units=units,
        dpi=dpi)
-
+}
 
 ####################################
 ## bar plot 2 for state-wide data ##
 ####################################
+## FIXME: Retire this plot. Need to remove it from the markdown file.
 
-
-## only label Sundays to avoid xlab overcrowding
-x.labs <- strftime(unique(ct.summary$Date), "%b %d")
-x.labs <- ifelse(strftime(unique(ct.summary$Date), "%w")=="0", x.labs, "")
+if (TRUE){
 
 ct.summary.2.plt <-
-    ct.summary %>%
-    ##    filter(!name %in% c("Tests Reported")) %>%
+    ct.summary.long %>%
+    filter(Date < as.Date("2020-06-01")) %>%
+    filter(name %in% c("Cases.0", "Tests.0", "Hospitalized.0", "Deaths.0" )) %>%
     mutate(name = fct_recode(name,
-                             "Cases, cumulative" = "Cases",
-                             "Tests, cumulative" = "Tests Reported",
-                             "Hospitalized, daily" = "Hospitalized",
-                             "Deaths, cumulative" = "Deaths")) %>%
+                             "Cases, cumulative" = "Cases.0",
+                             "Tests, cumulative" = "Tests.0",
+                             "Hospitalized, daily" = "Hospitalized.0",
+                             "Deaths, cumulative" = "Deaths.0")) %>%
     ggplot(aes(y=value, x=Date)) +
-    geom_bar(aes(fill=name), position="dodge", stat="identity") +
+    geom_bar(aes(fill=name), position="dodge", stat="identity", show.legend=FALSE) +
     facet_wrap(~name, nrow=4, scales="free_y") +
     scale_fill_brewer(type="qual", palette="Dark2") +
     scale_x_date(expand = expansion(add=c(1/4, 1/4)),
-                 labels=x.labs,
-                 breaks=unique(ct.summary$Date),
+                 date_labels="%b %d",
+                 date_breaks="1 week",
                  name=NULL) +
-    ## geom_text(aes(color=name, label=value),
-    ##           size=2,
-    ##           position=position_dodge(width=1),
-    ##           vjust=.5, hjust=-.1,
-    ##           angle=90,
-    ##           show.legend=FALSE) +
     scale_color_brewer(type="qual", palette="Dark2") +
-    ## geom_text(data=filter(ct.summary, name=="Tests Reported"),
-    ##           aes(label=value, x=Date, y=-150), color="grey70", size=2.25) +
-    ## geom_text_npc(aes(npcx=.05, npcy=.85, label="Cumulative No. of tests administered"),
-    ##               size=3,
-    ##               color="grey70") +
     ylim(-150, NA) +
     guides(fill=guide_legend(title=NULL)) +
     labs(title="Covid-19 Cases, Hospitalizations, Deaths, & Tests completed for Connecticut",
@@ -627,6 +715,7 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
        width=width*16/9, height=height,
        units=units,
        dpi=dpi)
+}
 
 ####################################
 ## NYT state-by-state corona data ##
@@ -674,10 +763,7 @@ caption.nyt <- paste("Data Source: https://github.com/nytimes/covid-19-data.",
                      "Figure by David Braze (davebraze@gmail.com) using R statistical software,",
                      "Released under the Creative Commons v4.0 CC-by license.", sep="\n")
 
-## only label Sundays to avoid xlab overcrowding
-x.labs <- strftime(unique(usa.state.corona$date), "%b %d")
-x.labs <- ifelse(strftime(unique(usa.state.corona$date), "%w")=="0", x.labs, "")
-
+## FIXME: need a version of this plot that shows cases per 100k population
 usa.state.corona.plt <-
     ggplot(usa.state.corona) +
     geom_line(aes(x=date, y=cases, group=state),
@@ -688,25 +774,22 @@ usa.state.corona.plt <-
                                            date == max(date) & cases >= label.cut.states[label.count.states]),
                              aes(label = assoc_press, x = date, y = cases),
                              segment.size=.25,
-                             size=2,
+                             size=2.5,
                              hjust = 0,
                              direction="y",
                              force=1/4,
                              nudge_x=5) +
-    scale_x_date(expand = expansion(add=c(1/4, 6)),
-                 breaks = unique(usa.state.corona$date),
-                 labels = x.labs,
+    scale_x_date(expand = expansion(add=c(2, 30)),
+                 date_breaks = "1 month",
+                 date_labels = "%b %d",
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases per U.S. State",
          subtitle="Data compiled by the New York Times",
          caption=caption.nyt) +
-    ## geom_text_npc(aes(npcx=.1, npcy=.9,
-    ##                   label=paste0("The top ", label.count.states, " states are labeled\n",
-    ##                                "(those with at least ", label.cut.states[label.count.states], " cases)")),
-    ##               size=2.5) +
     geom_text_npc(aes(npcx=.1, npcy=.8, label="Connecticut in Blue"), color="blue", size=2.5) +
     ylab("Number of Cases") +
     theme_fdbplot(font_size=font.size) +
+    background_grid(major="xy") +
     theme(legend.position="top",
           plot.margin = unit(c(1,1,1,1), "lines"),
           axis.text.x = element_text(angle=45, hjust=1))

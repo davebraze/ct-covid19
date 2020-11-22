@@ -91,6 +91,8 @@ cat(paste0(readLines("readme.md", n=-1), collapse="\n"))
 
 I started putting together graphs based on Connecticut Department of Public Health (DPH) data in late March, and I've been putting graphs up on various social media platforms since the first week of April. If you're interested in what those earlier efforts looked like, you can [find some of them on Twitter](https://twitter.com/search?q=%23Connecticut%20%23covid19%20%40davidbraze&src=typed_query). You could also [follow me on twitter](https://twitter.com/davidbraze), which is where I'll usually announce updates to this page.
 
+Around the end of May, I got busy with other things and stopped updating this page until around mid-November. Covid activity in Connecticut had subsided after the spring surge and stayed pretty flat through the summer. But, by mid-September it seemed clear that we were in the beginnings of a second wave of infections. I finally got around to updating these graphs again around mid-November.
+
 This web page (the one you're looking at now) is home to my most recent Connecticut Covid-19 graphs, although it won't have every figure I've built. I expect to grow the collection and add some narrative around the graphs, when I have time. Of course, I'll update the graphs as new data rolls in from the state. Don't expect web page updates to happen every day, but I guess I'll get around to it a couple of times a week. The date at the top of the page will always indicate when it was last updated. So, you should think of this web page as a "living document." It's going to change over time. And, yes, there will be typos. 
 
 Finally, at the bottom of this page, you'll find a few general [Covid-19 resources](#resources) that might be useful to you. 
@@ -119,15 +121,17 @@ The ***hospitalizations*** count is the number of people who are, on that day, h
 
 ## Statewide Summary
 
-While, CT DPH reports cumulative counts, these can be misleading numbers. I've plotted them just the same in Figure \@ref(fig:ct-summary-2-plt). The problem with this kind of graph is that it makes it hard to see how much the numbers are changing from one day to the next. It's easy to see the difference between cumulative and non-cumulative statistics. Cumulative counts (Cases, Deaths, Tests) can never go down, but a non-cumulative count (Hospitalizations) can decrease over time.
+While, CT DPH reports cumulative counts, these can be misleading numbers. I've plotted them just the same in Figure \@ref(fig:ct-summary-2-plt). The problem with this kind of graph is that it makes it hard to see how much the numbers are changing from one day to the next. It's easy to see the difference between cumulative and non-cumulative statistics. Cumulative counts (Cases, Deaths, Tests) can never go down, but a non-cumulative count (Hospitalizations) can decrease over time. For these I've stopped updating this figure, showing cumulative counts, as of the end of May. More up-to-date numbers and better visualization can be found in Figure \@ref(fig:ct-stat-daily-change) and beyond.
 
-```{r ct-summary-2-plt, fig.height=10.5, fig.cap="Covid-19 Cases, Hospitalizations, Deaths, & Tests completed for Connecticut. Note different y scales."}
+```{r ct-summary-2-plt, fig.height=10.5, fig.cap="Covid-19 Cases, Hospitalizations, Deaths, & Tests completed for Connecticut through the end of May. Note different y scales."}
 
 ct.summary.2.plt
 
+## cat("<img src='./figures/20200525-ct-summary.png' alt='20200525-ct-summary.png'/>")
+
 ```
 
-One way to visually emphasize day to day change in the numbers is to start with the DPH's cumulative counts (and daily count, in the case of ***Hospitalizations***), and subtract the previous day's count from each number. I'm showing these day-to-day differences in Figure \@ref(fig:ct-stat-daily-change). These difference values can look a little 'spiky', so I've added dashed lines for the three day running averages, which helps to smooth things out and may make trends a little easier to spot. It's important to keep in mind that Figure \@ref(fig:ct-summary-2-plt) and Figure \@ref(fig:ct-stat-daily-change) are based on the same underlying data. They just emphasize different aspects of it.
+One way to visually emphasize day to day change in the numbers is to start with the DPH's cumulative counts (and daily count, in the case of ***Hospitalizations***), and subtract the previous day's count from each number. I'm showing these day-to-day differences in Figure \@ref(fig:ct-stat-daily-change). These difference values can look a little 'spiky'. That seems to be mostly due to a weekly cycle in the way COVID tests are administered or reported. So, I've taken seven day running averages of the reported numbers to smooth things out a bit. These averages are shown as dashed lines in Figure \@ref(fig:ct-stat-daily-change). Averaging in this way makes longer term trends easier to spot. It's important to keep in mind that Figure \@ref(fig:ct-summary-2-plt) and Figure \@ref(fig:ct-stat-daily-change) are based on the same underlying data. They just emphasize different aspects of it. The most recent day's values, both the reported value and the seven day average, are labeled on the right-hand side of Figure \@ref(fig:ct-stat-daily-change). These can be compared to numbers at the table labelled "Connecticut COVID-19 Summary" at the top of the Connecticut DPH page [here](https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library). Keep in mind that the state page seems to be updated every weekday (but not weekends). My page, the one you're looking at now, is updated less frequently. The date at the top of this page indicates when it was last updated.
 
 ```{r ct-stat-daily-change, fig.height=10.5, fig.cap=ct.stat.daily.change.cap}
 
@@ -135,7 +139,9 @@ ct.stat.daily.change.plt
 
 ```
 
-It's also interesting to look at how Connecticut is doing relative to other states. Figure \@ref(fig:usa-state-corona) shows the growth in cumulative Covid-19 cases for all 50 states. Connecticut, shown in blue, is consistently between 9th and 12th place for number of cases. So, Connecticut is really outperforming, not in a good way , considering it is only the 29th most populous state.
+It's also interesting to look at how Connecticut is doing relative to other states. Figure \@ref(fig:usa-state-corona) shows the growth in cumulative Covid-19 cases for all 50 states. Connecticut, shown in blue, was consistently between 9th and 12th place for number of cases in the early stage of the pandemic, well into June. So, Connecticut was really outperforming, not in a good way , considering it is only the 29th most populous state.
+
+Starting in summer, Connecticut's response to the pandemic had the effect of reducing spread of the virus, while at the same time COVID started spreading out of control in states that were less effected during the spring. Sadly, starting in November, COVID cases started increasing all across the country.
 
 ```{r usa-state-corona, fig.cap=usa.state.corona.cap}
 
@@ -145,6 +151,7 @@ usa.state.corona.plt
 
 ## Town by Town
 
+In the following figures, I try to show how the pandemic is effecting individual towns across Connecticut. Unfortunately, detailed statistics are not available for each town, and we have to rely mostly on covid case counts, which the state does publish for each town. It should be no surprise that bigger towns tend to have more cases both across the state as a whole and within individual counties, as shown in Figures \@ref(fig:town-rate) and \@ref(fig:town-by-county-rate).
 
 ```{r town-rate, fig.cap=town.rate.cap}
 
@@ -158,6 +165,14 @@ town.by.county.rate.plt
 
 ```
 
+
+```{r town-by-pop-rate, fig.height=10.5, fig.cap=ct.town.by.pop.rate.cap}
+
+town.by.pop.rate.plt
+
+```
+
+
 ```{r map-today, fig.height=7, fig.cap="Cumulative Covid-19 cases by town."}
 
 map.today
@@ -168,7 +183,11 @@ map.today
 
 ## How Covid-19 Spreads
 
-There is a nice blog post by Erin Bromage, PhD in microbiology and immunology, about how person-to-person transmission of Covid-19 actually happens. It includes specific information on what the experts know about which situations are more risky, and which ones are less risky: https://www.erinbromage.com/post/the-risks-know-them-avoid-them. This is a great article for people who are worried about how to manage risk for themselves and their loved ones as governments start to scale back on Covid-19 restrictions on movement and business activities. 
+There is a nice blog post by Erin Bromage, PhD in microbiology and immunology, detailing what we knew in early May about how person-to-person transmission of Covid-19 actually happens. It includes specific information on what the experts know about which situations are more risky, and which ones are less risky: <https://www.erinbromage.com/post/the-risks-know-them-avoid-them>. This is a great article for people who are worried about how to manage risk for themselves and their loved ones as governments start to scale back on Covid-19 restrictions on movement and business activities. 
+
+Bromage got it mostly right, but we have learned some things about COVID transmission since then. The table below is taken from a research summary of what is known about COVID transmission routes as of October 22, 2020. You can get the source document [here](https://www.gov.uk/government/publications/sars-cov-2-transmission-routes-and-environments-22-october-2020).
+
+![Covid transmission risk table](./resources/2020-11-22 S0824_SARS-CoV-2_Transmission_routes_and_environments pdf.png)
 
 ## Plans for Re-opening
 
