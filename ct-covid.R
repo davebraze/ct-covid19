@@ -584,8 +584,8 @@ ct.stat.daily.change.plt  <-
     ct.summary.long %>%
     filter(! name %in% c("Tests.0", "Cases.0", "Hospitalized.0", "Deaths.0")) %>%
     ggplot(aes(x=Date)) +
-    geom_line(aes(y=value, color=name, linetype=type, size=rev(type), alpha=type), show.legend=FALSE) +
-    scale_size_manual(values=c(1,2)) +
+    geom_line(aes(y=value, color=name, linetype=type, size=type, alpha=type), show.legend=FALSE) +
+    scale_size_manual(values=c(2,1)) +
     scale_alpha_manual(values=c(1/3,1)) +
     scale_linetype_manual(values=c(1,5)) +
     scale_x_date(date_labels="%b %d",
@@ -593,7 +593,9 @@ ct.stat.daily.change.plt  <-
                  expand = expansion(add=c(2,30)),
                  name=NULL) +
     scale_y_continuous(limits=my_limits) +
-    scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
+    scale_color_manual(values=RColorBrewer::brewer.pal(5,"Dark2")[c(1,2,5,3,4)]) +
+    ## keep same color--variable mapping as in figure 1
+##    scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
     facet_wrap(~name, nrow=5, scales="free_y") +
     labs(title="Daily Values for Covid-19 Statistics in Connecticut",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
@@ -692,20 +694,25 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
 
 ct.summary.2.plt <-
     ct.summary.long %>%
-    filter(Date < as.Date("2020-06-01")) %>%
+    ##    filter(Date < as.Date("2020-06-01")) %>%
     filter(name %in% c("Cases.0", "Tests.0", "Hospitalized.0", "Deaths.0" )) %>%
     mutate(name = fct_recode(name,
                              "Cases, cumulative" = "Cases.0",
                              "Tests, cumulative" = "Tests.0",
                              "Hospitalized, daily" = "Hospitalized.0",
                              "Deaths, cumulative" = "Deaths.0")) %>%
+    mutate(name = forcats::fct_relevel(name,
+                                       "Tests, cumulative",
+                                       "Cases, cumulative",
+                                       "Hospitalized, daily",
+                                       "Deaths, cumulative")) %>%
     ggplot(aes(y=value, x=Date)) +
-    geom_bar(aes(fill=name), position="dodge", stat="identity", show.legend=FALSE) +
+    geom_bar(aes(fill=name), alpha=1/2, position="dodge", stat="identity", show.legend=FALSE) +
     facet_wrap(~name, nrow=4, scales="free_y") +
     scale_fill_brewer(type="qual", palette="Dark2") +
     scale_x_date(expand = expansion(add=c(1/4, 1/4)),
                  date_labels="%b %d",
-                 date_breaks="1 week",
+                 date_breaks="1 month",
                  name=NULL) +
     scale_color_brewer(type="qual", palette="Dark2") +
     ylim(-150, NA) +
