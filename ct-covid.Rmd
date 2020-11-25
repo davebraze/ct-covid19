@@ -169,7 +169,7 @@ town.by.county.rate.plt
 
 ```
 
-All other things being equal, you would expect larger towns to have more cases than smaller towns, and that comes out pretty clearly in Figures \@ref(fig:town-rate) and \@ref(fig:town-by-county-rate). Figure \@ref(fig:town--by-pop-rate) divides Connecticut's towns up by size, grouping towns of similar size together. This let's us see how each town is doing relative to other towns of similar size. 
+All other things being equal, you would expect larger towns to have more cases than smaller towns, and that comes out pretty clearly in Figures \@ref(fig:town-rate) and \@ref(fig:town-by-county-rate). Figure \@ref(fig:town-by-pop-rate) divides Connecticut's towns up by size, grouping towns of similar size together. This let's us see how each town is doing relative to other towns of similar size. 
 
 ```{r town-by-pop-rate, fig.height=10.5, fig.cap=ct.town.by.pop.rate.cap}
 

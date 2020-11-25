@@ -523,7 +523,7 @@ town.by.pop.rate.plt <-
 
 
 ct.town.by.pop.rate.cap <- paste(
-    "Cumulative Covid-19 case counts per 10k population by town, split by population bin.",
+    "Cumulative Covid-19 case counts by town, split by population bin.",
     "The top ", label.count, " towns in each population group are labeled.",
     "Note differing y scales for each group.",
     "Counties are color coded as in the previous plot.")
