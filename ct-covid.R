@@ -256,12 +256,18 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-days"), ftype),
 
 breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600, 3200, 6400)
 
-map.today <-
+ct.covid.today <-
     ct.covid %>%
-    filter(Date==max(Date)) %>%
-    ggplot() +
-    geom_sf(aes(fill=town.cases, geometry=geometry), color="lightblue", size=.33) +
-    geom_sf_text(aes(label=town.cases, geometry=geometry), color="white", size=2) +
+    filter(Date==max(Date))
+
+shade <- exp(log(max(ct.covid.today$town.cases))*.75)
+
+map.today <-
+    ggplot(ct.covid.today) +
+    geom_sf(aes(fill=town.cases, geometry=geometry), color="white", size=.33) +
+    geom_sf_text(aes(label=town.cases, geometry=geometry, color=town.cases<shade),
+                 size=2, show.legend=FALSE) +
+    scale_color_manual(values=c("black", "white")) +
     scale_fill_continuous(type="viridis",
                           trans="log",
                           breaks=breaks,
@@ -339,7 +345,7 @@ town.rate.plt <-
           plot.margin = unit(c(1,1,1,1), "lines"),
           axis.text.x = element_text(angle=45, hjust=1))
 
-town.rate.cap <- paste0("Total Covid-19 Cases for Connecticut's 169 Towns.",
+  town.rate.cap <- paste0("Total Covid-19 Cases for Connecticut's 169 Towns.",
                         "The top ", label.count.towns, " towns are labeled\n",
                         "(those with at least ", label.cut.towns[label.count.towns], " cases)")
 
@@ -496,15 +502,17 @@ town.by.pop.rate.plt <-
               size=4/3, alpha=1/2) +
     facet_wrap(~pop.2010.bin, nrow=5, scales="free_y") +
     ggrepel::geom_text_repel(data = label.cut,
-                             aes(label = Town, x = Date, y = town.cases),
+                             aes(label = Town, x = Date, y = town.cases, color=county),
+                             alpha=1,
                              segment.size=.25,
                              min.segment.length = 0,
                              size=2,
                              hjust = -0,
                              direction="y",
                              force=1/4,
-                             nudge_x=5) +
-    scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
+                             nudge_x=5,
+                             show.legend=FALSE) +
+    scale_color_brewer(type="qual", palette="Dark2") +
     scale_y_continuous(limits=my_limits) +
     scale_x_date(date_labels="%b %d",
                  date_breaks="1 month",
@@ -517,7 +525,10 @@ town.by.pop.rate.plt <-
     ylab("Number of Cases") +
     theme_fdbplot(font_size=font.size) +
     background_grid(major="xy") +
-    theme(legend.position="top",
+    guides(color=guide_legend(title="County", title.hjust=0.5, ncol=1,
+                              override.aes=list(size=3, alpha=1),
+                              shape=16)) +
+    theme(legend.position="right",
           plot.margin = unit(c(1,1,1,1), "lines"),
           axis.text.x = element_text(angle=45, hjust=1))
 
@@ -536,14 +547,13 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-by-pop-rate"), ftype),
        units=units,
        dpi=dpi)
 
+
 ########################################################
 ## line plot for daily change in core statistics.     ##
 ## Includes 7 day running average                     ##
 ########################################################
 
 ## FIXME:
-## o label average value at end date for each subplot
-## o fix positivity rate to use confirmedcases only
 ## o add "(confirmed + probable)" to Cases & Deaths labels
 
 ct.summary.1 <-
@@ -594,8 +604,6 @@ ct.stat.daily.change.plt  <-
                  name=NULL) +
     scale_y_continuous(limits=my_limits) +
     scale_color_manual(values=RColorBrewer::brewer.pal(5,"Dark2")[c(1,2,5,3,4)]) +
-    ## keep same color--variable mapping as in figure 1
-##    scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
     facet_wrap(~name, nrow=5, scales="free_y") +
     labs(title="Daily Values for Covid-19 Statistics in Connecticut",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
@@ -632,61 +640,6 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-rate"), ftype),
        units=units,
        dpi=dpi)
 
-##################################
-## bar plot for state-wide data ##
-##################################
-## This plot is retired, has not been updated since May
-
-if (FALSE){
-## only label Sundays to avoid xlab overcrowding
-x.labs <- strftime(unique(ct.summary$Date), "%b %d")
-x.labs <- ifelse(strftime(unique(ct.summary$Date), "%w")=="0", x.labs, "")
-
-ct.summary.plt <-
-    ct.summary %>%
-    filter(!name %in% c("Tests Reported")) %>%
-    mutate(name = fct_recode(name, "Cases, cumulative" = "Cases",
-                             "Hospitalized, daily" = "Hospitalized",
-                             "Deaths, cumulative" = "Deaths")) %>%
-    ggplot(aes(y=value, x=Date)) +
-    geom_bar(aes(fill=name), position="dodge", stat="identity") +
-    scale_fill_brewer(type="qual", palette="Dark2") +
-    scale_x_date(expand = expansion(add=c(1/4, 1/4)),
-                 date_labels="%b %d",
-                 date_breaks="1 month",
-                 name=NULL) +
-    geom_text(aes(color=name, label=value),
-              size=2,
-              position=position_dodge(width=1),
-              vjust=.5, hjust=-.1,
-              angle=90,
-              show.legend=FALSE) +
-    scale_color_brewer(type="qual", palette="Dark2") +
-    geom_text(data=filter(ct.summary, name=="Tests Reported"),
-              aes(label=value, x=Date, y=-150), color="grey70", size=2.25) +
-    geom_text_npc(aes(npcx=.05, npcy=.85, label="Cumulative No. of tests administered"),
-                  size=3,
-                  color="grey70") +
-    ylim(-150, NA) +
-    guides(fill=guide_legend(title=NULL)) +
-    labs(title="Covid-19 Cases, Hospitalizations, & Deaths for Connecticut",
-         subtitle=paste("Data compiled by CT Dept. of Public Health through",
-                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
-         caption=caption.ctdph) +
-    ylab("Count") + xlab(NULL) +
-    background_grid(major="xy") +
-    theme_fdbplot(font_size=font.size) +
-    theme(legend.position=c(.05, .90),
-          axis.text.x = element_text(angle=45, hjust=1))
-
-ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
-       plot=ct.summary.plt,
-       path=fig.path,
-       device=ftype,
-       width=width*16/9, height=height,
-       units=units,
-       dpi=dpi)
-}
 
 ####################################
 ## bar plot 2 for state-wide data ##
