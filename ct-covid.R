@@ -645,9 +645,19 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-rate"), ftype),
 ## bar plot 2 for state-wide data ##
 ####################################
 
+ct.stats.label.2 <-
+    ct.summary.long %>%
+    filter(name %in% c("Tests.0", "Cases.0", "Hospitalized.0", "Deaths.0")) %>%
+    filter(Date == max(Date)) %>%
+    mutate(name = fct_recode(name,
+                             "Cases, cumulative" = "Cases.0",
+                             "Tests, cumulative" = "Tests.0",
+                             "Hospitalized, daily" = "Hospitalized.0",
+                             "Deaths, cumulative" = "Deaths.0")) %>%
+    mutate(label = as.character(value))
+
 ct.summary.2.plt <-
     ct.summary.long %>%
-    ##    filter(Date < as.Date("2020-06-01")) %>%
     filter(name %in% c("Cases.0", "Tests.0", "Hospitalized.0", "Deaths.0" )) %>%
     mutate(name = fct_recode(name,
                              "Cases, cumulative" = "Cases.0",
@@ -663,14 +673,14 @@ ct.summary.2.plt <-
     geom_bar(aes(fill=name), alpha=1/2, position="dodge", stat="identity", show.legend=FALSE) +
     facet_wrap(~name, nrow=4, scales="free_y") +
     scale_fill_brewer(type="qual", palette="Dark2") +
-    scale_x_date(expand = expansion(add=c(1/4, 1/4)),
+    scale_x_date(expand = expansion(add=c(2, 30)),
                  date_labels="%b %d",
                  date_breaks="1 month",
                  name=NULL) +
     scale_color_brewer(type="qual", palette="Dark2") +
     ylim(-150, NA) +
     guides(fill=guide_legend(title=NULL)) +
-    labs(title="Covid-19 Cases, Hospitalizations, Deaths, & Tests completed for Connecticut",
+    labs(title="Covid-19 Cases, Hospitalizations, Deaths, & Tests for Connecticut",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
                         stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
          caption=caption.ctdph) +
@@ -678,7 +688,18 @@ ct.summary.2.plt <-
     theme_fdbplot(font_size=font.size) +
     background_grid(major="xy") +
     theme(legend.position=c(.05, .90),
-          axis.text.x = element_text(angle=45, hjust=1))
+          axis.text.x = element_text(angle=45, hjust=1)) +
+    ggrepel::geom_text_repel(data = ct.stats.label.2,
+                             aes(label = label, x = Date, y = value),
+                             segment.size=.25,
+                             min.segment.length = 0,
+                             size=2.5,
+                             hjust = 0,
+                             direction="y",
+                             force=1/4,
+                             nudge_x=10)
+
+
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
        plot=ct.summary.2.plt,

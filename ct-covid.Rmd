@@ -105,7 +105,7 @@ I am a freelance consultant for hire. Most of my time in my day job is spent wit
 
 This page and the graphs it contains are copyright 2020 by David Braze. The web page content and graphs are released under the [Creative Commons v4.0 CC-by license](https://creativecommons.org/licenses/by/4.0/).  Cutting through the legalese, it means that you're free to re-use the graphs (do what you want with them) so long as you say who made them and where you got them.
 
-# Show Me the Pictures
+# About the Data
 
 Connecticut DPH provides its most comprehensive set of statistics for the state as a whole (no subdivision for counties or towns). As of April 1, there are four basic daily statistics available for Connecticut. These are: Number of Covid-19 ***tests completed***; Number of ***confirmed cases*** of Covid19; Number of Covid-19 related ***Deaths***; Number of Covid-19 ***Hospitalizations***. The first three statistics are all cumulative counts. In other words, each represents the total number since record keeping began. So, those numbers can only go up (or stay the same) from one day to the next. On the other hand, ***Hospitalizations*** is the number of people in the hospital on a given day. That statistic can go up or down from one day to the next. For two of the statistics, ***confirmed cases*** and ***deaths***, the state also gives the breakdown by Age, Gender, and Race. But, there are no cross-tabulations provided. Only three of those statistics are available at the county level, ***tests completed*** is not. Only ***confirmed cases*** and ***deaths*** are available for individual towns. Age, Gender, and Race breakdowns are not available for county or town data.
 
@@ -118,6 +118,8 @@ The number of ***tests completed*** is the total, cumulative, number of Covid-19
 The cumulative ***deaths*** statistic is fairly self-explanatory. It is just the total number of people who have died as a result of, or while sick with Covid-19. It's worth looking at the link above on *Covid-19 reporting discrepancies in Connecticut*. Additional reporting points out that, as of May 2020,  [Connecticut uses an antiquated process for compiling death certificates and reporting them to the CDC](https://ctmirror.org/2020/05/19/as-it-prepares-to-reopen-connecticuts-count-of-covid-19-deaths-is-fragmented-and-incomplete/). So, there is a significant delay in the availability of Connecticut state mortality data, which means that it is not possible to have a real-time view of the increase this year over previous years for "death from all causes." Once available, that statistic will likely give a more accurate measure of lives lost due to Covid-19 than other indicators.
 
 The ***hospitalizations*** count is the number of people who are, on that day, hospitalized due to Covid-19. This is the only one of the 4 counts provided by Connecticut DPH that is not cumulative. Unlike some states, Connecticut does not break out how many of those are in ICU vs standard acute care (e.g., [New York](https://forward.ny.gov/daily-hospitalization-summary-region)). 
+
+# Show Me the Graphs
 
 ## Statewide Summary
 
