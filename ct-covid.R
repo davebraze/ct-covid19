@@ -595,9 +595,9 @@ ct.stat.daily.change.plt  <-
     filter(! name %in% c("Tests.0", "Cases.0", "Hospitalized.0", "Deaths.0")) %>%
     ggplot(aes(x=Date)) +
     geom_line(aes(y=value, color=name, linetype=type, size=type, alpha=type), show.legend=FALSE) +
-    scale_size_manual(values=c(2,1)) +
-    scale_alpha_manual(values=c(1/3,1)) +
-    scale_linetype_manual(values=c(1,5)) +
+    scale_size_manual(values=c(.75,1.5)) +
+    scale_alpha_manual(values=c(1,1/3)) +
+    scale_linetype_manual(values=c(1,1)) +
     scale_x_date(date_labels="%b %d",
                  date_breaks="1 month",
                  expand = expansion(add=c(2,30)),
