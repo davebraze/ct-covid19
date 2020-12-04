@@ -8,7 +8,7 @@
 <!-- <meta property="og:type" content="website" /> -->
 <!-- <meta property="og:title" content="Connecticut COVID-19 Case Tracker" /> -->
 <!-- <meta property="og:description" content="Track cases of COVID-19 (Coronavirus) in the State of Connecticut, including data from your local city or town." /> -->
-<!-- <meta property="og:image" content="https://www.ctcovid.com/preview.jpg" /> -->
+<meta property="og:image" content="https://davebraze.github.io/ct-covid19/preview.png" />
 
 <!-- Would setting this help with figuring out how long visitors are staying on the page? -->
 <!-- <meta http-equiv = "refresh" content = "15" /> -->

@@ -398,10 +398,6 @@ town.rate.10k.plt <-
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
                         stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
          caption=caption.ctdph) +
-    ## geom_text_npc(aes(npcx=.1, npcy=.9,
-    ##                   label=paste0("The top ", label.count.towns, " towns are labeled\n",
-    ##                                "(those with at least ", trunc(label.cut.towns[label.count.towns]), " cases per 10k population)")),
-    ##               size=2.5) +
     ylab("Number of Cases per 10,000 population") +
     theme_fdbplot(font_size=font.size) +
     background_grid(major="xy") +
@@ -588,7 +584,10 @@ ct.stats.label <-
     ct.summary.long %>%
     filter(! name %in% c("Tests.0", "Cases.0", "Hospitalized.0", "Deaths.0")) %>%
     filter(Date == max(Date)) %>%
-    mutate(label = str_replace(sprintf("%.2f", value), "\\.00", ""))
+    mutate(label = formatC(value, digits=2, format="f", big.mark=","),
+           label = if_else(type == "7mn",
+                           label,
+                           str_replace(label, "\\.00", "")))
 
 ct.stat.daily.change.plt  <-
     ct.summary.long %>%
@@ -626,8 +625,8 @@ ct.stat.daily.change.plt  <-
 
 ct.stat.daily.change.cap <- paste(
     "Daily Values (non-cumulative) for Covid-19 Statistics.",
-    "Heavy lines = raw counts.",
-    "Dashed lines = 7 day running averages.",
+    "Pale solid lines = raw counts.",
+    "Dark dashed lines = 7 day running averages.",
     "Tests before July 1 were in short supply and largely limited to those suspected of being infected.",
     "So, 'Test Positivity' for the period before July 1 is not shown.",
     "Note different y scales on subplots.")
@@ -654,7 +653,7 @@ ct.stats.label.2 <-
                              "Tests, cumulative" = "Tests.0",
                              "Hospitalized, daily" = "Hospitalized.0",
                              "Deaths, cumulative" = "Deaths.0")) %>%
-    mutate(label = as.character(value))
+    mutate(label = formatC(value, format="d", big.mark=","))
 
 ct.summary.2.plt <-
     ct.summary.long %>%
