@@ -317,7 +317,7 @@ town.rate.plt <-
     ct.covid %>%
     ggplot() +
     geom_line(aes(x=Date, y=town.cases, group=Town),
-              size=4/3, alpha=1/2, color="blue") +
+              size=1, alpha=1/2, color="blue") +
     geom_line(data=highlight, aes(x=Date, y=town.cases, group=Town),
               size=1/2, color="darkorange", alpha=1) +
     ggrepel::geom_text_repel(data = subset(ct.covid,
@@ -347,7 +347,7 @@ town.rate.plt <-
 
   town.rate.cap <- paste0("Total Covid-19 Cases for Connecticut's 169 Towns.",
                         "The top ", label.count.towns, " towns are labeled\n",
-                        "(those with at least ", label.cut.towns[label.count.towns], " cases)")
+                        "(those with at least ", formatC(label.cut.towns[label.count.towns], digits=2, format="f", big.mark=","), " cases)")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate"), ftype),
        plot=town.rate.plt,
@@ -377,7 +377,7 @@ town.rate.10k.plt <-
     ct.covid %>%
     ggplot() +
     geom_line(aes(x=Date, y=town.cases.10k, group=Town),
-              size=4/3, alpha=1/2, color="blue") +
+              size=1, alpha=1/2, color="blue") +
     geom_line(data=highlight, aes(x=Date, y=town.cases, group=Town),
               size=1/2, color="darkorange", alpha=1) +
     ggrepel::geom_text_repel(data = subset(ct.covid,
@@ -407,7 +407,7 @@ town.rate.10k.plt <-
 
 town.rate.10k.note <- paste("Cases per 10,000 population for each town.",
                              "The top ", label.count.towns, " towns are labeled",
-                             "(those with at least", trunc(label.cut.towns[label.count.towns]),
+                             "(those with at least", formatC(trunc(label.cut.towns[label.count.towns]), digits=2, format="f", big.mark=","),
                              "cases per 10k pop.)")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate-10k"), ftype),
@@ -436,7 +436,7 @@ town.by.county.rate.plt <-
     ct.covid %>%
     ggplot() +
     geom_line(aes(x=Date, y=town.cases, group=Town, color=county),
-              size=4/3, alpha=1/2) +
+              size=1, alpha=1/2) +
     facet_wrap(~county, nrow=4, scales="free_y") +
     ggrepel::geom_text_repel(data = label.cut,
                              aes(label = Town, x = Date, y = town.cases),
@@ -495,7 +495,7 @@ town.by.pop.rate.plt <-
     ct.covid %>%
     ggplot() +
     geom_line(aes(x=Date, y=town.cases, group=Town, color=county),
-              size=4/3, alpha=1/2) +
+              size=1, alpha=1/2) +
     facet_wrap(~pop.2010.bin, nrow=5, scales="free_y") +
     ggrepel::geom_text_repel(data = label.cut,
                              aes(label = Town, x = Date, y = town.cases, color=county),
@@ -640,6 +640,76 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-rate"), ftype),
        dpi=dpi)
 
 
+
+#####################################
+## Drill down into test positivity ##
+#####################################
+
+ct.tpos.label <-
+    ct.summary.long %>%
+    filter(name == "Test Positivity (percent)") %>%
+    filter(Date == max(Date)) %>%
+    mutate(label = formatC(value, digits=2, format="f", big.mark=","),
+           label = if_else(type == "7mn",
+                           label,
+                           str_replace(label, "\\.00", "")))
+
+holidays <- tibble(name = c("Independence Day", "Labor Day", "Columbus Day", "Thanksgiving"),
+                   start = as.Date(c("2020-07-03", "2020-09-05", "2020-10-10", "2020-11-26")),
+                   end = as.Date(c("2020-07-05", "2020-09-07", "2020-10-12", "2020-11-29")),
+                   ymin = 0,
+                   ymax = 7)
+
+ct.tpos.daily.change.plt  <-
+    ct.summary.long %>%
+    filter(name == "Test Positivity (percent)") %>%
+    ggplot(aes(x=Date)) +
+    geom_line(aes(y=value, color=name, linetype=type, size=type, alpha=type), show.legend=FALSE) +
+    scale_size_manual(values=c(1,.75)) +
+    scale_alpha_manual(values=c(1/3,1)) +
+    scale_linetype_manual(values=c("solid", "F2")) +
+    scale_x_date(date_labels="%b %d",
+                 date_breaks="1 month",
+                 expand = expansion(add=c(2,30)),
+                 name=NULL) +
+    scale_y_continuous(limits=my_limits) +
+    scale_color_manual(values=RColorBrewer::brewer.pal(5,"Dark2")[c(1,2,5,3,4)]) +
+    geom_rect(data=holidays, inherit.aes=FALSE,
+              aes(xmin=start, xmax=end, ymin=ymin, ymax=ymax),
+              fill="orange", color=NA, alpha=1/4) +
+    labs(title="Covid-19 Test Positivity in Connecticut",
+         subtitle=paste("Data compiled by CT Dept. of Public Health through",
+                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+         caption=caption.ctdph) +
+    ylab("Test Positivity Value (percent)") + xlab(NULL) +
+    theme_fdbplot(font_size=font.size) +
+    background_grid(major="xy") +
+    theme(axis.text.x = element_text(angle=45, hjust=1)) +
+    ggrepel::geom_text_repel(data = ct.tpos.label,
+                             aes(label = label, x = Date, y = value),
+                             segment.size=.25,
+                             min.segment.length = 0,
+                             size=2.5,
+                             hjust = 0,
+                             direction="y",
+                             force=1/4,
+                             nudge_x=10)
+
+ct.tpos.daily.change.cap <- paste(
+    "Daily Values for Covid-19 Test Positivity.",
+    "Pale solid line = raw percent.",
+    "Dark dashed line = 7 day running average.",
+    "Tests before July 1 were in short supply and largely limited to those suspected of being infected.",
+    "So, 'Test Positivity' for the period before July 1 is not shown.")
+
+ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-tpos"), ftype),
+       plot=ct.tpos.daily.change.plt,
+       path=fig.path,
+       device=ftype,
+       width=width, height=height,
+       units=units,
+       dpi=dpi)
+
 ####################################
 ## bar plot 2 for state-wide data ##
 ####################################
@@ -758,7 +828,7 @@ caption.nyt <- paste("Data Source: https://github.com/nytimes/covid-19-data.",
 usa.state.corona.plt <-
     ggplot(usa.state.corona) +
     geom_line(aes(x=date, y=cases, group=state),
-              size=4/3, color="orange", alpha=1/3) +
+              size=1, color="orange", alpha=1/3) +
     geom_line(data=highlight, aes(x=date, y=cases, group=state), ## highlight CT
               size=1, color="blue", alpha=.8) +
     ggrepel::geom_text_repel(data = subset(usa.state.corona,
@@ -788,7 +858,7 @@ usa.state.corona.plt <-
 
 usa.state.corona.cap <- paste("Cumulative Covid-19 Cases per U.S. State",
                               "The top", label.count.states, "states are labeled",
-                              "(those with at least", label.cut.states[label.count.states], "cases).")
+                              "(those with at least", formatC(label.cut.states[label.count.states], digits=2, format="f", big.mark=","), "cases).")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "usa-rate"), ftype),
        plot=usa.state.corona.plt,
