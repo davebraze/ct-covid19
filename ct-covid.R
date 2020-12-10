@@ -58,20 +58,16 @@ ct.shp <-
 covid.fnames <- fs::dir_ls(here::here("01-ctdph-daily-reports")) %>%
     str_subset("CTDPHCOVID19summary[0-9]+.pdf")
 
-## ##### read all available covid pdfs
+##### read available covid reports and scrape data from them
+##### this is necessary to get numbers for early part of the pandemic
+scrape.reports = FALSE
 town.tab <- TRUE
-covid <- purrr::map_dfr(covid.fnames, read_ctcovid_pdf, town.tab=town.tab)
-
-
-## if (town.tab == TRUE){
-##     covid[779, "Town"] <- "North Stonington" ## repair bad line from one input file
-##     covid <- covid[-778,]
-## }
-
-## covid  <-
-##     covid %>%
-##     arrange(Date) %>%
-##     mutate(date.string = as_factor(strftime(Date, "%b %d")))
+if(scrape.reports) {
+    covid <- purrr::map_dfr(covid.fnames, read_ctcovid_pdf, town.tab=town.tab)
+    saveRDS(covid, file=here::here("03-other-source-data/pdf-reports.rds"))
+} else {
+    covid <- readRDS(file=here::here("03-other-source-data/pdf-reports.rds"))
+}
 
 ##################################################
 ## Use the Socrata API to access state DPH data ##
