@@ -161,9 +161,14 @@ ct.summary.wide <- read.socrata("https://data.ct.gov/resource/rf3k-f8fg.json",
            probabledeathscum = as.integer(probabledeaths)) %>%
     select(-c(state, confirmeddeaths, probabledeaths, confirmedcases, probablecases), -starts_with("cases_"))
 
-## FIXME
-tmp <- purrr::map_dfr(covid.fnames, read_ctcovid_pdf, town.tab=FALSE) %>%
-    select(Date, tests.complete)
+## FIXME: this line should be redundant.
+## The pdfs have already been scanned at line 66, although with town.tab=TRUE.
+## tmp <- purrr::map_dfr(covid.fnames, read_ctcovid_pdf, town.tab=FALSE) %>%
+##     select(Date, tests.complete)
+
+tmp <- covid %>%
+    select(Date, tests.complete) %>%
+    distinct()
 
 ct.summary.wide <- left_join(ct.summary.wide, tmp) %>%
     arrange(Date) %>%
