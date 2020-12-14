@@ -479,6 +479,71 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-by-county-rate"), ftype)
        dpi=dpi)
 
 
+#############################################################
+## rate plot by town per 10k pop., facet by population bin ##
+#############################################################
+
+label.count <- 6
+label.cut <-
+    ct.covid %>%
+    filter(Date == max(Date)) %>%
+    select(Town, county, pop.2010.bin, town.cases.10k, Date) %>%
+    group_by(pop.2010.bin) %>%
+    arrange(town.cases.10k, .by_group=TRUE) %>%
+    top_n(label.count, town.cases.10k)
+
+town.by.pop.rate10k.plt <-
+    ct.covid %>%
+    ggplot() +
+    geom_line(aes(x=Date, y=town.cases.10k, group=Town, color=county),
+              size=1, alpha=1/2) +
+    facet_wrap(~pop.2010.bin, nrow=5, scales="free_y") +
+    ggrepel::geom_text_repel(data = label.cut,
+                             aes(label = Town, x = Date, y = town.cases.10k, color=county),
+                             alpha=1,
+                             segment.size=.25,
+                             min.segment.length = 0,
+                             size=2,
+                             hjust = -0,
+                             direction="y",
+                             force=1/4,
+                             nudge_x=5,
+                             show.legend=FALSE) +
+    scale_color_brewer(type="qual", palette="Dark2") +
+    scale_y_continuous(limits=my_limits) +
+    scale_x_date(date_labels="%b %d",
+                 date_breaks="1 month",
+                 expand = expansion(add=c(2,30)),
+                 name=NULL) +
+    labs(title="Cumulative Covid-19 Cases per 10k population for 169 Connecticut Towns\nsplit by population bin",
+         subtitle=paste("Data compiled by CT Dept. of Public Health through",
+                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+         caption=caption.ctdph) +
+    ylab("Number of Cases") +
+    theme_fdbplot(font_size=font.size) +
+    background_grid(major="xy") +
+    guides(color=guide_legend(title="County", title.hjust=0.5, ncol=1,
+                              override.aes=list(size=3, alpha=1),
+                              shape=16)) +
+    theme(legend.position="right",
+          plot.margin = unit(c(1,1,1,1), "lines"),
+          axis.text.x = element_text(angle=45, hjust=1))
+
+ct.town.by.pop.rate10k.cap <- paste(
+    "Cumulative Covid-19 case counts per capita for each town, split by population bin.",
+    "The top ", label.count, " towns in each population group are labeled.",
+    "Note differing y scales for each group.",
+    "Counties are color coded as before.")
+
+ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-by-pop-rate10k"), ftype),
+       plot=town.by.pop.rate10k.plt,
+       path=fig.path,
+       device=ftype,
+       width=width*16/9, height=height,
+       units=units,
+       dpi=dpi)
+
+
 ################################################
 ## rate plot by town, facet by population bin ##
 ################################################
