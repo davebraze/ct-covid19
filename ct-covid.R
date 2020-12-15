@@ -519,7 +519,7 @@ town.by.pop.rate10k.plt <-
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
                         stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
          caption=caption.ctdph) +
-    ylab("Number of Cases") +
+    ylab("Number of Cases per 10,000 Population") +
     theme_fdbplot(font_size=font.size) +
     background_grid(major="xy") +
     guides(color=guide_legend(title="County", title.hjust=0.5, ncol=1,
