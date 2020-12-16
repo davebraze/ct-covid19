@@ -348,7 +348,7 @@ town.rate.plt <-
 
   town.rate.cap <- paste0("Total Covid-19 Cases for Connecticut's 169 Towns.",
                         "The top ", label.count.towns, " towns are labeled\n",
-                        "(those with at least ", formatC(label.cut.towns[label.count.towns], digits=2, format="f", big.mark=","), " cases)")
+                        "(those with at least ", formatC(label.cut.towns[label.count.towns], format="d", big.mark=","), " cases)")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate"), ftype),
        plot=town.rate.plt,
@@ -483,7 +483,7 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-by-county-rate"), ftype)
 ## rate plot by town per 10k pop., facet by population bin ##
 #############################################################
 
-label.count <- 6
+label.count <- 7
 label.cut <-
     ct.covid %>%
     filter(Date == max(Date)) %>%
@@ -548,7 +548,7 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-by-pop-rate10k"), ftype)
 ## rate plot by town, facet by population bin ##
 ################################################
 
-label.count <- 6
+label.count <- 7
 label.cut <-
     ct.covid %>%
     filter(Date == max(Date)) %>%
@@ -924,7 +924,7 @@ usa.state.corona.plt <-
 
 usa.state.corona.cap <- paste("Cumulative Covid-19 Cases per U.S. State",
                               "The top", label.count.states, "states are labeled",
-                              "(those with at least", formatC(label.cut.states[label.count.states], digits=2, format="f", big.mark=","), "cases).")
+                              "(those with at least", formatC(label.cut.states[label.count.states], format="d", big.mark=","), "cases).")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "usa-rate"), ftype),
        plot=usa.state.corona.plt,
