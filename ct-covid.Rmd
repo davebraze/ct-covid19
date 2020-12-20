@@ -123,7 +123,7 @@ The ***hospitalizations*** count is the number of people who are, on that day, h
 
 ## Map Files
 
-The map files used in Figure \@ref(fig:map-today) were downloaded from the [Map and Geographic Information Center at the UConn Library](http://magic.lib.uconn.edu/).
+The map files used in Figure \@ref(fig:map-cumcases) were downloaded from the [Map and Geographic Information Center at the UConn Library](http://magic.lib.uconn.edu/).
 
 ## Population Data
 
@@ -197,11 +197,11 @@ town.by.pop.rate10k.plt
 
 ```
 
-The map in Figure \@ref(fig:map-today) shows the total cumulative number of COVID19 cases for every town in Connecticut over the entire span of the pandemic to date. The numbers shown for each town in the map correspond to the endpoints of the lines in Figures \@ref(fig:town-rate), \@ref(fig:town-by-county-rate), and \@ref(fig:town-by-pop-rate).
+The map in Figure \@ref(fig:map-cumcases) shows the total cumulative number of COVID19 cases for every town in Connecticut over the entire span of the pandemic to date. The numbers shown for each town in the map correspond to the endpoints of the lines in Figures \@ref(fig:town-rate), \@ref(fig:town-by-county-rate), and \@ref(fig:town-by-pop-rate).
 
-```{r map-today, fig.height=7, fig.cap="Cumulative Covid-19 cases by town."}
+```{r map-cumcases, fig.height=7, fig.cap="Cumulative Covid-19 cases by town."}
 
-map.today
+map.cumcases
 
 ```
 

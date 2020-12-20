@@ -205,36 +205,64 @@ height <- 7
 units <- "in"
 dpi <- 300
 
-#########################################################
-## map cumulative confirmed case count by Town and Day ##
-#########################################################
-
-## This needs updating to accomodate the much larger number of timepoints in the data.
-## one way to do that would be replace this facetted map with an animation.
-
-breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600)
-
-if(FALSE) {
+################################################
+## map 10 day average Test Positivity by Town ##
+################################################
 
 
-map.days <-
+## 2 slightly different ways of calculating Average Test Positivity by town
+## for the most recent N days of data. I think the first method (".0") will do a better
+## job of smoothing over sampling variation, by summing over numberoftests &
+## numberofpositives BEFORE computing positivity.
+ct.covid.positivity.0 <-
     ct.covid %>%
-    ggplot() +
-    geom_sf(aes(fill=town.cases, geometry=geometry), color="lightblue", size=.33) +
-    scale_fill_continuous(type="viridis",
-                          trans="log",
-                          breaks=breaks,
-                          labels=breaks) +
+    group_by(Town) %>%
+    slice_max(Date, n=10) %>%
+    mutate(ending.date = max(Date),
+           positive.sum = sum(numberofpositives),
+           tests.sum = sum(numberoftests),
+           town.positivity = positive.sum/tests.sum*100) %>%
+    filter(Date == ending.date)
+
+## hist(ct.covid.positivity.0$town.positivity, col="lightblue")
+
+## ct.covid.positivity.1 <-
+##     ct.covid %>%
+##     group_by(Town) %>%
+##     slice_max(Date, n=10) %>%
+##     mutate(ending.date = max(Date),
+##            town.positivity.daily = numberofpositives/numberoftests*100,
+##            town.positivity = mean(town.positivity.daily)) %>%
+##     filter(Date == ending.date)
+
+## hist(ct.covid.positivity.1$town.positivity)
+
+breaks <- c(0,2,4,6,8,20)
+shade <- max(ct.covid.positivity.0$town.positivity)*.5
+
+map.positivity <-
+    ggplot(ct.covid.positivity.0) +
+    geom_sf(aes(fill=town.positivity, geometry=geometry), color="white", size=.33) +
+    geom_sf_text(aes(label=formatC(town.positivity, format="f", digits=2),
+                     geometry=geometry,
+                     color=town.positivity<shade),
+                 size=2, show.legend=FALSE) +
+    scale_color_manual(values=c("black", "white")) +
+    viridis::scale_fill_viridis(option="magma",
+                                breaks=breaks,
+                                labels=breaks) +
     guides(fill=guide_colorbar(barwidth=20,
-                               title="Number of Cases",
+                               title="10 Day Average Test Positivity (%)",
                                title.vjust=1)) +
-    facet_wrap(~Date,
-               ncol=5,
-               labeller=label_date) +
-    labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
+    ## facet_wrap(~Date,
+    ##            ncol=4,
+    ##            labeller=label_date) +
+    labs(title=paste("10 Day Average Covid-19 Test Positivity in Connecticut Towns\nfor period ending",
+                     format(max(ct.covid$Date), "%b %d, %Y")),
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
-                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+                        format(max(ct.covid$Date), "%B %d, %Y")),
          caption=caption.ctdph) +
+    xlab(NULL) + ylab(NULL) +
     theme_fdbplot(font_size=font.size) +
     theme(legend.position="top",
           axis.text.x = element_blank(),
@@ -242,14 +270,14 @@ map.days <-
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank())
 
-ggsave(filename=fs::path_ext_set(paste0(today, "map-days"), ftype),
-       plot=map.days,
+
+ggsave(filename=fs::path_ext_set(paste0(today, "map-positivity"), ftype),
+       plot=map.positivity,
        path=fig.path,
        device=ftype,
        width=width, height=height,
        units=units,
        dpi=dpi)
-}
 
 #################################################################
 ## map cumulative confirmed case count by Town most recent day ##
@@ -257,14 +285,14 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-days"), ftype),
 
 breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600, 3200, 6400)
 
-ct.covid.today <-
+ct.covid.cumcases <-
     ct.covid %>%
     filter(Date==max(Date))
 
-shade <- exp(log(max(ct.covid.today$town.cases))*.75)
+shade <- exp(log(max(ct.covid.cumcases$town.cases))*.75)
 
-map.today <-
-    ggplot(ct.covid.today) +
+map.cumcases <-
+    ggplot(ct.covid.cumcases) +
     geom_sf(aes(fill=town.cases, geometry=geometry), color="white", size=.33) +
     geom_sf_text(aes(label=town.cases, geometry=geometry, color=town.cases<shade),
                  size=2, show.legend=FALSE) +
@@ -281,7 +309,7 @@ map.today <-
                labeller=label_date) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
-                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+                        format(max(ct.covid$Date), "%B %d, %Y")),
          caption=caption.ctdph) +
     xlab(NULL) + ylab(NULL) +
     theme_fdbplot(font_size=font.size) +
@@ -291,8 +319,8 @@ map.today <-
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank())
 
-ggsave(filename=fs::path_ext_set(paste0(today, "map-today"), ftype),
-       plot=map.today,
+ggsave(filename=fs::path_ext_set(paste0(today, "map-cumcases"), ftype),
+       plot=map.cumcases,
        path=fig.path,
        device=ftype,
        width=width, height=height,
@@ -337,7 +365,7 @@ town.rate.plt <-
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
-                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+                        format(max(ct.covid$Date), "%B %d, %Y")),
          caption=caption.ctdph) +
     ylab("Number of Cases") +
     theme_fdbplot(font_size=font.size) +
@@ -397,7 +425,7 @@ town.rate.10k.plt <-
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut Towns (per 10k pop.)",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
-                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+                        format(max(ct.covid$Date), "%B %d, %Y")),
          caption=caption.ctdph) +
     ylab("Number of Cases per 10,000 population") +
     theme_fdbplot(font_size=font.size) +
@@ -456,7 +484,7 @@ town.by.county.rate.plt <-
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns, split by county",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
-                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+                        format(max(ct.covid$Date), "%B %d, %Y")),
          caption=caption.ctdph) +
     ylab("Number of Cases") +
     theme_fdbplot(font_size=font.size) +
@@ -517,7 +545,7 @@ town.by.pop.rate10k.plt <-
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases per 10k population for 169 Connecticut Towns\nsplit by population bin",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
-                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+                        format(max(ct.covid$Date), "%B %d, %Y")),
          caption=caption.ctdph) +
     ylab("Number of Cases per 10,000 Population") +
     theme_fdbplot(font_size=font.size) +
@@ -582,7 +610,7 @@ town.by.pop.rate.plt <-
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns, split by population",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
-                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+                        format(max(ct.covid$Date), "%B %d, %Y")),
          caption=caption.ctdph) +
     ylab("Number of Cases") +
     theme_fdbplot(font_size=font.size) +
@@ -672,7 +700,7 @@ ct.stat.daily.change.plt  <-
     facet_wrap(~name, nrow=5, scales="free_y") +
     labs(title="Daily Values for Covid-19 Statistics in Connecticut",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
-                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+                        format(max(ct.covid$Date), "%B %d, %Y")),
          caption=caption.ctdph) +
     ylab("Daily Value (non-cumulative)") + xlab(NULL) +
     theme_fdbplot(font_size=font.size) +
@@ -745,7 +773,7 @@ ct.tpos.daily.change.plt  <-
               fill="orange", color=NA, alpha=1/4) +
     labs(title="Covid-19 Test Positivity in Connecticut",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
-                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+                        format(max(ct.covid$Date), "%B %d, %Y")),
          caption=caption.ctdph) +
     ylab("Test Positivity Value (percent)") + xlab(NULL) +
     theme_fdbplot(font_size=font.size) +
@@ -817,7 +845,7 @@ ct.summary.2.plt <-
     guides(fill=guide_legend(title=NULL)) +
     labs(title="Covid-19 Cases, Hospitalizations, Deaths, & Tests for Connecticut",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
-                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+                        format(max(ct.covid$Date), "%B %d, %Y")),
          caption=caption.ctdph) +
     ylab("Count") + xlab(NULL) +
     theme_fdbplot(font_size=font.size) +
@@ -912,7 +940,7 @@ usa.state.corona.plt <-
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases per U.S. State",
          subtitle=paste("Data compiled by the New York Times through",
-                        stringi::stri_datetime_format(max(ct.covid$Date), "MMMM d, yyyy")),
+                        format(max(ct.covid$Date), "%B %d, %Y")),
          caption=caption.nyt) +
     geom_text_npc(aes(npcx=.1, npcy=.8, label="Connecticut in Blue"), color="blue", size=2.5) +
     ylab("Number of Cases") +
