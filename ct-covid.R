@@ -209,11 +209,13 @@ dpi <- 300
 ## map 10 day average Test Positivity by Town ##
 ################################################
 
-
 ## 2 slightly different ways of calculating Average Test Positivity by town
 ## for the most recent N days of data. I think the first method (".0") will do a better
 ## job of smoothing over sampling variation, by summing over numberoftests &
-## numberofpositives BEFORE computing positivity.
+## numberofpositives BEFORE computing positivity. But there's really little difference
+## between tthe two.
+
+## Average Test Positivity method 1
 ct.covid.positivity.0 <-
     ct.covid %>%
     group_by(Town) %>%
@@ -224,8 +226,7 @@ ct.covid.positivity.0 <-
            town.positivity = positive.sum/tests.sum*100) %>%
     filter(Date == ending.date)
 
-## hist(ct.covid.positivity.0$town.positivity, col="lightblue")
-
+## Average Test Positivity Method 2
 ## ct.covid.positivity.1 <-
 ##     ct.covid %>%
 ##     group_by(Town) %>%
@@ -234,8 +235,6 @@ ct.covid.positivity.0 <-
 ##            town.positivity.daily = numberofpositives/numberoftests*100,
 ##            town.positivity = mean(town.positivity.daily)) %>%
 ##     filter(Date == ending.date)
-
-## hist(ct.covid.positivity.1$town.positivity)
 
 breaks <- c(0,2,4,6,8,20)
 shade <- max(ct.covid.positivity.0$town.positivity)*.5
