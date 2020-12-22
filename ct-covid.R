@@ -253,9 +253,6 @@ map.positivity <-
     guides(fill=guide_colorbar(barwidth=20,
                                title="10 Day Average Test Positivity (%)",
                                title.vjust=1)) +
-    ## facet_wrap(~Date,
-    ##            ncol=4,
-    ##            labeller=label_date) +
     labs(title=paste("10 Day Average Covid-19 Test Positivity in Connecticut Towns\nfor period ending",
                      format(max(ct.covid$Date), "%b %d, %Y")),
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
@@ -303,9 +300,9 @@ map.cumcases <-
     guides(fill=guide_colorbar(barwidth=20,
                                title="Number of Cases",
                                title.vjust=1)) +
-    facet_wrap(~Date,
-               ncol=4,
-               labeller=label_date) +
+    ## facet_wrap(~Date,
+    ##            ncol=4,
+    ##            labeller=label_date) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
                         format(max(ct.covid$Date), "%B %d, %Y")),

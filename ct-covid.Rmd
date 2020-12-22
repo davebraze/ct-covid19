@@ -199,15 +199,15 @@ town.by.pop.rate10k.plt
 
 The map in Figure \@ref(fig:map-cumcases) shows the total cumulative number of COVID19 cases for every town in Connecticut over the entire span of the pandemic to date. So, the numbers are an indication of the total Covid-19 load in a town over the duration of the pandemic. The numbers shown for each town in the map correspond to the endpoints of the lines in Figures \@ref(fig:town-rate), \@ref(fig:town-by-county-rate), and \@ref(fig:town-by-pop-rate).
 
-```{r map-cumcases, fig.height=7, fig.cap="Cumulative Covid-19 cases by town."}
+```{r map-cumcases, fig.height=7, fig.cap="Cumulative Covid-19 Cases for each Connecticut Town from the Beginning of the Pandemic."}
 
 map.cumcases
 
 ```
 
-Figure \@ref(fig:map-positivity) shows the average Covid-19 Test Positivity for the most recent 10 day period with available data. In contrast to the map in Figure \@ref(fig:map-cumcases), Figure \@ref(fig:map-positivity) gives an indication of where the _current_ covid hotspots are in the state. Test Positivity is an estimate of the percentage of a town's population that is currently infected with Covid-19.
+Figure \@ref(fig:map-positivity) shows the average Covid-19 Test Positivity for the most recent 10 day period with available data. In contrast to the map in Figure \@ref(fig:map-cumcases), Figure \@ref(fig:map-positivity) gives an indication of where the ***current*** covid hotspots are in the state. Under ideal circumstances, Test Positivity is an estimate of the percentage of a town's population that is infected with Covid-19 when the Test sample is collected. There are a few
 
-```{r map-positivity, , fig.height=7, fig.cap="Ten Day Average Covid-19 Test Positivity in Connecticut Towns."}
+```{r map-positivity, fig.height=7, fig.cap="Ten Day Average Covid-19 Test Positivity for each Connecticut Town."}
 
 map.positivity
 
