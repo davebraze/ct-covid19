@@ -63,7 +63,7 @@ knitr::opts_chunk$set(fig.width=7,
                       echo=FALSE,
                       include=TRUE,
                       results='asis',
-                      cache=TRUE,
+                      cache=FALSE,
                       cache.lazy=FALSE,
                       warning=FALSE)
 
