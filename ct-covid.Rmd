@@ -201,7 +201,7 @@ The map in Figure \@ref(fig:map-cumcases) shows the total cumulative number of C
 
 ```{r map-cumcases, fig.height=7, fig.cap="Cumulative Covid-19 Cases for each Connecticut Town from the Beginning of the Pandemic."}
 
-map.cumcases
+## map.cumcases
 
 ```
 
@@ -212,7 +212,6 @@ Figure \@ref(fig:map-positivity) shows the average Covid-19 Test Positivity for 
 map.positivity
 
 ```
-
 
 # General Covid-19 Resources {#resources}
 
@@ -227,6 +226,7 @@ Bromage got it mostly right, but we have learned some things about COVID transmi
 ## Plans for Re-opening
 
 Keeping people at home and cutting back on public activities, including some kinds of business activities, was always intended as a temporary measure. The point of it is to keep the healthcare system from being overloaded and to allow time to build capacity for managing the spread of Covid-19. The question has always been how and when to re-open. It was never about whether or not to re-open at all. So, how do we move beyond the emergency situation with some businesses closed and many people sheltering in place?
+
 Several credible road maps have been proposed for how and when to re-open in a responsible way. Here are three of them:
 
 * American Enterprise Institute: https://www.aei.org/research-products/report/national-coronavirus-response-a-road-map-to-reopening/
