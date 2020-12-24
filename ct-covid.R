@@ -266,6 +266,7 @@ map.positivity <-
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank())
 
+## plotly::ggplotly(map.positivity, tooltip=c("Town", "town.positivity"))
 
 ggsave(filename=fs::path_ext_set(paste0(today, "map-positivity"), ftype),
        plot=map.positivity,
