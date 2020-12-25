@@ -209,13 +209,6 @@ dpi <- 300
 ## map 10 day average Test Positivity by Town ##
 ################################################
 
-## 2 slightly different ways of calculating Average Test Positivity by town
-## for the most recent N days of data. I think the first method (".0") will do a better
-## job of smoothing over sampling variation, by summing over numberoftests &
-## numberofpositives BEFORE computing positivity. But there's really little difference
-## between tthe two.
-
-## Average Test Positivity method 1
 ct.covid.positivity.0 <-
     ct.covid %>%
     group_by(Town) %>%
@@ -226,31 +219,21 @@ ct.covid.positivity.0 <-
            town.positivity = positive.sum/tests.sum*100) %>%
     filter(Date == ending.date)
 
-## Average Test Positivity Method 2
-## ct.covid.positivity.1 <-
-##     ct.covid %>%
-##     group_by(Town) %>%
-##     slice_max(Date, n=10) %>%
-##     mutate(ending.date = max(Date),
-##            town.positivity.daily = numberofpositives/numberoftests*100,
-##            town.positivity = mean(town.positivity.daily)) %>%
-##     filter(Date == ending.date)
-
-breaks <- c(0,2,4,6,8,20)
-shade <- max(ct.covid.positivity.0$town.positivity)*.5
+breaks.0 <- c(0,2,4,6,8,20)
+shade.0 <- max(ct.covid.positivity.0$town.positivity)*.5
 
 map.positivity <-
     ggplot(ct.covid.positivity.0) +
     geom_sf(aes(fill=town.positivity, geometry=geometry), color="white", size=.33) +
     geom_sf_text(aes(label=formatC(town.positivity, format="f", digits=2),
                      geometry=geometry,
-                     color=town.positivity<shade),
+                     color=town.positivity<shade.0),
                  size=2, show.legend=FALSE) +
-    scale_color_manual(values=c("black", "white")) +
+    scale_color_manual(values=c("blue", "orange")) +
     viridis::scale_fill_viridis(option="magma",
-                                breaks=breaks,
-                                labels=breaks) +
-    guides(fill=guide_colorbar(barwidth=20,
+                                breaks=breaks.0,
+                                labels=breaks.0) +
+    guides(fill=guide_colorbar(barwidth=10,
                                title="10 Day Average Test Positivity (%)",
                                title.vjust=1)) +
     labs(title=paste("10 Day Average Covid-19 Test Positivity in Connecticut Towns\nfor period ending",
@@ -280,24 +263,25 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-positivity"), ftype),
 ## map cumulative confirmed case count by Town most recent day ##
 #################################################################
 
-breaks <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600, 3200, 6400)
-
 ct.covid.cumcases <-
     ct.covid %>%
     filter(Date==max(Date))
 
-shade <- exp(log(max(ct.covid.cumcases$town.cases))*.75)
+breaks.1 <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600, 3200, 6400)
+shade.1 <- exp(log(max(ct.covid.cumcases$town.cases))*.75)
 
 map.cumcases <-
     ggplot(ct.covid.cumcases) +
     geom_sf(aes(fill=town.cases, geometry=geometry), color="white", size=.33) +
-    geom_sf_text(aes(label=town.cases, geometry=geometry, color=town.cases<shade),
+    geom_sf_text(aes(label=town.cases,
+                     geometry=geometry,
+                     color=town.cases<shade.1),
                  size=2, show.legend=FALSE) +
     scale_color_manual(values=c("black", "white")) +
     scale_fill_continuous(type="viridis",
                           trans="log",
-                          breaks=breaks,
-                          labels=breaks) +
+                          breaks=breaks.1,
+                          labels=breaks.1) +
     guides(fill=guide_colorbar(barwidth=20,
                                title="Number of Cases",
                                title.vjust=1)) +

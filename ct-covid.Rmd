@@ -201,7 +201,7 @@ The map in Figure \@ref(fig:map-cumcases) shows the total cumulative number of C
 
 ```{r map-cumcases, fig.height=7, fig.cap="Cumulative Covid-19 Cases for each Connecticut Town from the Beginning of the Pandemic."}
 
-## map.cumcases
+map.cumcases
 
 ```
 
