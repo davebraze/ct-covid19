@@ -108,7 +108,16 @@ covid.api <- read.socrata("https://data.ct.gov/resource/28fr-iqnx.json",
            across(starts_with("people", ignore.case=FALSE), as.integer),
            across(starts_with("number", ignore.case=FALSE), as.integer),
            Date = as.Date(lastupdatedate))
-##    select(-c(town_no, lastupdatedate, confirmedcases, deaths))
+
+if(FALSE) {
+
+    covid.api %>%
+        ggplot(aes(x=Date, color=Town)) +
+        geom_line(aes(y=peopletested), legend=FALSE) +
+        geom_line(aes(y=numberoftests), legend=FALSE)
+
+}
+
 
 ##### scrape town/county data from wikipedia
 
@@ -212,24 +221,40 @@ dpi <- 300
 ct.covid.positivity.0 <-
     ct.covid %>%
     group_by(Town) %>%
-    slice_max(Date, n=10) %>%
+    slice_max(Date, n=11) %>% ## use 11 days instead of 10 so as to catch test count on 1st of 10 days of interest
     mutate(ending.date = max(Date),
-           positive.sum = sum(numberofpositives),
-           tests.sum = sum(numberoftests),
+           positive.sum = diff(range(numberofpositives)),
+           tests.sum = diff(range(numberoftests)),
+           tests.10k = tests.sum*(10000/pop.2010),
            town.positivity = positive.sum/tests.sum*100) %>%
     filter(Date == ending.date)
+
+if(FALSE) {
+
+    ct.covid.positivity.0 %>%
+    ggplot(aes(x=Date, y=peopletested, color=Town)) +
+        geom_line()
+
+}
+
 
 breaks.0 <- c(0,2,4,6,8,20)
 shade.0 <- max(ct.covid.positivity.0$town.positivity)*.5
 
 map.positivity <-
     ggplot(ct.covid.positivity.0) +
-    geom_sf(aes(fill=town.positivity, geometry=geometry), color="white", size=.33) +
+    geom_sf(aes(fill=town.positivity,
+                geometry=geometry),
+            color="white", size=.33) +
     geom_sf_text(aes(label=formatC(town.positivity, format="f", digits=2),
                      geometry=geometry,
-                     color=town.positivity<shade.0),
+                     color=town.positivity<shade.0,
+                     ## 'text' is a dummy aes used for plotly tooltip
+                     text=paste0(Town,
+                                 "\nTest Pos: ", formatC(town.positivity, format="f", digits=2), "%",
+                                 "\nTests/10k: ", formatC(tests.10k, format="f", digits=2))),
                  size=2, show.legend=FALSE) +
-    scale_color_manual(values=c("blue", "orange")) +
+    scale_color_manual(values=c("black", "white")) +
     viridis::scale_fill_viridis(option="magma",
                                 breaks=breaks.0,
                                 labels=breaks.0) +
@@ -249,7 +274,18 @@ map.positivity <-
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank())
 
-## plotly::ggplotly(map.positivity, tooltip=c("Town", "town.positivity"))
+if(FALSE) {
+
+    library(plotly)
+
+    map.positivity.plotly <- ggplotly(map.positivity,
+                                      layerData=2, ## default = 1
+                                      tooltip=c("text")) %>%
+        hide_legend() ## also hide_colorbar() & hide_guides()
+
+    map.positivity.plotly
+
+}
 
 ggsave(filename=fs::path_ext_set(paste0(today, "map-positivity"), ftype),
        plot=map.positivity,
@@ -357,7 +393,7 @@ town.rate.plt <-
 
   town.rate.cap <- paste0("Total Covid-19 Cases for Connecticut's 169 Towns.",
                         "The top ", label.count.towns, " towns are labeled\n",
-                        "(those with at least ", formatC(label.cut.towns[label.count.towns], format="d", big.mark=","), " cases)")
+                        "(those with at least ", formatC(label.cut.towns[label.count.towns], format="d", big.mark=","), " cases).")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate"), ftype),
        plot=town.rate.plt,
@@ -418,7 +454,7 @@ town.rate.10k.plt <-
 town.rate.10k.note <- paste("Cases per 10,000 population for each town.",
                              "The top ", label.count.towns, " towns are labeled",
                              "(those with at least", formatC(trunc(label.cut.towns[label.count.towns]), digits=2, format="f", big.mark=","),
-                             "cases per 10k pop.)")
+                             "cases per 10k pop.).")
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-town-rate-10k"), ftype),
        plot=town.rate.10k.plt,

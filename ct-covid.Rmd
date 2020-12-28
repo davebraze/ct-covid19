@@ -145,7 +145,7 @@ ct.summary.2.plt
 
 One way to visually emphasize day to day change in the numbers is to start with the DPH's cumulative counts (and daily count, in the case of ***Hospitalizations***), and subtract the previous day's count from each number. I'm showing these day-to-day differences in Figure \@ref(fig:ct-stat-daily-change). These difference values can look a little 'spiky'. That is mostly due to to the fact that, starting in July, each Monday's reports include counts for the preceeding weekend as well. Think of it as a sort of catch up day. In order to smooth that out a bit, I've taken seven day running averages of the reported numbers and added them as dashed lines in Figure \@ref(fig:ct-stat-daily-change). Averaging in this way makes longer term trends easier to spot. It's important to keep in mind that Figure \@ref(fig:ct-summary-2-plt) and Figure \@ref(fig:ct-stat-daily-change) are based on the same underlying data. They just emphasize different aspects of it. 
 
-Another difference between the two graphs is that Figure \@ref(fig:ct-stat-daily-change) includes a new variable, ***Test Positivity***. It is calculated as the number of ***Tests Reported*** on a given day (top panel of Figure \@ref(fig:ct-stat-daily-change)), divided by the number of ***Cases*** diagnosed on that same day (second panel of the same figure). ***Test Positivity*** is expressed as a percentage.
+Another difference between the two graphs is that Figure \@ref(fig:ct-stat-daily-change) includes a new variable, ***Test Positivity***. It is calculated as the number of ***Tests Reported*** on a given day (top panel of Figure \@ref(fig:ct-stat-daily-change)), divided by the number of ***Cases*** diagnosed on that same day (second panel of the same figure). ***Test Positivity*** is the percentage of tests that came back positive on a given day.
 
 The most recent day's values, both the reported value and the seven day average, are labeled on the right-hand side of Figure \@ref(fig:ct-stat-daily-change). These can be compared to numbers at the table labelled "Connecticut COVID-19 Summary" at the top of the Connecticut DPH page [here](https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library). Keep in mind that the state page seems to be updated every weekday (but not weekends). My page, the one you're looking at now, is updated less frequently. The date at the top of this page indicates when it was last updated.
 
@@ -205,11 +205,11 @@ map.cumcases
 
 ```
 
-Figure \@ref(fig:map-positivity) shows the average Covid-19 Test Positivity for the most recent 10 day period with available data. In contrast to the map in Figure \@ref(fig:map-cumcases), Figure \@ref(fig:map-positivity) gives an indication of where the ***current*** covid hotspots are in the state. Under ideal circumstances, Test Positivity is an estimate of the percentage of a town's population that is infected with Covid-19 when the Test sample is collected. There are a few
+Figure \@ref(fig:map-positivity) shows the average Covid-19 Test Positivity for the most recent 10 day period with available data. In contrast to the map in Figure \@ref(fig:map-cumcases), Figure \@ref(fig:map-positivity) gives an indication of where the ***current*** covid hotspots are in the state. Under ideal circumstances, Test Positivity is an estimate of the percentage of a town's population that is infected with Covid-19 when the Test sample is collected. In some circumstances, Test Positivity may not be a good estimate of prevalence. For example, if not enough testing is being done in an area, then TP will not give a reliable estimage of COVID-19 prevalence.
 
 ```{r map-positivity, fig.height=7, fig.cap="Ten Day Average Covid-19 Test Positivity for each Connecticut Town."}
 
-map.positivity
+## map.positivity
 
 ```
 
@@ -221,7 +221,7 @@ There is a nice blog post by Erin Bromage, PhD in microbiology and immunology, d
 
 Bromage got it mostly right, but we have learned some things about COVID transmission since then. The table below is taken from a research summary of what is known about COVID transmission routes as of October 22, 2020. You can get the source document [here](https://www.gov.uk/government/publications/sars-cov-2-transmission-routes-and-environments-22-october-2020).
 
-![Covid transmission risk table](./resources/2020-11-22 S0824_SARS-CoV-2_Transmission_routes_and_environments pdf.png)
+![Covid transmission risk table from https://www.gov.uk/government/publications/sars-cov-2-transmission-routes-and-environments-22-october-2020](./resources/2020-11-22 S0824_SARS-CoV-2_Transmission_routes_and_environments pdf.png)
 
 ## Plans for Re-opening
 
