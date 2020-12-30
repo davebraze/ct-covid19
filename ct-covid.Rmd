@@ -209,7 +209,7 @@ Figure \@ref(fig:map-positivity) shows the average Covid-19 Test Positivity for 
 
 ```{r map-positivity, fig.height=7, fig.cap="Ten Day Average Covid-19 Test Positivity for each Connecticut Town."}
 
-## map.positivity
+map.positivity
 
 ```
 

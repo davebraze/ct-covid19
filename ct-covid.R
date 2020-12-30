@@ -236,13 +236,19 @@ ct.covid.positivity.0 <-
 if(FALSE) {
 
     ct.covid.positivity.0 %>%
-    ggplot(aes(x=Date, y=peopletested, color=Town)) +
-        geom_line()
+        ggplot(aes(x=fct_reorder(Town, town.positivity), y=town.positivity)) +
+        geom_point(aes(size=tests.10k)) +
+        theme_fdbplot(font_size=font.size*.7) +
+        background_grid(major="xy") +
+        theme(legend.position="top",
+              plot.margin = unit(c(1,1,1,1), "lines"),
+              axis.text.x = element_text(angle=45, hjust=1))
+
 
 }
 
 
-breaks.0 <- c(0,2,4,6,8,20)
+breaks.0 <- c(0,2,4,6,8,10,12,14,16,18,20)
 shade.0 <- max(ct.covid.positivity.0$town.positivity)*.5
 
 map.positivity <-
