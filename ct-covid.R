@@ -98,7 +98,11 @@ if(FALSE) {
 
 ##### cases and deaths by town
 
-## upon reviewing the data provided by CT on Nov. 1 2020, for the first time since mid-May, there have been some changes to the variables in the data file. Need to sort that out before pushing new data to the web.
+## Upon reviewing the data provided by CT on Nov. 1 2020, for the first time since mid-May, there
+## have been some changes to the variables in the Town data file. Need to sort that out before
+## pushing new data to the web. Metadata for the Town dataset can be found here
+## https://data.ct.gov/Health-and-Human-Services/COVID-19-Tests-Cases-and-Deaths-By-Town-/28fr-iqnx
+## OR https://data.ct.gov/resource/28fr-iqnx
 
 covid.api <- read.socrata("https://data.ct.gov/resource/28fr-iqnx.json",
                           app_token=socrata.app.token) %>%
@@ -113,7 +117,7 @@ if(FALSE) {
 
     covid.api %>%
         ggplot(aes(x=Date, color=Town)) +
-        geom_line(aes(y=peopletested), legend=FALSE) +
+##        geom_line(aes(y=peopletested), legend=FALSE) +
         geom_line(aes(y=numberoftests), legend=FALSE)
 
 }
