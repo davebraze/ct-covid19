@@ -117,9 +117,13 @@ The number of ***confirmed cases*** is a cumulative count of people who have tes
 
 The number of ***tests completed*** is the total, cumulative, number of Covid-19 tests that have been reported to the state. My understanding is that Connecticut is reporting the results of PCR-based tests that identify the virus's genetic material in people who are currently infected, but can't tell if they once had the virus and then recovered (they'll test negative). This contrasts with an antibody test which can tell if a person ever had the virus, but can't distinguish between people who are infected at time of test vs. infected as some point in the past. The PCR type is the more useful test for establishing the current rate of infection in the state. Also, up until May 3rd, the number of tests completed equaled the number of people tested, but since May 3rd some people have been tested more than once, so the number of tests completed is more than the number of people tested.
 
-The cumulative ***deaths*** statistic is fairly self-explanatory. It is just the total number of people who have died as a result of, or while sick with Covid-19. It's worth looking at the link above on *Covid-19 reporting discrepancies in Connecticut*. Additional reporting points out that, as of May 2020,  [Connecticut uses an antiquated process for compiling death certificates and reporting them to the CDC](https://ctmirror.org/2020/05/19/as-it-prepares-to-reopen-connecticuts-count-of-covid-19-deaths-is-fragmented-and-incomplete/). So, there is a significant delay in the availability of Connecticut state mortality data, which means that it is not possible to have a real-time view of the increase this year over previous years for "death from all causes." Once available, that statistic will likely give a more accurate measure of lives lost due to Covid-19 than other indicators.
+***Test positivity*** is the ratio of positive tests to all tests reported in a specific time frame (usually 1 day). For example, daily test positivity is calculated by dividing the number of positive tests reported each day (***Confirmed Cases***) by the total number of tests carried out on that day (***Tests Completed***). 
 
 The ***hospitalizations*** count is the number of people who are, on that day, hospitalized due to Covid-19. This is the only one of the 4 counts provided by Connecticut DPH that is not cumulative. Unlike some states, Connecticut does not break out how many of those are in ICU vs standard acute care (e.g., [New York](https://forward.ny.gov/daily-hospitalization-summary-region)). 
+
+*Hospitalization rate is important* because it directly measures health outcomes of interest and is not subject to the most of the measurement problems that arise with case counts and related variables (e.g., Test Positivity).
+
+The cumulative ***deaths*** statistic is fairly self-explanatory. It is just the total number of people who have died as a result of, or while sick with Covid-19. It's worth looking at the link above on *Covid-19 reporting discrepancies in Connecticut*. Additional reporting points out that, as of May 2020,  [Connecticut uses an antiquated process for compiling death certificates and reporting them to the CDC](https://ctmirror.org/2020/05/19/as-it-prepares-to-reopen-connecticuts-count-of-covid-19-deaths-is-fragmented-and-incomplete/). So, there is a significant delay in the availability of Connecticut state mortality data, which means that it is not possible to have a real-time view of the increase this year over previous years for "death from all causes." Once available, that statistic will likely give a more accurate measure of lives lost due to Covid-19 than other indicators.
 
 ## Map Files
 
@@ -250,3 +254,15 @@ the state, by business sector. Those rules are available here: [Sector Rules for
 
 ``` 
 
+```{r eval=FALSE}
+
+## Kids and Schools
+
+## A recent study finds "For counties whose pre-opening total new COVID-19 hospitalization rates were below roughly 36-44 per 100,000 population per week (roughly the 75th percentile of counties during the summer), we find no effect of in-person school reopening on COVID-19 hospitalization rates. For these counties, the estimates are robust to alternative school reopening and hospitalization data sources, the addition of controls for general state social distancing policies and college opening modes, and alternative estimation methods. For counties where total baseline new hospitalizations are above the 36-44 new hospitalizations per 100,000 per week, the estimates are inconsistent across methods and are therefore inconclusive." https://www.reachcentered.org/publications/the-effects-of-school-reopenings-on-covid-19-hospitalizations
+
+## Another study reports "in-person modality options are not associated with increased spread of COVID at low levels of pre-existing COVID cases,  but cases do increase at moderate to high pre-existing COVID rates." https://caldercenter.org/sites/default/files/WP%20247-1220_updated_typo.pdf
+
+## A lay person's outline of the preceeding two studies summarizes them "Reopening schools in areas with higher caseloads, though, does spread the virus, one found, while the other couldn’t rule out that possibility. It remains unclear exactly at what point school reopening becomes more risky." https://www.chalkbeat.org/2021/1/4/22214312/covid-spread-schools-research
+
+
+```
