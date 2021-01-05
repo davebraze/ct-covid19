@@ -262,14 +262,15 @@ map.positivity <-
                      ## 'text' is a dummy aes used for plotly tooltip
                      text=paste0(Town,
                                  "\nTest Pos: ", formatC(town.positivity, format="f", digits=2), "%",
-                                 "\nTests/10k: ", formatC(tests.10k, format="f", digits=2))),
+                                 "\nPopulation: ", formatC(pop.2010, format="d"),
+                                 "\nTests/10k/day: ", formatC(tests.10k/10, format="f", digits=2))),
                  size=2, show.legend=FALSE) +
     scale_color_manual(values=c("black", "white")) +
     viridis::scale_fill_viridis(option="magma",
                                 breaks=breaks.0,
                                 labels=breaks.0) +
     guides(fill=guide_colorbar(barwidth=10,
-                               title="10 Day Average Test Positivity (%)",
+                               title="Test Positivity (%)",
                                title.vjust=1)) +
     labs(title=paste("10 Day Average Covid-19 Test Positivity in Connecticut Towns\nfor period ending",
                      format(max(ct.covid$Date), "%b %d, %Y")),
@@ -760,7 +761,17 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-rate"), ftype),
        units=units,
        dpi=dpi)
 
+if(FALSE){
 
+    plotly::ggplotly(ct.stat.daily.change.plt)
+
+    tmp <-
+        ct.summary.wide %>%
+        filter(Date >= "2020-10-01")
+
+    Hmisc::rcorr(tmp$`Tests Reported`, tmp$`Test Positivity (percent)`)
+
+}
 
 #####################################
 ## Drill down into test positivity ##

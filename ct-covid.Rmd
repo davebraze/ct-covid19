@@ -117,21 +117,25 @@ The number of ***confirmed cases*** is a cumulative count of people who have tes
 
 The number of ***tests completed*** is the total, cumulative, number of Covid-19 tests that have been reported to the state. My understanding is that Connecticut is reporting the results of PCR-based tests that identify the virus's genetic material in people who are currently infected, but can't tell if they once had the virus and then recovered (they'll test negative). This contrasts with an antibody test which can tell if a person ever had the virus, but can't distinguish between people who are infected at time of test vs. infected as some point in the past. The PCR type is the more useful test for establishing the current rate of infection in the state. Also, up until May 3rd, the number of tests completed equaled the number of people tested, but since May 3rd some people have been tested more than once, so the number of tests completed is more than the number of people tested.
 
-***Test positivity*** is the ratio of positive tests to all tests reported in a specific time frame (usually 1 day). For example, daily test positivity is calculated by dividing the number of positive tests reported each day (***Confirmed Cases***) by the total number of tests carried out on that day (***Tests Completed***). 
+***Test positivity*** is the ratio of positive tests to all tests reported in a specific time frame (usually 1 day). For example, daily test positivity is calculated by dividing the number of positive tests reported each day (***Confirmed Cases***) by the total number of tests reported on that day (***Tests Completed***). 
 
 The ***hospitalizations*** count is the number of people who are, on that day, hospitalized due to Covid-19. This is the only one of the 4 counts provided by Connecticut DPH that is not cumulative. Unlike some states, Connecticut does not break out how many of those are in ICU vs standard acute care (e.g., [New York](https://forward.ny.gov/daily-hospitalization-summary-region)). 
 
-*Hospitalization rate is important* because it directly measures health outcomes of interest and is not subject to the most of the measurement problems that arise with case counts and related variables (e.g., Test Positivity).
+*Hospitalization rate is important* because it directly measures health outcomes of interest and is not subject to most of the measurement issues that arise with case counts and related variables (e.g., Test Positivity).
 
 The cumulative ***deaths*** statistic is fairly self-explanatory. It is just the total number of people who have died as a result of, or while sick with Covid-19. It's worth looking at the link above on *Covid-19 reporting discrepancies in Connecticut*. Additional reporting points out that, as of May 2020,  [Connecticut uses an antiquated process for compiling death certificates and reporting them to the CDC](https://ctmirror.org/2020/05/19/as-it-prepares-to-reopen-connecticuts-count-of-covid-19-deaths-is-fragmented-and-incomplete/). So, there is a significant delay in the availability of Connecticut state mortality data, which means that it is not possible to have a real-time view of the increase this year over previous years for "death from all causes." Once available, that statistic will likely give a more accurate measure of lives lost due to Covid-19 than other indicators.
 
 ## Map Files
 
-The map files used in Figure \@ref(fig:map-cumcases) were downloaded from the [Map and Geographic Information Center at the UConn Library](http://magic.lib.uconn.edu/).
+The map files used in Figures \@ref(fig:map-cumcases) and \@ref(fig:map-positivity) were downloaded from the [Map and Geographic Information Center at the UConn Library](http://magic.lib.uconn.edu/).
 
-## Population Data
+## CT Population Data
 
 Population data for Connecticut towns was scraped from the [Wikipedia](https://www.wikipedia.org) page [List of Towns in Connecticut](https://en.wikipedia.org/wiki/List_of_towns_in_Connecticut). Town population data corresponds to 2010 US census counts.
+
+## Other States' Data
+
+Case rates for other states used in Figure \@ref(fig:usa-state-corona) is downloaded from the [New York Times repository of Covid-19 data on GitHub](https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv). 
 
 # Show Me the Graphs
 
