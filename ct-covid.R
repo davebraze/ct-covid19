@@ -389,7 +389,7 @@ town.rate.plt <-
     scale_color_brewer(type="qual", palette="Dark2") +
     scale_x_date(date_labels="%b %d",
                  date_breaks = "1 month",
-                 expand = expansion(add=c(2,30)),
+                 expand = expansion(mult=c(.01,.15)),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
@@ -449,7 +449,7 @@ town.rate.10k.plt <-
     scale_color_brewer(type="qual", palette="Dark2") +
     scale_x_date(date_labels="%b %d",
                  date_breaks="1 month",
-                 expand = expansion(add=c(2,30)),
+                 expand = expansion(mult=c(.01,.15)),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut Towns (per 10k pop.)",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
@@ -508,7 +508,7 @@ town.by.county.rate.plt <-
     scale_y_continuous(limits=my_limits) +
     scale_x_date(date_labels="%b %d",
                  date_breaks="1 month",
-                 expand = expansion(add=c(2,30)),
+                 expand = expansion(mult=c(.01,.25)),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns, split by county",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
@@ -569,7 +569,7 @@ town.by.pop.rate10k.plt <-
     scale_y_continuous(limits=my_limits) +
     scale_x_date(date_labels="%b %d",
                  date_breaks="1 month",
-                 expand = expansion(add=c(2,30)),
+                 expand = expansion(mult=c(.01,.15)),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases per 10k population for 169 Connecticut Towns\nsplit by population bin",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
@@ -634,7 +634,7 @@ town.by.pop.rate.plt <-
     scale_y_continuous(limits=my_limits) +
     scale_x_date(date_labels="%b %d",
                  date_breaks="1 month",
-                 expand = expansion(add=c(2,30)),
+                 expand = expansion(mult=c(.01, .15)),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns, split by population",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
@@ -721,7 +721,7 @@ ct.stat.daily.change.plt  <-
     scale_linetype_manual(values=c("solid", "F2")) +
     scale_x_date(date_labels="%b %d",
                  date_breaks="1 month",
-                 expand = expansion(add=c(2,30)),
+                 expand = expansion(mult=c(.01,.1)),
                  name=NULL) +
     scale_y_continuous(limits=my_limits) +
     scale_color_manual(values=RColorBrewer::brewer.pal(5,"Dark2")[c(1,2,5,3,4)]) +
@@ -743,7 +743,6 @@ ct.stat.daily.change.plt  <-
                              direction="y",
                              force=1/4,
                              nudge_x=10)
-
 
 ct.stat.daily.change.cap <- paste(
     "Daily Values (non-cumulative) for Covid-19 Statistics.",
