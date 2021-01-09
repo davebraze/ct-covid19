@@ -104,7 +104,7 @@ I am a freelance consultant for hire. Most of my time in my day job is spent wit
 
 ## Copyright & License
 
-This page and the graphs it contains are copyright 2020 by David Braze. The web page content and graphs are released under the [Creative Commons v4.0 CC-by license](https://creativecommons.org/licenses/by/4.0/).  Cutting through the legalese, it means that you're free to re-use the graphs (do what you want with them) so long as you say who made them and where you got them.
+This page and the graphs it contains are copyright 2020-2021 by David Braze. The web page content and graphs are released under the [Creative Commons v4.0 CC-by license](https://creativecommons.org/licenses/by/4.0/).  Cutting through the legalese, it means that you're free to re-use the graphs (do what you want with them) so long as you say who made them and where you got them.
 
 # About the Data
 
