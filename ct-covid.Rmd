@@ -7,7 +7,7 @@ email: davebraze@gmail.com
 institution: FDB Research
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 
-# bibliography: ["al-report.bib"]
+# bibliography: ["ct-covid.bib"]
 # biblio-style: "apalike"
 # link-citations: true
 
