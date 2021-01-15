@@ -189,15 +189,10 @@ town.by.county.rate.plt
 
 ```
 
-All other things being equal, you would expect larger towns to have more cases than smaller towns, and that comes out pretty clearly in Figures \@ref(fig:town-rate) and \@ref(fig:town-by-county-rate). Figure \@ref(fig:town-by-pop-rate) divides Connecticut's towns up by size, grouping towns of similar size together. This let's us see how each town is doing relative to other towns of similar size. 
+All other things being equal, you would expect larger towns to have more cases than smaller towns, and that comes out pretty clearly in Figures \@ref(fig:town-rate) and \@ref(fig:town-by-county-rate).
 
-```{r town-by-pop-rate, fig.height=10.5, fig.cap=ct.town.by.pop.rate.cap}
-
-town.by.pop.rate.plt
-
-```
-
-Figure \@ref(fig:town-by-pop-rate10k) is similar to Figure \@ref(fig:town-by-pop-rate), but instead of showing the crude number of cases for each town, it shows the number of cases per 10,000 population.
+Figure \@ref(fig:town-by-pop-rate10k) divides Connecticut's towns up by size, grouping towns of similar size together. This let's us see how each town is doing relative to other towns of similar size.
+What's more, instead of showing the crude number of cases for each town, it shows the number of cases per 10,000 population. This graph makes clear that larger towns do tend to have more cases than smaller towns, even accounting for differences in population. 
 
 ```{r town-by-pop-rate10k, fig.height=10.5, fig.cap=ct.town.by.pop.rate10k.cap}
 
@@ -205,7 +200,7 @@ town.by.pop.rate10k.plt
 
 ```
 
-The map in Figure \@ref(fig:map-cumcases) shows the total cumulative number of COVID19 cases for every town in Connecticut over the entire span of the pandemic to date. So, the numbers are an indication of the total Covid-19 load in a town over the duration of the pandemic. The numbers shown for each town in the map correspond to the endpoints of the lines in Figures \@ref(fig:town-rate), \@ref(fig:town-by-county-rate), and \@ref(fig:town-by-pop-rate).
+The map in Figure \@ref(fig:map-cumcases) shows the total cumulative number of COVID19 cases for every town in Connecticut over the entire span of the pandemic to date. So, the numbers are an indication of the total Covid-19 load in a town over the duration of the pandemic. The numbers shown for each town in the map correspond to the endpoints of the lines in Figures \@ref(fig:town-rate), \@ref(fig:town-by-county-rate).
 
 ```{r map-cumcases, fig.height=7, fig.cap="Cumulative Covid-19 Cases for each Connecticut Town from the Beginning of the Pandemic."}
 
