@@ -314,7 +314,7 @@ ct.covid.cumcases <-
     ct.covid %>%
     filter(Date==max(Date))
 
-breaks.1 <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600, 3200, 6400)
+breaks.1 <- c(1, 3, 6, 12, 25, 50, 100, 200, 400, 800, 1600, 3200, 6400, 12800)
 shade.1 <- exp(log(max(ct.covid.cumcases$town.cases))*.75)
 
 map.cumcases <-
