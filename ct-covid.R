@@ -64,9 +64,9 @@ scrape.reports = FALSE
 town.tab <- TRUE
 if(scrape.reports) {
     covid <- purrr::map_dfr(covid.fnames, read_ctcovid_pdf, town.tab=town.tab)
-    saveRDS(covid, file=here::here("03-other-source-data/pdf-reports.rds"))
+    saveRDS(covid, file=here::here("03-other-source-data", "pdf-reports.rds"))
 } else {
-    covid <- readRDS(file=here::here("03-other-source-data/pdf-reports.rds"))
+    covid <- readRDS(file=here::here("03-other-source-data", "pdf-reports.rds"))
 }
 
 ##################################################
@@ -926,9 +926,18 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary"), ftype),
 ## County csv file: https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv
 
 ##### Get the data
-usa.state.corona <-
-    getURL("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv?accessType=DOWNLOAD") %>%
-    readr::read_csv()
+
+## ##  This worked up until January 13 2021
+## usa.state.corona <-
+##     getURL("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv?accessType=DOWNLOAD") %>%
+##     readr::read_csv()
+
+## The workaround is here
+downloader::download("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv?accessType=DOWNLOAD",
+                     here::here("03-other-source-data", "nyt-us-states.csv"))
+
+usa.state.corona <- readr::read_csv(here::here("03-other-source-data", "nyt-us-states.csv"))
+
 
 ##### Get state meta data
 state.meta <-
@@ -970,8 +979,8 @@ usa.state.corona.plt <-
                              hjust = 0,
                              direction="y",
                              force=1/4,
-                             nudge_x=5) +
-    scale_x_date(expand = expansion(add=c(2, 30)),
+                             nudge_x=15) +
+    scale_x_date(expand = expansion(mult=c(.01, .15)),
                  date_breaks = "1 month",
                  date_labels = "%b %d",
                  name=NULL) +
