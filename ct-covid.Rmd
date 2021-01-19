@@ -123,19 +123,11 @@ The ***hospitalizations*** count is the number of people who are, on that day, h
 
 *Hospitalization rate is important* because it directly measures health outcomes of interest and is not subject to most of the measurement issues that arise with case counts and related variables (e.g., Test Positivity).
 
-The cumulative ***deaths*** statistic is fairly self-explanatory. It is just the total number of people who have died as a result of, or while sick with Covid-19. It's worth looking at the link above on *Covid-19 reporting discrepancies in Connecticut*. Additional reporting points out that, as of May 2020,  [Connecticut uses an antiquated process for compiling death certificates and reporting them to the CDC](https://ctmirror.org/2020/05/19/as-it-prepares-to-reopen-connecticuts-count-of-covid-19-deaths-is-fragmented-and-incomplete/). So, there is a significant delay in the availability of Connecticut state mortality data, which means that it is not possible to have a real-time view of the increase this year over previous years for "death from all causes." Once available, that statistic will likely give a more accurate measure of lives lost due to Covid-19 than other indicators.
+The cumulative ***deaths*** statistic is fairly self-explanatory. It is just the total number of people who have died as a result of, or while sick with Covid-19. It's worth looking at the link above on *Covid-19 reporting discrepancies in Connecticut*. Additional reporting points out that, as of May 2020, [Connecticut uses an antiquated process for compiling death certificates and reporting them to the CDC](https://ctmirror.org/2020/05/19/as-it-prepares-to-reopen-connecticuts-count-of-covid-19-deaths-is-fragmented-and-incomplete/). So, there is a significant delay in the availability of Connecticut state mortality data, which means that it is not possible to have a real-time view of the increase this year over previous years for "death from all causes." Once available, that statistic will likely give a more accurate measure of lives lost due to Covid-19 than other indicators.
 
-The dates associated with three of these variables (tests completed, cases, deaths) is the date that
-they are ***reported***, not the date that they actually ***occur***. This is important for understanding why the
-numbers fluctuate in the way that they do. From July onward, there is a clear weekly cycle in the numbers. This is
-because beginning on July 1, the state does not report numbers on weekends or holidays. Numbers for those days are
-effectively zero. So, at the beginning of each week there is a 'catch-up' day and the numbers reported then include
-weekend (and possibly holiday) numbers. 
+The dates associated with three of these variables (tests completed, cases, deaths) is the date that they are ***reported***, not the date that they actually ***occur***. This is important for understanding why the numbers fluctuate in the way that they do. For example, from July onward there is a clear weekly cycle in the numbers. This is because beginning on July 1, the state does not report numbers on weekends or holidays. Numbers for those days are effectively zero. So from July forward, at the beginning of each week there is a 'catch-up' day and the numbers reported on that day include weekend (and possibly holiday) numbers.
 
-Another idiosyncrasy that comes about is that every once in a while the state dumps a bunch of back-logged results into
-their data file all at once. This happened, for example on January 18 2021, resulting in an apparent huge spike in
-reported tests for that day. In fact, those tests are the result of a back-log that had been accumulating for quite a
-while. Just how long is not entirely clear to me.
+Another driver of idiosyncrasy in these data is that every once in a while the state dumps a bunch of back-logged results into their data file all at once. This happened, for example on January 18 2021, resulting in an apparent huge spike in reported tests for that day. In fact, those tests are the result of a back-log that had been accumulating for quite a while. Just how long is not entirely clear to me. Other instances of data dumps to catch up with reporting back-logs are revealed in the two large spikes in deaths that we see in April.
 
 ## Map Files
 
