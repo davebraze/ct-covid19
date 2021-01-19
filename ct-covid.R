@@ -247,9 +247,12 @@ if(FALSE) {
 
 }
 
-
 breaks.0 <- c(0,2,4,6,8,10,12,14,16,18,20)
 shade.0 <- max(ct.covid.positivity.0$town.positivity)*.5
+
+map.positivity.cap <- paste("Ten Day Average Covid-19 Test Positivity for each Connecticut Town.",
+                            "Test Positivity is the percentage of tests administered in a town",
+                            "that had a positive result.")
 
 map.positivity <-
     ggplot(ct.covid.positivity.0) +
@@ -776,71 +779,73 @@ if(FALSE){
 ## Drill down into test positivity ##
 #####################################
 
-ct.tpos.label <-
-    ct.summary.long %>%
-    filter(name == "Test Positivity (percent)") %>%
-    filter(Date == max(Date)) %>%
-    mutate(label = formatC(value, digits=2, format="f", big.mark=","),
-           label = if_else(type == "7mn",
-                           label,
-                           str_replace(label, "\\.00", "")))
+if (FALSE) {
 
-holidays <- tibble(name = c("Independence Day", "Labor Day", "Columbus Day", "Thanksgiving"),
-                   start = as.Date(c("2020-07-03", "2020-09-05", "2020-10-10", "2020-11-26")),
-                   end = as.Date(c("2020-07-05", "2020-09-07", "2020-10-12", "2020-11-29")),
-                   ymin = 0,
-                   ymax = 7)
+    ct.tpos.label <-
+        ct.summary.long %>%
+        filter(name == "Test Positivity (percent)") %>%
+        filter(Date == max(Date)) %>%
+        mutate(label = formatC(value, digits=2, format="f", big.mark=","),
+               label = if_else(type == "7mn",
+                               label,
+                               str_replace(label, "\\.00", "")))
 
-ct.tpos.daily.change.plt  <-
-    ct.summary.long %>%
-    filter(name == "Test Positivity (percent)") %>%
-    ggplot(aes(x=Date)) +
-    geom_line(aes(y=value, color=name, linetype=type, size=type, alpha=type), show.legend=FALSE) +
-    scale_size_manual(values=c(1,.75)) +
-    scale_alpha_manual(values=c(1/3,1)) +
-    scale_linetype_manual(values=c("solid", "F2")) +
-    scale_x_date(date_labels="%b %d",
-                 date_breaks="1 month",
-                 expand = expansion(add=c(2,30)),
-                 name=NULL) +
-    scale_y_continuous(limits=my_limits) +
-    scale_color_manual(values=RColorBrewer::brewer.pal(5,"Dark2")[c(1,2,5,3,4)]) +
-    geom_rect(data=holidays, inherit.aes=FALSE,
-              aes(xmin=start, xmax=end, ymin=ymin, ymax=ymax),
-              fill="orange", color=NA, alpha=1/4) +
-    labs(title="Covid-19 Test Positivity in Connecticut",
-         subtitle=paste("Data compiled by CT Dept. of Public Health through",
-                        format(max(ct.covid$Date), "%B %d, %Y")),
-         caption=caption.ctdph) +
-    ylab("Test Positivity Value (percent)") + xlab(NULL) +
-    theme_fdbplot(font_size=font.size) +
-    background_grid(major="xy") +
-    theme(axis.text.x = element_text(angle=45, hjust=1)) +
-    ggrepel::geom_text_repel(data = ct.tpos.label,
-                             aes(label = label, x = Date, y = value),
-                             segment.size=.25,
-                             min.segment.length = 0,
-                             size=2.5,
-                             hjust = 0,
-                             direction="y",
-                             force=1/4,
-                             nudge_x=10)
+    holidays <- tibble(name = c("Independence Day", "Labor Day", "Columbus Day", "Thanksgiving"),
+                       start = as.Date(c("2020-07-03", "2020-09-05", "2020-10-10", "2020-11-26")),
+                       end = as.Date(c("2020-07-05", "2020-09-07", "2020-10-12", "2020-11-29")),
+                       ymin = 0,
+                       ymax = 7)
 
-ct.tpos.daily.change.cap <- paste(
-    "Daily Values for Covid-19 Test Positivity.",
-    "Pale solid line = raw percent.",
-    "Dark dashed line = 7 day running average.",
-    "Tests before July 1 were in short supply and largely limited to those suspected of being infected.",
-    "So, 'Test Positivity' for the period before July 1 is not shown.")
+    ct.tpos.daily.change.plt  <-
+        ct.summary.long %>%
+        filter(name == "Test Positivity (percent)") %>%
+        ggplot(aes(x=Date)) +
+        geom_line(aes(y=value, color=name, linetype=type, size=type, alpha=type), show.legend=FALSE) +
+        scale_size_manual(values=c(1,.75)) +
+        scale_alpha_manual(values=c(1/3,1)) +
+        scale_linetype_manual(values=c("solid", "F2")) +
+        scale_x_date(date_labels="%b %d",
+                     date_breaks="1 month",
+                     expand = expansion(add=c(2,30)),
+                     name=NULL) +
+        scale_y_continuous(limits=my_limits) +
+        scale_color_manual(values=RColorBrewer::brewer.pal(5,"Dark2")[c(1,2,5,3,4)]) +
+        geom_rect(data=holidays, inherit.aes=FALSE,
+                  aes(xmin=start, xmax=end, ymin=ymin, ymax=ymax),
+                  fill="orange", color=NA, alpha=1/4) +
+        labs(title="Covid-19 Test Positivity in Connecticut",
+             subtitle=paste("Data compiled by CT Dept. of Public Health through",
+                            format(max(ct.covid$Date), "%B %d, %Y")),
+             caption=caption.ctdph) +
+        ylab("Test Positivity Value (percent)") + xlab(NULL) +
+        theme_fdbplot(font_size=font.size) +
+        background_grid(major="xy") +
+        theme(axis.text.x = element_text(angle=45, hjust=1)) +
+        ggrepel::geom_text_repel(data = ct.tpos.label,
+                                 aes(label = label, x = Date, y = value),
+                                 segment.size=.25,
+                                 min.segment.length = 0,
+                                 size=2.5,
+                                 hjust = 0,
+                                 direction="y",
+                                 force=1/4,
+                                 nudge_x=10)
 
-ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-tpos"), ftype),
-       plot=ct.tpos.daily.change.plt,
-       path=fig.path,
-       device=ftype,
-       width=width, height=height,
-       units=units,
-       dpi=dpi)
+    ct.tpos.daily.change.cap <- paste(
+        "Daily Values for Covid-19 Test Positivity.",
+        "Pale solid line = raw percent.",
+        "Dark dashed line = 7 day running average.",
+        "Tests before July 1 were in short supply and largely limited to those suspected of being infected.",
+        "So, 'Test Positivity' for the period before July 1 is not shown.")
 
+    ggsave(filename=fs::path_ext_set(paste0(today, "ct-summary-tpos"), ftype),
+           plot=ct.tpos.daily.change.plt,
+           path=fig.path,
+           device=ftype,
+           width=width, height=height,
+           units=units,
+           dpi=dpi)
+}
 ####################################
 ## bar plot 2 for state-wide data ##
 ####################################
@@ -986,7 +991,7 @@ usa.state.corona.plt <-
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases per U.S. State",
          subtitle=paste("Data compiled by the New York Times through",
-                        format(max(ct.covid$Date), "%B %d, %Y")),
+                        format(max(usa.state.corona$date), "%B %d, %Y")),
          caption=caption.nyt) +
     geom_text_npc(aes(npcx=.1, npcy=.8, label="Connecticut in Blue"), color="blue", size=2.5) +
     ylab("Number of Cases") +

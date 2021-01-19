@@ -125,6 +125,18 @@ The ***hospitalizations*** count is the number of people who are, on that day, h
 
 The cumulative ***deaths*** statistic is fairly self-explanatory. It is just the total number of people who have died as a result of, or while sick with Covid-19. It's worth looking at the link above on *Covid-19 reporting discrepancies in Connecticut*. Additional reporting points out that, as of May 2020,  [Connecticut uses an antiquated process for compiling death certificates and reporting them to the CDC](https://ctmirror.org/2020/05/19/as-it-prepares-to-reopen-connecticuts-count-of-covid-19-deaths-is-fragmented-and-incomplete/). So, there is a significant delay in the availability of Connecticut state mortality data, which means that it is not possible to have a real-time view of the increase this year over previous years for "death from all causes." Once available, that statistic will likely give a more accurate measure of lives lost due to Covid-19 than other indicators.
 
+The dates associated with three of these variables (tests completed, cases, deaths) is the date that
+they are ***reported***, not the date that they actually ***occur***. This is important for understanding why the
+numbers fluctuate in the way that they do. From July onward, there is a clear weekly cycle in the numbers. This is
+because beginning on July 1, the state does not report numbers on weekends or holidays. Numbers for those days are
+effectively zero. So, at the beginning of each week there is a 'catch-up' day and the numbers reported then include
+weekend (and possibly holiday) numbers. 
+
+Another idiosyncrasy that comes about is that every once in a while the state dumps a bunch of back-logged results into
+their data file all at once. This happened, for example on January 18 2021, resulting in an apparent huge spike in
+reported tests for that day. In fact, those tests are the result of a back-log that had been accumulating for quite a
+while. Just how long is not entirely clear to me.
+
 ## Map Files
 
 The map files used in Figures \@ref(fig:map-cumcases) and \@ref(fig:map-positivity) were downloaded from the [Map and Geographic Information Center at the UConn Library](http://magic.lib.uconn.edu/).
@@ -155,7 +167,7 @@ One way to visually emphasize day to day change in the numbers is to start with 
 
 Another difference between the two graphs is that Figure \@ref(fig:ct-stat-daily-change) includes a new variable, ***Test Positivity***. It is calculated as the number of ***Tests Reported*** on a given day (top panel of Figure \@ref(fig:ct-stat-daily-change)), divided by the number of ***Cases*** diagnosed on that same day (second panel of the same figure). ***Test Positivity*** is the percentage of tests that came back positive on a given day.
 
-The most recent day's values, both the reported value and the seven day average, are labeled on the right-hand side of Figure \@ref(fig:ct-stat-daily-change). These can be compared to numbers at the table labelled "Connecticut COVID-19 Summary" at the top of the Connecticut DPH page [here](https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library). Keep in mind that the state page seems to be updated every weekday (but not weekends). My page, the one you're looking at now, is updated less frequently. The date at the top of this page indicates when it was last updated.
+The most recent day's values, both the reported value and the seven day average, are labeled on the right-hand side of Figure \@ref(fig:ct-stat-daily-change). These can be compared to numbers in the table labelled "Connecticut COVID-19 Summary" at the top of the Connecticut DPH page [here](https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/#data-library). Keep in mind that the state page seems to be updated every weekday (but not weekends). My page, the one you're looking at now, is updated less frequently. The date at the top of this page indicates when it was last updated.
 
 ```{r ct-stat-daily-change, fig.height=10.5, fig.cap=ct.stat.daily.change.cap}
 
@@ -210,7 +222,7 @@ map.cumcases
 
 Figure \@ref(fig:map-positivity) shows the average Covid-19 Test Positivity for the most recent 10 day period with available data. In contrast to the map in Figure \@ref(fig:map-cumcases), Figure \@ref(fig:map-positivity) gives an indication of where the ***current*** covid hotspots are in the state. Under ideal circumstances, Test Positivity is an estimate of the percentage of a town's population that is infected with Covid-19 when the Test sample is collected. In some circumstances, Test Positivity may not be a good estimate of prevalence. For example, if not enough testing is being done in an area, then TP will not give a reliable estimage of COVID-19 prevalence.
 
-```{r map-positivity, fig.height=7, fig.cap="Ten Day Average Covid-19 Test Positivity for each Connecticut Town."}
+```{r map-positivity, fig.height=7, fig.cap=map.positivity.cap}
 
 map.positivity
 
