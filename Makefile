@@ -15,7 +15,7 @@ html:
 	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::html_document2')"
 
 pdf: 
-	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::tufte_handout2')"
+	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::pdf_document2')"
 
 ### maintenance
 

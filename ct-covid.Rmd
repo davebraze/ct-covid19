@@ -17,6 +17,7 @@ geometry: margin=1in
 header-includes:
   - \usepackage{booktabs}
 
+ 
 output:
   bookdown::tufte_html2:
     keep_md: true
@@ -76,7 +77,16 @@ options(tinytex.verbose=TRUE,
 
 ```{r workhorse, include=FALSE}
 
-source("./ct-covid.R")
+source(here::here("locals.R"))
+
+out_type <- "other"
+if (knitr::is_html_output()) {
+    out_type <- "html"
+} else if (knitr::is_latex_output()) {
+    out_type <- "pdf"
+}
+
+source(here::here("ct-covid.R"))
 
 ```
 
@@ -90,9 +100,9 @@ cat(paste0(readLines("readme.md", n=-1), collapse="\n"))
 
 # Introduction to this Page
 
-I started putting together graphs based on Connecticut Department of Public Health (DPH) data in late March, and I've been putting graphs up on various social media platforms since the first week of April. If you're interested in what those earlier efforts looked like, you can [find some of them on Twitter](https://twitter.com/search?q=%23Connecticut%20%23covid19%20%40davidbraze&src=typed_query). You could also [follow me on twitter](https://twitter.com/davidbraze), which is where I'll usually announce updates to this page.
+I started putting together graphs based on Connecticut Department of Public Health (DPH) data in late March, and I've been putting graphs up on various social media platforms since the first week of April. You can [follow me on twitter](https://twitter.com/davidbraze), which is where I'll usually announce updates to this page (or just check back here every once in a while).
 
-Around the end of May, I got busy with other things and stopped updating this page until around mid-November. Covid activity in Connecticut had subsided after the spring surge and stayed pretty flat through the summer. But, by mid-September it seemed clear that we were in the beginnings of a second wave of infections. I finally got around to updating these graphs again around mid-November.
+Around the end of May, I got busy with other things and stopped updating this page until around mid-November. Covid activity in Connecticut had subsided after the spring surge and stayed pretty flat through the summer. But, by mid-September it seemed clear that we were in the beginnings of a second wave of infections. I finally got around to updating these graphs again around mid-November. Updates will happen on most weekdays.
 
 This web page (the one you're looking at now) is home to my most recent Connecticut Covid-19 graphs, although it won't have every figure I've built. I expect to grow the collection and add some narrative around the graphs, when I have time. Of course, I'll update the graphs as new data rolls in from the state. Don't expect web page updates to happen every day, but I guess I'll get around to it a couple of times a week. The date at the top of the page will always indicate when it was last updated. So, you should think of this web page as a "living document." It's going to change over time. And, yes, there will be typos. 
 
@@ -267,5 +277,30 @@ the state, by business sector. Those rules are available here: [Sector Rules for
 
 ## A lay person's outline of the preceeding two studies summarizes them "Reopening schools in areas with higher caseloads, though, does spread the virus, one found, while the other couldn’t rule out that possibility. It remains unclear exactly at what point school reopening becomes more risky." https://www.chalkbeat.org/2021/1/4/22214312/covid-spread-schools-research
 
+
+```
+
+\pagebreak
+
+# Appendix: Analysis Software {#r-packages}
+
+All summaries and analyses in this report were carried out using the R statistical environment, version `r paste(version$major, version$minor, sep=".")`. The report itself was produced using an Rmarkdown workflow. The specific code can be found on GitHub at [github.com/davebraze/ct-covid19](https://github.com/davebraze/ct-covid19). The following table lists the  R packages, beyond base R, used in building this report.
+
+```{r r-package-tab, include=TRUE}
+
+package_tab <-
+    sessioninfo::package_info() %>%
+    unclass() %>%
+    tibble::as_tibble() %>%
+    filter(attached == TRUE) %>%
+    select(package, ondiskversion, date) %>%
+    rename(version = ondiskversion)
+
+caption <- "R packages used in this report."
+
+package_tab %>%
+    format_table(out_type=out_type,
+                 digits=c(NA),
+                 caption=caption)
 
 ```
