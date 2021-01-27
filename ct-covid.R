@@ -247,7 +247,8 @@ ct.students.plt <-
     ct.schools %>%
     filter(Group != "student_cases",
            Group != "staff_cases") %>%
-    mutate(Group = fct_relabel(Group, function(x) str_remove(x, "_student_cases|_learning_model_student_cases"))) %>%  ## glimpse()
+    mutate(Group = fct_relabel(Group, function(x) str_remove(x, "_student_cases|_learning_model_student_cases")),
+           Group = fct_relevel(Group, rev)) %>%  ## glimpse()
     ggplot(aes(y=Count, x=report_period_start_date)) +
     geom_col(aes(fill=Group)) +
     scale_x_date(date_labels="%b %d",
@@ -260,7 +261,11 @@ ct.students.plt <-
     theme_fdbplot(font_size=font.size) +
     background_grid(major="xy") +
     theme(plot.margin = unit(c(1,1,1,1), "lines"),
-          axis.text.x = element_text(angle=45, hjust=1))
+          axis.text.x = element_text(angle=45, hjust=1)) +
+    labs(title="Weekly Covid19 Cases in Connecticut Public School Students",
+         subtitle=paste("Data compiled by CT Dept. of Public Health through",
+                        format(max(ct.schools$report_period_end_date), "%B %d, %Y")),
+         caption=caption.ctdph)
 
 ggsave(filename=fs::path_ext_set(paste0(today, "ct-students"), ftype),
        plot=ct.students.plt,

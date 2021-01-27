@@ -230,7 +230,7 @@ map.positivity
 
 ## Schools
 
-In Figure \@ref(fig:ct-schools), you have a chart of the reported number of Covid19 cases among Connecticut school children, as provided by the state. Numbers are broken down by 'learning model', that is, whether the reported cases for children engaged in remote learning, fully in-person learning, or some hybrid model. 
+In Figure \@ref(fig:ct-schools), you have a chart of the reported number of Covid19 cases among Connecticut school children, as provided by the state. Numbers are broken down by 'learning model', that is, whether the reported cases indicate children engaged in remote learning, fully in-person learning, or some hybrid model. 
 
 ***These numbers are pretty much completely completely useless!*** The reason is that no baselines are provided by the state. We are not told how many students were tested in each week; we are not told how many students are in each learning model; we are not told the proportion of students in each learning model that were tested each week. 
 
