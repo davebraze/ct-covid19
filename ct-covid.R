@@ -21,6 +21,8 @@ library(cowplot)
 library(kableExtra)
 
 
+source(here::here("locals.R"))
+
 #######################
 ## load up map files ##
 #######################
@@ -197,6 +199,19 @@ ct.summary.wide <- left_join(ct.summary.wide, tmp) %>%
            ) ## Handful of x<0 after this. Let it be.
 
 
+##### Get what limited school data the state makes available
+
+ct.schools <- read.socrata("https://data.ct.gov/resource/vvjf-9vkr.json",
+                                app_token=socrata.app.token) %>%
+    mutate_at(vars(ends_with("date")), as.Date) %>%
+    mutate_at(vars(starts_with("number")), as.integer) %>%
+    select(-starts_with("difference"), -starts_with("percent")) %>%
+    tidyr::pivot_longer(cols=starts_with("number"),
+                        names_to = "Group",
+                        values_to = "Count") %>%
+    mutate(Group = as_factor(str_remove_all(Group, "^number_of_")))
+
+
 
 #########################
 ## constants for plots ##
@@ -217,6 +232,43 @@ width <- 7
 height <- 7
 units <- "in"
 dpi <- 300
+
+##########################
+## school related cases ##
+##########################
+
+ct.students.cap <- paste("Weekly Covid19 case count in Connecticut schools broken down",
+                         "by learning model (in person; remote; hybrid).",
+                         "DPH provides no baselines for these numbers. So, it is unknown",
+                         "how many students are in each learning model, and unknown what",
+                         "proportion of students in each group were actually tested.")
+
+ct.students.plt <-
+    ct.schools %>%
+    filter(Group != "student_cases",
+           Group != "staff_cases") %>%
+    mutate(Group = fct_relabel(Group, function(x) str_remove(x, "_student_cases|_learning_model_student_cases"))) %>%  ## glimpse()
+    ggplot(aes(y=Count, x=report_period_start_date)) +
+    geom_col(aes(fill=Group)) +
+    scale_x_date(date_labels="%b %d",
+                 date_breaks="1 week",
+                 name="Week Starting Date") +
+    scale_fill_brewer(type="qual",
+                      palette="Dark2",
+                      name = "Student Group") +
+    ylab("Number of Cases") +
+    theme_fdbplot(font_size=font.size) +
+    background_grid(major="xy") +
+    theme(plot.margin = unit(c(1,1,1,1), "lines"),
+          axis.text.x = element_text(angle=45, hjust=1))
+
+ggsave(filename=fs::path_ext_set(paste0(today, "ct-students"), ftype),
+       plot=ct.students.plt,
+       path=fig.path,
+       device=ftype,
+       width=width, height=height,
+       units=units,
+       dpi=dpi)
 
 ################################################
 ## map 10 day average Test Positivity by Town ##
@@ -716,7 +768,7 @@ ct.stats.label <-
 
 ct.stat.daily.change.plt  <-
     ct.summary.long %>%
-    filter(! name %in% c("Tests.0", "Cases.0", "Hospitalized.0", "Deaths.0")) %>%
+    filter(! name %in% c("Tests.0", "Cases.0", "Hospitalized.0", "Deaths.0")) %>% ## glimpse()
     ggplot(aes(x=Date)) +
     geom_line(aes(y=value, color=name, linetype=type, size=type, alpha=type), show.legend=FALSE) +
     scale_size_manual(values=c(1,.75)) +
@@ -798,7 +850,7 @@ if (FALSE) {
 
     ct.tpos.daily.change.plt  <-
         ct.summary.long %>%
-        filter(name == "Test Positivity (percent)") %>%
+        filter(name == "Test Positivity (percent)") %>% ## glimpse()
         ggplot(aes(x=Date)) +
         geom_line(aes(y=value, color=name, linetype=type, size=type, alpha=type), show.legend=FALSE) +
         scale_size_manual(values=c(1,.75)) +
@@ -863,7 +915,7 @@ ct.stats.label.2 <-
 
 ct.summary.2.plt <-
     ct.summary.long %>%
-    filter(name %in% c("Cases.0", "Tests.0", "Hospitalized.0", "Deaths.0" )) %>%
+    filter(name %in% c("Cases.0", "Tests.0", "Hospitalized.0", "Deaths.0" )) %>% ## glimpse()
     mutate(name = fct_recode(name,
                              "Cases, cumulative" = "Cases.0",
                              "Tests, cumulative" = "Tests.0",

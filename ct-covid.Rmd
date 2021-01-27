@@ -77,8 +77,6 @@ options(tinytex.verbose=TRUE,
 
 ```{r workhorse, include=FALSE}
 
-source(here::here("locals.R"))
-
 out_type <- "other"
 if (knitr::is_html_output()) {
     out_type <- "html"
@@ -227,6 +225,20 @@ Figure \@ref(fig:map-positivity) shows the average Covid-19 Test Positivity for 
 ```{r map-positivity, fig.height=7, fig.cap=map.positivity.cap}
 
 map.positivity
+
+```
+
+## Schools
+
+In Figure \@ref(fig:ct-schools), you have a chart of the reported number of Covid19 cases among Connecticut school children, as provided by the state. Numbers are broken down by 'learning model', that is, whether the reported cases for children engaged in remote learning, fully in-person learning, or some hybrid model. 
+
+***These numbers are pretty much completely completely useless!*** The reason is that no baselines are provided by the state. We are not told how many students were tested in each week; we are not told how many students are in each learning model; we are not told the proportion of students in each learning model that were tested each week. 
+
+Because of these deficiencies, comparisons across groups are impossible, as are comparisons over time. It is impossible to draw any conclusions about differences in transmission rates between learning models, and it is impossible to draw any conclusions as to change over time in Covid19 prevalance among students. Don't try to interpret these numbers. They are meaningless.
+
+```{r ct-schools, fig.cap=ct.students.cap }
+
+ct.students.plt
 
 ```
 
