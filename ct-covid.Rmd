@@ -289,6 +289,10 @@ the state, by business sector. Those rules are available here: [Sector Rules for
 
 ## A lay person's outline of the preceeding two studies summarizes them "Reopening schools in areas with higher caseloads, though, does spread the virus, one found, while the other couldn’t rule out that possibility. It remains unclear exactly at what point school reopening becomes more risky." https://www.chalkbeat.org/2021/1/4/22214312/covid-spread-schools-research
 
+## "A study of more than a half-million people in India who were exposed to the novel coronavirus SARS-CoV-2 suggests that the virus’ continued spread is driven by only a small percentage of those who become infected. Furthermore, children and young adults were found to be potentially much more important to transmitting the virus — especially within households — than previous studies have identified, according to a paper by researchers from the United States and India published Sept. 30 in the journal Science." https://www.princeton.edu/news/2020/09/30/largest-covid-19-contact-tracing-study-date-finds-children-key-spread-evidence?fbclid=IwAR1Xh__57BGI1V96FkbevpsoODenGHIcMw66pGdDV5nTeYJhs2bkSqxG7kw
+
+
+## JAMA publication laying out CDC reasoning behind recommendations for school reopening: 
 
 ```
 
