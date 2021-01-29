@@ -4,6 +4,8 @@ library(tidytext)
 lines <- read_lines("ct-covid.Rmd")
 
 text <- tibble(line = lines) %>%
+
+
     unnest_tokens(word, line) %>%
     anti_join(stop_words)
 
