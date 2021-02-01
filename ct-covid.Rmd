@@ -236,6 +236,8 @@ In Figure \@ref(fig:ct-schools), you have a chart of the reported number of Covi
 
 Because of these deficiencies, comparisons across groups are impossible, as are comparisons over time. It is impossible to draw any conclusions about differences in transmission rates between learning models, and it is impossible to draw any conclusions as to change over time in Covid19 prevalance among students. Don't try to interpret these numbers. They are meaningless.
 
+So, why does the lack of baseline matter so much? In order to make comparisons across groups (or within the same group over time), we need to divide the number of positive cases by the number actually tested in each group (or within the same group at different points in time). Without accurate baseline/denominator values there is no way to determine the percentage of a group that is effected by Covid, and no way to make valid comparisons across groups.
+
 ```{r ct-schools, fig.cap=ct.students.cap }
 
 ct.students.plt
