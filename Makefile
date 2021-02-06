@@ -8,20 +8,17 @@ date:
 
 ### building reports
 
-tuftehtml: 
-	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::tufte_html2')"
-
 html: 
 	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::html_document2')"
 
 pdf: 
 	R $(R_OPTS) -e "rmarkdown::render('"$(rmd)"', output_format='bookdown::pdf_document2')"
 
-### maintenance
-
+## generate figures only
 figs: 
 	R $(R_OPTS) -e "base::source('"$(source)"')"
 
+## make html page suitable for web
 html2web:
 	sed '/Covid-19 in Connecticut/ r gtag.js' < $(fname).html > tmp0.html ## insert google analytics tag
 	sed '/Covid-19 in Connecticut/ r html-meta.txt' < tmp0.html > index.html ## insert meta tags
