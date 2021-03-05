@@ -25,6 +25,10 @@ html2web:
 	mv --backup index.html ./docs/.
 	rm -f tmp0.html
 
+publish:
+	git commit -a -m "add 'publish' target to makefile"
+	git push --all
+
 ### cleaning up
 
 nocache:
