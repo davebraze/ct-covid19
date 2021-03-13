@@ -1,5 +1,5 @@
 ---
-title: Covid-19 in Connecticut xx
+title: Covid-19 in Connecticut
 subtitle: Data Visualizations
 author:
   - David Braze
