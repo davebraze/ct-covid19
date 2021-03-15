@@ -26,9 +26,8 @@ html2web: # make html page suitable for web
 	rm -f tmp0.html
 
 publish: # push webpage updates
-	git commit -a -v -m "update webpage"
+	git commit -a -m "update webpage"
 	git push --all
-
 
 ### cleaning up
 
