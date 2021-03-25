@@ -25,7 +25,7 @@ html2web: # make html page suitable for web
 	mv --backup index.html ./docs/.
 	rm -f tmp0.html
 
-publish: # push webpage updates
+publish: html html2web # push webpage updates
 	git commit -a -m "update webpage"
 	git push --all
 
