@@ -25,9 +25,11 @@ html2web: # make html page suitable for web
 	mv --backup index.html ./docs/.
 	rm -f tmp0.html
 
-publish: html html2web # push webpage updates
-	git commit -a -m "update webpage"
-	git push --all
+publish: html html2web # push webpage updates. 
+	git add --verbose 'docs/*'
+	git add --verbose '03-other-source-data/*'
+	git commit --verbose -m "update webpage"
+	git push --verbose --all
 
 ### cleaning up
 
@@ -42,7 +44,4 @@ tidy: # delete intermediate files
 noreports: # delete formatted reports
 	rm -f $(fname).html $(fname).pdf
 
-clean:
-	make nocache
-	make tidy
-	make noreports
+clean: nocache tidy noreports
