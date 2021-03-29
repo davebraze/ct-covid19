@@ -18,6 +18,7 @@ pdf:
 figs: # generate figures only
 	R $(R_OPTS) -e "base::source('"$(source)"')"
 
+### deploy report to web
 
 html2web: # make html page suitable for web
 	sed '/Covid-19 in Connecticut/ r gtag.js' < $(fname).html > tmp0.html ## insert google analytics tag
@@ -36,7 +37,7 @@ publish: html html2web # push webpage updates.
 nocache: # delete cache files
 	rm -rf $(fname)_cache $(fname)_files
 
-tidy: # delete intermediate files
+nopartials: # delete intermediate files
 	rm -f $(fname).aux $(fname).log $(fname).out
 	rm -f $(fname).tex $(fname).toc
 	rm -f $(fname).md $(fname).knit.md $(fname).utf8.md
@@ -44,4 +45,4 @@ tidy: # delete intermediate files
 noreports: # delete formatted reports
 	rm -f $(fname).html $(fname).pdf
 
-clean: nocache tidy noreports
+clean: nocache nopartials noreports
