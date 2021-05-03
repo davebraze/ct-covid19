@@ -126,10 +126,11 @@ if(FALSE) {
 
 ##### scrape town/county data from wikipedia
 
+########### FIXME: STASH THIS TABLE LOCALLY AND USE THAT UNLESS WP PAGE IS UPDATED #########
 url <- "https://en.wikipedia.org/wiki/List_of_towns_in_Connecticut"
 town.info <- GET(url) %>%
     htmlParse() %>%
-    readHTMLTable(header=TRUE, which=2, skip=170) %>%
+    readHTMLTable(header=TRUE, which=3, skip=170) %>%
     janitor::clean_names() %>%
     select(-c(number, form_ofgovernment, native_americanname)) %>%
     rename(year.est = dateestablished,
