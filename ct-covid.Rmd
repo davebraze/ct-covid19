@@ -23,7 +23,8 @@ output:
     keep_md: true
     pandoc_args:
     - --lua-filter
-    - "c:/Program Files/R/R-3.6.1/library/rmarkdown/rmd/lua/pagebreak.lua"
+    - "C:/Users/daveb/R/win-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua"
+
 
   bookdown::html_document2:
     keep_md: true
@@ -35,7 +36,8 @@ output:
     toc_float: yes
     pandoc_args:
     - --lua-filter
-    - "c:/Program Files/R/R-3.6.1/library/rmarkdown/rmd/lua/pagebreak.lua"
+    - "C:/Users/daveb/R/win-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua"
+
     
   bookdown::pdf_document2:
     keep_tex: true
@@ -44,7 +46,8 @@ output:
     number_sections: no
     pandoc_args:
     - --lua-filter
-    - "c:/Program Files/R/R-3.6.1/library/rmarkdown/rmd/lua/pagebreak.lua"
+    - "C:/Users/daveb/R/win-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua"
+
 
 ---
 

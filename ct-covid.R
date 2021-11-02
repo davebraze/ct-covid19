@@ -237,8 +237,8 @@ dpi <- 300
 ## school related cases ##
 ##########################
 
-ct.students.cap <- paste("Weekly Covid19 case count in Connecticut schools broken down",
-                         "by learning model (in person; remote; hybrid).",
+ct.students.cap <- paste("Weekly Covid19 case count in Connecticut schools for the 2020-21",
+                         "school year, broken down by learning model (in person; remote; hybrid).",
                          "DPH provides no baselines for these numbers. So, it is unknown",
                          "how many students are in each learning model, and unknown what",
                          "proportion of students in each group were actually tested.")
@@ -248,12 +248,12 @@ ct.students.plt <-
     filter(Group != "student_cases",
            Group != "staff_cases") %>%
     mutate(Group = fct_relabel(Group, function(x) str_remove(x, "_student_cases|_learning_model_student_cases")),
-           Group = fct_relevel(Group, rev)) %>%  ## glimpse()
+           Group = fct_relevel(Group, rev)) %>%
     ggplot(aes(y=Count, x=report_period_start_date)) +
     geom_col(aes(fill=Group)) +
     scale_x_date(date_labels="%b %d",
-                 date_breaks="1 week",
-                 name="Week Starting Date") +
+                 date_breaks="1 month",
+                 name="Weekly") +
     scale_fill_brewer(type="qual",
                       palette="Dark2",
                       name = "Student Group") +
@@ -262,7 +262,7 @@ ct.students.plt <-
     background_grid(major="xy") +
     theme(plot.margin = unit(c(1,1,1,1), "lines"),
           axis.text.x = element_text(angle=45, hjust=1)) +
-    labs(title="Weekly Covid19 Cases in Connecticut Public School Students",
+    labs(title="Weekly Covid19 Cases in Ct Public School Students (2020-21 school year)",
          subtitle=paste("Data compiled by CT Dept. of Public Health through",
                         format(max(ct.schools$report_period_end_date), "%B %d, %Y")),
          caption=caption.ctdph)
@@ -445,7 +445,7 @@ town.rate.plt <-
                              hjust = -0,
                              direction="y",
                              force=1/4,
-                             nudge_x=5) +
+                             nudge_x=15) +
     scale_color_brewer(type="qual", palette="Dark2") +
     scale_x_date(date_labels="%b %d",
                  date_breaks = "1 month",
@@ -505,7 +505,7 @@ town.rate.10k.plt <-
                              hjust = -0,
                              direction="y",
                              force=1/4,
-                             nudge_x=5) +
+                             nudge_x=15) +
     scale_color_brewer(type="qual", palette="Dark2") +
     scale_x_date(date_labels="%b %d",
                  date_breaks="1 month",
@@ -563,11 +563,11 @@ town.by.county.rate.plt <-
                              hjust = -0,
                              direction="y",
                              force=1/4,
-                             nudge_x=5) +
+                             nudge_x=15) +
     scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
     scale_y_continuous(limits=my_limits) +
     scale_x_date(date_labels="%b %d",
-                 date_breaks="1 month",
+                 date_breaks="3 months",
                  expand = expansion(mult=c(.01,.25)),
                  name=NULL) +
     labs(title="Cumulative Covid-19 Cases for Connecticut's 169 Towns, split by county",
@@ -623,7 +623,7 @@ town.by.pop.rate10k.plt <-
                              hjust = -0,
                              direction="y",
                              force=1/4,
-                             nudge_x=5,
+                             nudge_x=15,
                              show.legend=FALSE) +
     scale_color_brewer(type="qual", palette="Dark2") +
     scale_y_continuous(limits=my_limits) +
@@ -688,7 +688,7 @@ town.by.pop.rate.plt <-
                              hjust = -0,
                              direction="y",
                              force=1/4,
-                             nudge_x=5,
+                             nudge_x=10,
                              show.legend=FALSE) +
     scale_color_brewer(type="qual", palette="Dark2") +
     scale_y_continuous(limits=my_limits) +
@@ -802,7 +802,7 @@ ct.stat.daily.change.plt  <-
                              hjust = 0,
                              direction="y",
                              force=1/4,
-                             nudge_x=10)
+                             nudge_x=15)
 
 ct.stat.daily.change.cap <- paste(
     "Daily Values (non-cumulative) for Covid-19 Statistics.",
