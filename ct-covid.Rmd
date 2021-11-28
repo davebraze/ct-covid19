@@ -54,6 +54,13 @@ output:
 
 ```{r setup, echo=FALSE, include=FALSE}
 
+out_type <- "other"
+if (knitr::is_html_output()) {
+    out_type <- "html"
+} else if (knitr::is_latex_output()) {
+    out_type <- "pdf"
+}
+
 ## To render this document from a guaranteed clean R environment, use
 ## the provided Makefile.
 
@@ -63,7 +70,12 @@ output:
 knitr::opts_chunk$set(fig.width=7,
                       fig.height=7/(16/9),
                       dpi=200,
-                      tinytex.verbose=TRUE, ## PDFs very slow to compile.
+                      fig.align = "center", ## horz center figs on page
+                      out.width="95%",
+                      out.height="95%", 
+                      dpi=if(out_type=="pdf") 300 else 200,
+                      dev=if(out_type=="pdf") "cairo_pdf" else "png", 
+                      dev.args=if(out_type=="pdf") NULL else list(type="cairo-png"),
                       echo=FALSE,
                       include=TRUE,
                       results='asis',
@@ -80,13 +92,6 @@ options(tinytex.verbose=TRUE,
 
 ```{r workhorse, include=FALSE}
 
-out_type <- "other"
-if (knitr::is_html_output()) {
-    out_type <- "html"
-} else if (knitr::is_latex_output()) {
-    out_type <- "pdf"
-}
-
 source(here::here("ct-covid.R"))
 
 ```
@@ -94,6 +99,7 @@ source(here::here("ct-covid.R"))
 # Read This First
 
 ```{r readme, include=TRUE}
+## include the readme.md file here
 
 cat(paste0(readLines("readme.md", n=-1), collapse="\n"))
 
