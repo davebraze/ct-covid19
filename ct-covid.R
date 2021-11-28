@@ -130,12 +130,13 @@ if(FALSE) {
 url <- "https://en.wikipedia.org/wiki/List_of_towns_in_Connecticut"
 town.info <- GET(url) %>%
     htmlParse() %>%
-    readHTMLTable(header=TRUE, which=3, skip=170) %>%
+    readHTMLTable(header=TRUE, which=2, skip=170) %>%
     janitor::clean_names() %>%
-    select(-c(number, form_ofgovernment, native_americanname)) %>%
+    select(-c(form_ofgovernment, native_americanname)) %>%
     rename(year.est = dateestablished,
            land.area.sq.miles = land_area_square_miles,
-           pop.2010 = population_in_2010,
+           pop.2010 = population_in_2010_1,
+           pop.2020 = population_in_2020_1,
            council.of.governments = council_of_governments) %>%
     mutate(pop.2010 = as.integer(str_remove(pop.2010, ",")),
            land.area.sq.miles = as.numeric(land.area.sq.miles),
@@ -148,7 +149,7 @@ town.info <- GET(url) %>%
 ## Merge shapes covid data
 ct.covid <-
     covid.api %>%
-    left_join(town.info, by=c("Town" = "town")) %>%
+    left_join(town.info, by=c("Town" = "name")) %>%
     mutate(town.cases.10k = (10000/pop.2010)*town.cases,
            town.deaths.10k = (10000/pop.2010)*towntotaldeaths) %>%
     left_join(ct.shp, by=c("Town" = "NAME10"))
