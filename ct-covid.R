@@ -19,6 +19,9 @@ library(ggpmisc)
 library(ggrepel)
 library(cowplot)
 library(kableExtra)
+library(plotly)
+library(htmlwidgets)
+
 
 source(here::here("locals.R"))
 
@@ -313,14 +316,16 @@ map.positivity.cap <- paste("Ten Day Average Covid-19 Test Positivity for each C
                             "that had a positive result.")
 
 map.positivity <-
-    ggplot(ct.covid.positivity.0) +
+    ct.covid.positivity.0 %>%
+    select(town.positivity, geometry, Town, pop.2010, tests.10k) %>%
+    ggplot() +
     geom_sf(aes(fill=town.positivity,
                 geometry=geometry),
             color="white", size=.33) +
     geom_sf_text(aes(label=formatC(town.positivity, format="f", digits=2),
                      geometry=geometry,
                      color=town.positivity<shade.0,
-                     ## 'text' is a dummy aes used for plotly tooltip
+                     ## 'text' is used for the plotly tooltip
                      text=paste0(Town,
                                  "\nTest Pos: ", formatC(town.positivity, format="f", digits=2), "%",
                                  "\nPopulation: ", formatC(pop.2010, format="d"),
@@ -346,19 +351,6 @@ map.positivity <-
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank())
 
-if(FALSE) {
-
-    library(plotly)
-
-    map.positivity.plotly <- ggplotly(map.positivity,
-                                      layerData=2, ## default = 1
-                                      tooltip=c("text")) %>%
-        hide_legend() ## also hide_colorbar() & hide_guides()
-
-    map.positivity.plotly
-
-}
-
 ggsave(filename=fs::path_ext_set(paste0(today, "map-positivity"), ftype),
        plot=map.positivity,
        path=fig.path,
@@ -366,6 +358,22 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-positivity"), ftype),
        width=width, height=height,
        units=units,
        dpi=dpi)
+
+## Make an interactive version with plotly
+map.positivity.plotly <-
+    ggplotly(map.positivity,
+             layerData=2, ## default = 1
+             tooltip=c("text")) %>%
+    config(showTips=FALSE,
+           displayModeBar=FALSE ## hide plotly menubar
+           ## scrollZoom=FALSE     ## disable zooming? No.
+           ) %>%
+    hide_legend() %>%
+    hide_colorbar()
+
+fqfname <- fs::path(fig.path, fs::path_ext_set(paste0(today, "map-positivity-plotly"), "html"))
+saveWidget(map.positivity.plotly, file=fqfname)
+
 
 #################################################################
 ## map cumulative confirmed case count by Town most recent day ##
@@ -565,7 +573,7 @@ town.by.county.rate.plt <-
                              direction="y",
                              force=1/4,
                              nudge_x=15) +
-    scale_color_brewer(type="qual", palette="Dark2", guide=FALSE) +
+    scale_color_brewer(type="qual", palette="Dark2", guide="none") +
     scale_y_continuous(limits=my_limits) +
     scale_x_date(date_labels="%b %d",
                  date_breaks="3 months",

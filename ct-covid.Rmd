@@ -231,9 +231,11 @@ map.cumcases
 
 Figure \@ref(fig:map-positivity) shows the average Covid-19 Test Positivity for the most recent 10 day period with available data. In contrast to the map in Figure \@ref(fig:map-cumcases), Figure \@ref(fig:map-positivity) gives an indication of where the ***current*** covid hotspots are in the state. Under ideal circumstances, Test Positivity is an estimate of the percentage of a town's population that is infected with Covid-19 when the Test sample is collected. In some circumstances, Test Positivity may not be a good estimate of prevalence. For example, if not enough testing is being done in an area, then TP will not give a reliable estimage of COVID-19 prevalence.
 
+**Figure \@ref(fig:map-positivity) is interactive.** Hover over the positivity number for any town to see more details. You can also zoom by clicking and dragging to select the area you want to zoom. Undo the zoom by double clicking anywhere on the map. None of this is very usable on small screens (phones!); it's best viewed on a larger tablet or computer.
+
 ```{r map-positivity, fig.height=7, fig.cap=map.positivity.cap}
 
-map.positivity
+map.positivity.plotly
 
 ```
 
