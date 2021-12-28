@@ -22,7 +22,6 @@ library(kableExtra)
 library(plotly)
 library(htmlwidgets)
 
-
 source(here::here("locals.R"))
 
 #######################
@@ -283,6 +282,7 @@ ggsave(filename=fs::path_ext_set(paste0(today, "ct-students"), ftype),
 ## map 10 day average Test Positivity by Town ##
 ################################################
 
+## configure the data
 ct.covid.positivity.0 <-
     ct.covid %>%
     group_by(Town) %>%
@@ -294,20 +294,22 @@ ct.covid.positivity.0 <-
            town.positivity = positive.sum/tests.sum*100) %>%
     filter(Date == ending.date)
 
+
 if(FALSE) {
 
+    ## towns ranked by positivity rate
     ct.covid.positivity.0 %>%
         ggplot(aes(x=fct_reorder(Town, town.positivity), y=town.positivity)) +
-        geom_point(aes(size=tests.10k)) +
+        geom_point(aes(size=tests.10k), alpha=1/3) +
         theme_fdbplot(font_size=font.size*.7) +
         background_grid(major="xy") +
         theme(legend.position="top",
               plot.margin = unit(c(1,1,1,1), "lines"),
               axis.text.x = element_text(angle=45, hjust=1))
 
-
 }
 
+## ggplot::geom_sf
 breaks.0 <- c(0,2,4,6,8,10,12,14,16,18,20)
 shade.0 <- max(ct.covid.positivity.0$town.positivity)*.5
 
@@ -359,7 +361,7 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-positivity"), ftype),
        units=units,
        dpi=dpi)
 
-## Make an interactive version with plotly
+## Make an interactive version ggplot::geom_sf >> plotly::ggplotly
 map.positivity.plotly <-
     ggplotly(map.positivity,
              layerData=2, ## default = 1
@@ -373,6 +375,21 @@ map.positivity.plotly <-
 
 fqfname <- fs::path(fig.path, fs::path_ext_set(paste0(today, "map-positivity-plotly"), "html"))
 saveWidget(map.positivity.plotly, file=fqfname)
+
+
+if(FALSE) {
+
+    ## with leaflet
+    library(leaflet)
+
+    leaflet(ct.covid.positivity.0) %>%
+        addTiles() %>%
+        setView(-72.8, 41.5, 9) %>%
+        addPolygons(data=ct.shp)
+
+    glimpse(ct.covid.positivity.0)
+}
+
 
 
 #################################################################

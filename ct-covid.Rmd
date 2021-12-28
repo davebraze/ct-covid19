@@ -231,7 +231,7 @@ map.cumcases
 
 Figure \@ref(fig:map-positivity) shows the average Covid-19 Test Positivity for the most recent 10 day period with available data. In contrast to the map in Figure \@ref(fig:map-cumcases), Figure \@ref(fig:map-positivity) gives an indication of where the ***current*** covid hotspots are in the state. Under ideal circumstances, Test Positivity is an estimate of the percentage of a town's population that is infected with Covid-19 when the Test sample is collected. In some circumstances, Test Positivity may not be a good estimate of prevalence. For example, if not enough testing is being done in an area, then TP will not give a reliable estimage of COVID-19 prevalence.
 
-**Figure \@ref(fig:map-positivity) is interactive.** Hover over the positivity number for any town to see more details. You can also zoom by clicking and dragging to select the area you want to zoom. Undo the zoom by double clicking anywhere on the map. None of this is very usable on small screens (phones!); it's best viewed on a larger tablet or computer.
+**Figure \@ref(fig:map-positivity) is interactive.** Hover over the positivity number for any town to see more details. You can also zoom by clicking and dragging to select the area you want to zoom. Undo the zoom by double clicking anywhere on the map. None of this is very usable on small screens (phones!); it's best viewed on a larger tablet or computer. (Tests/10k/day is the number of tests performed in the town each day for each 10,000 population.)
 
 ```{r map-positivity, fig.height=7, fig.cap=map.positivity.cap}
 
@@ -241,7 +241,7 @@ map.positivity.plotly
 
 ## Schools
 
-In Figure \@ref(fig:ct-schools), you have a chart of the reported number of Covid19 cases among Connecticut school children, as provided by the state. Numbers are broken down by 'learning model', that is, whether the reported cases indicate children engaged in remote learning, fully in-person learning, or some hybrid model. 
+In Figure \@ref(fig:ct-schools), you have a chart of the reported number of Covid19 cases among Connecticut school children in the the 2020-21 school year, as provided by the state. Numbers are broken down by 'learning model', that is, whether the reported cases indicate children engaged in remote learning, fully in-person learning, or some hybrid model. 
 
 ***These numbers are pretty much completely completely useless!*** The reason is that no baselines are provided by the state. We are not told how many students were tested in each week; we are not told how many students are in each learning model; we are not told the proportion of students in each learning model that were tested each week. 
 
