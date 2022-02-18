@@ -11,7 +11,7 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 # biblio-style: "apalike"
 # link-citations: true
 
-always_allow_html: false
+always_allow_html: true
 fontsize: 11pt
 geometry: margin=1in
 header-includes:
@@ -43,6 +43,7 @@ output:
     keep_tex: true
     highlight: tango
     toc: yes
+    toc_depth: 2
     number_sections: no
     pandoc_args:
     - --lua-filter
@@ -107,11 +108,13 @@ cat(paste0(readLines("readme.md", n=-1), collapse="\n"))
 
 # Introduction to this Page
 
-I started putting together graphs based on Connecticut Department of Public Health (DPH) data in late March, and I've been putting graphs up on various social media platforms since the first week of April. You can [follow me on twitter](https://twitter.com/davidbraze), which is where I'll usually announce updates to this page (or just check back here every once in a while).
+I started putting together graphs based on Connecticut Department of Public Health (DPH) data in late March 2020, and I've been putting graphs up on various social media platforms since the first week of April. You can [follow me on twitter](https://twitter.com/davidbraze), which is where I'll usually announce updates to this page (or just check back here every once in a while). The date at the top of the page will always indicate when the graph data was last updated.
 
-Around the end of May, I got busy with other things and stopped updating this page until around mid-November. Covid activity in Connecticut had subsided after the spring surge and stayed pretty flat through the summer. But, by mid-September it seemed clear that we were in the beginnings of a second wave of infections. I finally got around to updating these graphs again around mid-November. Updates will happen on most weekdays.
+Around the end of May, I got busy with other things and stopped updating this page until around mid-November. Covid activity in Connecticut had subsided after the spring surge and stayed pretty flat through the summer. But, by mid-September it seemed clear that we were in the beginnings of a second wave of infections. I finally got around to updating these graphs again around mid-November. Updates continued on weekdays until around mid-May 2021. At that point, the page went silent until end of October 2021. When the winter surge started ramping up in November, I once again began updating the page, but only got around to it about once a week. As I write, it is mid-February 2022 and we are on the back side of that winter surge. 
 
-This web page (the one you're looking at now) is home to my most recent Connecticut Covid-19 graphs, although it won't have every figure I've built. I expect to grow the collection and add some narrative around the graphs, when I have time. Of course, I'll update the graphs as new data rolls in from the state. Don't expect web page updates to happen every day, but I guess I'll get around to it a couple of times a week. The date at the top of the page will always indicate when it was last updated. So, you should think of this web page as a "living document." It's going to change over time. And, yes, there will be typos. 
+Regardless, this web page is home to my most recent Connecticut Covid-19 graphs. Over the months (and years) of the pandemic, I have expanded the collection of dataviz, and I have added some narrative around the graphics. I have to admit that addition of the narrative was a bit piecemeal and result somewhat fragmented. 
+
+I'm still trying to figure out what comes next, but it's reasonable for you to think of this web page as a "living document." It's going to change over time. And, yes, there will be typos. 
 
 Finally, at the bottom of this page, you'll find a few general [Covid-19 resources](#resources) that might be useful to you. 
 
@@ -121,7 +124,7 @@ I am a freelance consultant for hire. Most of my time in my day job is spent wit
 
 ## Copyright & License
 
-This webpage, the graphs it contains, and the code used to generate them are copyright 2020-2021 by David Braze. The web page content and graphs are released under the [Creative Commons v4.0 CC-by license](https://creativecommons.org/licenses/by/4.0/). Cutting through the legalese, it means that you're free to re-use these materials (do what you want with them) so long as you acknowledged who made them and where you got them.
+This webpage, the graphs it contains, and the code used to generate them are copyright 2020-2022 by David Braze. The web page content and graphs are released under the [Creative Commons v4.0 CC-by license](https://creativecommons.org/licenses/by/4.0/). Cutting through the legalese, it means that you're free to re-use these materials (do what you want with them) so long as you acknowledged who made them and where you got them.
 
 # About the Data
 
@@ -164,7 +167,7 @@ Case rates for other states used in Figure \@ref(fig:usa-state-corona) is downlo
 
 While, CT DPH reports cumulative counts, these can be misleading numbers. I've plotted them just the same in Figure \@ref(fig:ct-summary-2-plt). The problem with this kind of graph is that it makes it hard to see how much the numbers are changing from one day to the next. It's easy to see the difference between cumulative and non-cumulative statistics. Cumulative counts (Cases, Deaths, Tests) can never go down, but a non-cumulative count (Hospitalizations) can decrease over time. For these I've stopped updating this figure, showing cumulative counts, as of the end of May. From the start of the pandemic throught June, DPH reported statistics 7 days a week. Beginning in July, they no longer report statistics on weekends or holidays, so stats for those days are reported on the next business day. I think Figure \@ref(fig:ct-stat-daily-change) gives a clearer view of day to day change.
 
-```{r ct-summary-2-plt, fig.height=10.5, fig.cap="Covid-19 Cases, Hospitalizations, Deaths, & Tests completed for Connecticut through the end of May. Note different y scales."}
+```{r ct-summary-2-plt, fig.height=10.5, fig.cap="Covid-19 Cases, Hospitalizations, Deaths, \\& Tests completed for Connecticut through the end of May. Note different y scales."}
 
 ct.summary.2.plt
 
@@ -231,7 +234,7 @@ map.cumcases
 
 Figure \@ref(fig:map-positivity) shows the average Covid-19 Test Positivity for the most recent 10 day period with available data. In contrast to the map in Figure \@ref(fig:map-cumcases), Figure \@ref(fig:map-positivity) gives an indication of where the ***current*** covid hotspots are in the state. Under ideal circumstances, Test Positivity is an estimate of the percentage of a town's population that is infected with Covid-19 when the Test sample is collected. In some circumstances, Test Positivity may not be a good estimate of prevalence. For example, if not enough testing is being done in an area, then TP will not give a reliable estimage of COVID-19 prevalence.
 
-**Figure \@ref(fig:map-positivity) is interactive.** Hover over the positivity number for any town to see more details. You can also zoom by clicking and dragging to select the area you want to zoom. Undo the zoom by double clicking anywhere on the map. None of this is very usable on small screens (phones!); it's best viewed on a larger tablet or computer. (Tests/10k/day is the number of tests performed in the town each day for each 10,000 population.)
+**Figure \@ref(fig:map-positivity) is now interactive. Hover over the positivity number for any town to see more details. You can also zoom by clicking and dragging to select the area you want to zoom. Undo the zoom by double clicking anywhere on the map. None of this is very usable on small screens (phones!); it's best viewed on a larger tablet or computer. (Tests/10k/day is the average number of tests performed in a town each day, for each 10,000 population.)**
 
 ```{r map-positivity, fig.height=7, fig.cap=map.positivity.cap}
 
