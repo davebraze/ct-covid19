@@ -362,6 +362,11 @@ ggsave(filename=fs::path_ext_set(paste0(today, "map-positivity"), ftype),
        dpi=dpi)
 
 ## Make an interactive version ggplot::geom_sf >> plotly::ggplotly
+## This is pretty marginal. Here are a couple of tutorials that may
+## help make better maps, although they're a bit dated:
+## • https://blog.cpsievert.me/2018/03/30/visualizing-geo-spatial-data-with-sf-and-plotly/
+## • https://plotly-r.com/maps.html
+##
 map.positivity.plotly <-
     ggplotly(map.positivity,
              layerData=2, ## default = 1
