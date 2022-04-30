@@ -41,8 +41,8 @@ figures:
 
 html2web:
 # make html page suitable for web deployment & put it in '/docs/' folder
-	sed '/Covid-19 in Connecticut/ r gtag.js' < $(fname).html > tmp0.html ## insert google analytics tag
-	sed '/Covid-19 in Connecticut/ r html-meta.txt' < tmp0.html > index.html ## insert meta tags
+	sed '/Covid-19 in Connecticut/ r gtag.js' < $(fname).html > tmp0.html ## insert google analytics tag below page title
+	sed '/Covid-19 in Connecticut/ r html-meta.txt' < tmp0.html > index.html ## insert meta tags below page title
 	mv --backup index.html ./docs/.
 	rm -f tmp0.html
 
