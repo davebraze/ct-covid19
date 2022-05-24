@@ -26,9 +26,13 @@ jobs:
 
       - uses: r-lib/actions/setup-renv@v1
 
+        ## Installs all R packages referenced in DEPENDENCIES file
+        ## Good for an R package. Not so much here.
+      ## - uses: r-lib/actions/setup-r-dependencies@v2 
+        
       - name: Install R packages
         run: |
-          install.packages("rmarkdown", type="binary")
+          install.packages(c("rmarkdown", "bookdown", "httr", "XML", "here", "fs", "RCurl", "readr", "sf", "RSocrata"))
         shell: Rscript {0}
         
       - name: Do the thing
