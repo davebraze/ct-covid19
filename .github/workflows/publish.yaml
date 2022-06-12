@@ -26,8 +26,12 @@ jobs:
 
       - uses: r-lib/actions/setup-renv@v1
 
-        ## Installs all R packages referenced in DEPENDENCIES file
-        ## Good for an R package. Not so much here.
+        ## The 'uses:' line below installs all R packages referenced in DEPENDENCIES file.
+        ## That's good for an R package, not so much here (because no DEPENDENCIES file).
+        ## So, I'm trying to use the 'install R packages' target to get that done.
+        ## No success yet. Seems to work fine for libs w/o external dependencies, but
+        ## fails on, e.g., RCurl. Would it help to force installation of binaries? Dunno.
+        
       ## - uses: r-lib/actions/setup-r-dependencies@v2 
         
       - name: Install R packages
