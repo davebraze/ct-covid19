@@ -1,16 +1,17 @@
 ## ignore these patterns in the root, but not subdirs
 /*.pdf
-/*.html
-/gtag.js
+/ct-covid.html
+/ct-covid.md
 
-## ignore these folders
+# ignore these folders
 figures/*
 archive/*
+ct-covid_files/*
 
-## ignore files matching these patterns everywhere
+# ignore these patterns from the root down
 *~
-*_cache
-*_files
-*.log
-*.md
-*.URL
+*/*_cache
+*/*_files
+*/*.log
+*/*.md
+*/*.url
