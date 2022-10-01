@@ -65,12 +65,8 @@ if (knitr::is_html_output()) {
 ## To render this document from a guaranteed clean R environment, use
 ## the provided Makefile.
 
-## To load all objects referenced in this file into the current R
-## environment, make the following call at the R prompt:
-
 knitr::opts_chunk$set(fig.width=7,
                       fig.height=7/(16/9),
-                      dpi=200,
                       fig.align = "center", ## horz center figs on page
                       out.width="95%",
                       out.height="95%", 
